@@ -252,11 +252,11 @@ function buildDataFootprint(): DataFootprintField[] {
     sharedWithOrgs: data.orgs.size,
     activeGrants: data.count,
     lastSharedAt: data.lastAt,
-    riskLevel: HIGH_RISK.includes(field as ConsentField)
+    riskLevel: (HIGH_RISK.includes(field as ConsentField)
       ? 'high'
       : MED_RISK.includes(field as ConsentField)
       ? 'medium'
-      : 'low',
+      : 'low') as 'high' | 'medium' | 'low',
   })).sort((a, b) => b.sharedWithOrgs - a.sharedWithOrgs)
 }
 

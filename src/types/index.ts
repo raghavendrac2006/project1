@@ -57,6 +57,7 @@ export type DocumentCategory = 'all' | 'identity' | 'property' | 'revenue' | 'le
 export interface CivicDocument {
   id: string
   title: string
+  name?: string
   category: Exclude<DocumentCategory, 'all'>
   documentNumber: string
   issueDate: string
@@ -64,7 +65,7 @@ export interface CivicDocument {
   issuer: string
   fileSize: string
   fileType: 'PDF' | 'IMAGE' | 'XML'
-  verificationStatus: 'verified' | 'pending' | 'expiring_soon' | 'action_required'
+  verificationStatus: 'verified' | 'pending' | 'expiring_soon' | 'action_required' | 'expired'
   isFavorite: boolean
   tags: string[]
   owner?: 'self' | 'family_member'
@@ -119,11 +120,16 @@ export type DelegatedPermission =
   | 'SUBMIT_SERVICE'
   | 'VIEW_NOTIFICATIONS'
   | 'SHARE_AUTHORIZED_PROOF'
+  | 'MANAGE_PAYMENTS'
+  | 'MANAGE_CONSENT'
+  | 'FULL_DELEGATION'
 
 export interface FamilyMember {
   id: string
-  fullName: string
-  relationship: 'Spouse' | 'Child' | 'Parent' | 'Sibling' | 'Dependent' | 'Other'
+  fullName?: string
+  name?: string
+  relationship?: string
+  relation?: string
   dateOfBirth: string
   isMinor: boolean
   nationalIdMasked?: string
@@ -308,6 +314,8 @@ export interface CivicPayment {
   amount: number
   dueDate: string
   paidDate?: string
+  paidAt?: string
+  description?: string
   status: 'paid' | 'pending' | 'overdue'
   paymentMethod?: string
 }

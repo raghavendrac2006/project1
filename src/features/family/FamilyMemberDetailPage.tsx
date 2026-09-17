@@ -167,7 +167,7 @@ export function FamilyMemberDetailPage() {
             className="text-xs font-bold rounded-xl shadow-sm gap-2"
           >
             <Briefcase className="w-4 h-4" />
-            Apply for Service for {member.fullName.split(' ')[0]}
+            Apply for Service for {(member.fullName || member.name || 'Member').split(' ')[0]}
           </Button>
         </div>
       </div>
@@ -242,7 +242,7 @@ export function FamilyMemberDetailPage() {
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-sm">Vault Records for {member.fullName.split(' ')[0]}</CardTitle>
+                  <CardTitle className="text-sm">Vault Records for {(member.fullName || member.name || 'Member').split(' ')[0]}</CardTitle>
                   <CardDescription className="text-xs">
                     Encrypted certificates owned by this family member
                   </CardDescription>

@@ -24,13 +24,13 @@ export const familyService = {
       actorId: 'usr_civiq_99182',
       role: 'CITIZEN',
       action: 'ADDED_FAMILY_MEMBER',
-      resource: `${member.fullName} (${member.relationship})`,
+      resource: `${member.fullName || member.name || 'Member'} (${member.relationship || member.relation || 'Relative'})`,
       ipAddress: '14.139.128.9',
       status: 'success',
-      metadata: { relationship: member.relationship, isMinor: String(member.isMinor) },
+      metadata: { relationship: member.relationship || member.relation || 'Relative', isMinor: String(member.isMinor) },
     })
 
-    realtimeBus.emit('FAMILY_MEMBER_ADDED', { memberId: member.id, name: member.fullName })
+    realtimeBus.emit('FAMILY_MEMBER_ADDED', { memberId: member.id, name: member.fullName || member.name || 'Member' })
     return member
   },
 

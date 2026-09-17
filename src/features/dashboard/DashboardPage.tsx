@@ -420,11 +420,11 @@ export function DashboardPage() {
                 .slice(0, 3)
                 .map((doc) => {
                   const daysLeft = Math.ceil(
-                    (new Date(doc.expiryDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+                    (new Date(doc.expiryDate || Date.now()).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
                   )
                   return (
                     <div key={doc.id} className="flex items-center justify-between text-xs">
-                      <span className="text-muted-foreground truncate flex-1 pr-2">{doc.name}</span>
+                      <span className="text-muted-foreground truncate flex-1 pr-2">{doc.name || doc.title}</span>
                       <Badge variant="outline" className={`text-[9px] font-bold shrink-0 ${
                         daysLeft <= 0 ? 'bg-rose-500/10 text-rose-600 border-rose-500/30' : 'bg-amber-500/10 text-amber-600 border-amber-500/30'
                       }`}>
@@ -641,14 +641,14 @@ export function DashboardPage() {
                 >
                   <div className="flex items-center gap-2.5">
                     <div className="w-9 h-9 rounded-full bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-sm border border-border shrink-0">
-                      {member.fullName.slice(0, 2).toUpperCase()}
+                      {(member.fullName || member.name || 'FM').slice(0, 2).toUpperCase()}
                     </div>
                     <div>
                       <p className="text-xs font-bold text-foreground group-hover:text-primary transition-colors">
-                        {member.fullName}
+                        {member.fullName || member.name}
                       </p>
                       <p className="text-[11px] text-muted-foreground">
-                        {member.relationship} • {member.isMinor ? 'Minor Child' : 'Adult Member'}
+                        {member.relationship || member.relation} • {member.isMinor ? 'Minor Child' : 'Adult Member'}
                       </p>
                     </div>
                   </div>

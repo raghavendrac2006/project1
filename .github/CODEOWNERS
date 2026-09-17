@@ -1,0 +1,26 @@
+# CIVICONE Codeowners File
+# Defines domain owners for automated PR reviews and structural conflict prevention.
+
+# Core System Contracts & Shared Services
+/src/types/                 @raghavendrac2006
+/src/services/              @raghavendrac2006
+/src/lib/                   @raghavendrac2006
+
+# UI Component Library
+/src/components/ui/         @frontend-ui-lead
+
+# Feature Domains
+/src/features/auth/         @auth-team
+/src/features/dashboard/    @identity-team
+/src/features/documents/    @vault-team
+/src/features/identity/     @identity-team
+/src/features/permissions/  @privacy-team
+/src/features/audit/        @audit-team
+/src/features/privacy/      @privacy-team
+/src/features/family/       @family-team
+/src/features/services/     @services-team
+/src/features/organization/ @b2b-portal-team
+/src/features/government/   @gov-portal-team
+/src/features/admin/        @ops-admin-team
+/src/features/analytics/    @analytics-team
+/src/features/help/         @ai-assistant-team

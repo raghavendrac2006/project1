@@ -123,9 +123,9 @@ export function ServicesPage() {
     try {
       const isSelf = selectedApplicantId === 'self'
       const targetMember = !isSelf ? familyMembers.find((m: FamilyMember) => m.id === selectedApplicantId) : null
-      const applicantName = targetMember ? targetMember.fullName : (user?.name || 'Rajesh Sharma')
+      const applicantName = targetMember ? (targetMember.fullName || targetMember.name || 'Applicant') : (user?.name || 'Rajesh Sharma')
       const proxyPrefix = targetMember
-        ? `[Proxy Submission on behalf of ${targetMember.fullName} (${targetMember.relationship}) by citizen ${user?.name}]. `
+        ? `[Proxy Submission on behalf of ${targetMember.fullName || targetMember.name} (${targetMember.relationship || targetMember.relation}) by citizen ${user?.name}]. `
         : ''
 
       const newApp = await applicationService.submitNewApplication(activeService.id, {
@@ -553,7 +553,7 @@ export function ServicesPage() {
                           : 'border-border bg-card text-muted-foreground hover:text-foreground'
                       )}
                     >
-                      <p className="text-xs font-bold leading-tight truncate">{member.fullName.split(' ')[0]}</p>
+                      <p className="text-xs font-bold leading-tight truncate">{(member.fullName || member.name || 'Member').split(' ')[0]}</p>
                       <p className="text-[10px] text-muted-foreground truncate">
                         {member.relationship} {member.isMinor ? '(Minor)' : ''}
                       </p>
