@@ -10,12 +10,19 @@ export function Breadcrumbs() {
 
   const breadcrumbNameMap: Record<string, string> = {
     dashboard: 'Dashboard',
+    actions: 'Action Center',
     identity: 'Civic Identity',
+    family: 'Family Hub',
     documents: 'Document Vault',
     services: 'Civic Services',
     applications: 'Applications Tracker',
+    benefits: 'Government Benefits',
+    data: 'Data Footprint',
+    journey: 'Civic Journey',
+    privacy: 'Privacy & Consent',
+    security: 'Security Center',
     payments: 'Civic Payments',
-    assistant: 'CIVIQONE AI Assistant',
+    assistant: 'CIVIQONE AI',
     notifications: 'Notifications',
     profile: 'Citizen Profile',
     settings: 'Settings & Security',
@@ -34,7 +41,7 @@ export function Breadcrumbs() {
       {pathnames.map((value, index) => {
         const to = `/app/${pathnames.slice(0, index + 1).join('/')}`
         const isLast = index === pathnames.length - 1
-        const displayName = breadcrumbNameMap[value] || value
+        const displayName = breadcrumbNameMap[value] || (value.charAt(0).toUpperCase() + value.slice(1).replace(/-/g, ' '))
 
         return (
           <div key={to} className="flex items-center gap-1">
