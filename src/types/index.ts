@@ -225,6 +225,15 @@ export type ServiceCategory =
   | 'taxes_finance'
   | 'utilities_municipal'
   | 'education_skills'
+  | 'identity'
+  | 'tax'
+  | 'transport'
+  | 'health'
+  | 'welfare'
+  | 'housing'
+  | 'legal'
+  | 'business'
+  | 'other'
 
 export interface CivicService {
   id: string
@@ -247,6 +256,12 @@ export interface CivicService {
   isPublished?: boolean
   verificationBadge?: string
   dataFieldsRequired?: string[]
+  ministry?: string
+  jurisdictionLevel?: 'Central' | 'State' | 'Municipal'
+  stateOrUt?: string
+  serviceCode?: string
+  statutoryAct?: string
+  portalUrl?: string
 }
 
 export type ApplicationStatus =

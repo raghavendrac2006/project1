@@ -78,6 +78,29 @@ export const governmentService = {
     return civicStorage.getServices()
   },
 
+  async gazetteService(service: CivicService): Promise<void> {
+    const current = civicStorage.getServices()
+    const updated = [service, ...current.filter((s) => s.id !== service.id)]
+    civicStorage.saveServices(updated)
+    const session = civicStorage.getGovSession()
+    civicStorage.addAuditEvent({
+      workspace: 'government',
+      actor: session?.official.name ?? 'Senior Government Manager (All-India)',
+      actorId: session?.official.id ?? 'gov_mgr_all_india',
+      role: session?.official.role ?? 'COMMISSIONER',
+      action: 'STATUTORY_SCHEME_GAZETTED',
+      resource: `${service.title} (${service.serviceCode || service.id})`,
+      ipAddress: '10.20.1.1',
+      status: 'success',
+      metadata: {
+        ministry: service.ministry ?? 'N/A',
+        jurisdiction: service.jurisdictionLevel ?? 'Central',
+        stateOrUt: service.stateOrUt ?? 'All India',
+        statutoryAct: service.statutoryAct ?? 'N/A',
+      },
+    })
+  },
+
   async getApplications(): Promise<CivicApplication[]> {
     return civicStorage.getApplications()
   },

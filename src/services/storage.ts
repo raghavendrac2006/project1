@@ -58,7 +58,7 @@ const STORAGE_KEYS = {
   USER: 'civiqone_user_v1',
   IDENTITY: 'civiqone_identity_v1',
   DOCUMENTS: 'civiqone_documents_v1',
-  SERVICES: 'civiqone_services_v1',
+  SERVICES: 'civiqone_services_v2',
   APPLICATIONS: 'civiqone_applications_v1',
   NOTIFICATIONS: 'civiqone_notifications_v1',
   PAYMENTS: 'civiqone_payments_v1',
