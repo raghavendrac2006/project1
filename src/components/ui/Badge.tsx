@@ -45,8 +45,8 @@ export function Badge({
     <div
       className={cn(
         'inline-flex items-center border font-sans uppercase tracking-wider transition-colors',
-        variants[variant],
-        sizes[size],
+        variants[variant] || variants.secondary,
+        sizes[size] || sizes.md,
         className
       )}
       {...props}

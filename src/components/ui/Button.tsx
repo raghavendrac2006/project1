@@ -52,7 +52,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         ref={ref}
         disabled={disabled || isLoading}
-        className={cn(baseStyles, variants[variant], sizes[size], className)}
+        className={cn(baseStyles, variants[variant] || variants.primary, sizes[size] || sizes.md, className)}
         {...props}
       >
         {isLoading && <Loader2 className="w-4 h-4 animate-spin shrink-0" />}
