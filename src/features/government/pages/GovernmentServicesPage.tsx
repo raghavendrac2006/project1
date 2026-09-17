@@ -39,76 +39,11 @@ import {
   DialogFooter
 } from '@/components/ui/Dialog'
 
-const ALL_STATES_AND_UTS = [
-  'All India (Pan-National)',
-  'Andhra Pradesh',
-  'Arunachal Pradesh',
-  'Assam',
-  'Bihar',
-  'Chhattisgarh',
-  'Goa',
-  'Gujarat',
-  'Haryana',
-  'Himachal Pradesh',
-  'Jharkhand',
-  'Karnataka',
-  'Kerala',
-  'Madhya Pradesh',
-  'Maharashtra',
-  'Manipur',
-  'Meghalaya',
-  'Mizoram',
-  'Nagaland',
-  'Odisha',
-  'Punjab',
-  'Rajasthan',
-  'Sikkim',
-  'Tamil Nadu',
-  'Telangana',
-  'Tripura',
-  'Uttar Pradesh',
-  'Uttarakhand',
-  'West Bengal',
-  'Andaman and Nicobar Islands',
-  'Chandigarh',
-  'Dadra and Nagar Haveli and Daman and Diu',
-  'Delhi (NCT)',
-  'Jammu and Kashmir',
-  'Ladakh',
-  'Lakshadweep',
-  'Puducherry'
-]
-
-const MINISTRIES = [
-  'All Ministries',
-  'Ministry of Electronics and Information Technology (MeitY)',
-  'Ministry of Finance (MoF)',
-  'Ministry of External Affairs (MEA)',
-  'Election Commission of India (ECI)',
-  'Ministry of Home Affairs (MHA)',
-  'Ministry of Road Transport and Highways (MoRTH)',
-  'Ministry of Health and Family Welfare (MoHFW)',
-  'Ministry of Consumer Affairs, Food & Public Distribution',
-  'Ministry of Agriculture & Farmers Welfare',
-  'Ministry of New and Renewable Energy (MNRE)',
-  'Ministry of Labour & Employment',
-  'Ministry of Education (MoE)',
-  'Ministry of Housing and Urban Affairs (MoHUA)',
-  'Ministry of Law and Justice',
-  'Ministry of Micro, Small & Medium Enterprises (MSME)',
-  'Ministry of Commerce and Industry (MoCI)',
-  'Ministry of Communications (DoP)',
-  'Ministry of Personnel, Public Grievances and Pensions (DARPG)'
-]
-
 export function GovernmentServicesPage() {
   const [session, setSession] = useState<GovSessionData | null>(null)
   const [services, setServices] = useState<CivicService[]>([])
   const [searchTerm, setSearchTerm] = useState('')
-  const [selectedState, setSelectedState] = useState('All India (Pan-National)')
-  const [selectedMinistry, setSelectedMinistry] = useState('All Ministries')
   const [categoryFilter, setCategoryFilter] = useState('all')
-  const [jurisdictionFilter, setJurisdictionFilter] = useState<'all' | 'Central' | 'State' | 'Municipal'>('all')
   const [loading, setLoading] = useState(true)
 
   // Detail Modal State
@@ -155,67 +90,53 @@ export function GovernmentServicesPage() {
     const matchesSearch =
       srv.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       srv.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (srv.ministry && srv.ministry.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (srv.serviceCode && srv.serviceCode.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (srv.statutoryAct && srv.statutoryAct.toLowerCase().includes(searchTerm.toLowerCase()))
 
-    const matchesState =
-      selectedState === 'All India (Pan-National)' ||
-      srv.stateOrUt === selectedState ||
-      (srv.jurisdictionLevel === 'Central' && selectedState === 'All India (Pan-National)') ||
-      (srv.stateOrUt === 'All India' && selectedState === 'All India (Pan-National)')
-
-    const matchesMinistry =
-      selectedMinistry === 'All Ministries' ||
-      srv.ministry === selectedMinistry
-
     const matchesCat = categoryFilter === 'all' || srv.category === categoryFilter
-    const matchesJurisdiction =
-      jurisdictionFilter === 'all' || srv.jurisdictionLevel === jurisdictionFilter
-
-    return matchesSearch && matchesState && matchesMinistry && matchesCat && matchesJurisdiction
+    return matchesSearch && matchesCat
   })
 
   const handleGazetteScheme = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!newTitle.trim() || !newDept.trim()) return
+    if (!newTitle.trim()) return
 
     const gazettedService: CivicService = {
       id: `srv_${Date.now()}`,
       title: newTitle.trim(),
       slug: newTitle.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-      serviceCode: newCode.trim() || `IN-${newJurisdiction.toUpperCase().slice(0, 3)}-${Math.floor(100 + Math.random() * 900)}`,
-      description: newDesc.trim() || 'Statutory public digital service enacted by gazette notification.',
-      department: newDept.trim(),
-      ministry: newMinistry,
-      jurisdictionLevel: newJurisdiction,
-      stateOrUt: newJurisdiction === 'Central' ? 'All India' : newState,
+      serviceCode: newCode.trim() || `${session.department.code}-${Math.floor(100 + Math.random() * 900)}`,
+      description: newDesc.trim() || `Statutory service administered under the authority of ${session.department.name}.`,
+      department: session.department.name,
+      departmentId: session.department.id,
+      departmentCode: session.department.code,
+      ministry: session.department.ministry,
+      jurisdictionLevel: session.department.jurisdiction,
+      stateOrUt: session.department.jurisdiction === 'State' ? 'Karnataka' : 'All India',
       category: newCategory,
-      statutoryAct: newAct.trim() || 'Government of India Allocation of Business Rules',
+      statutoryAct: newAct.trim() || session.department.statutoryAct || 'Right to Public Services Act',
       processingTime: `${newSla} Business Days`,
-      processingTimeDays: parseInt(newSla, 10) || 7,
+      processingTimeDays: parseInt(newSla, 10) || session.department.avgSlaDays || 4,
       fees: parseFloat(newFee) || 0,
       governmentFee: parseFloat(newFee) || 0,
       popular: false,
       recommended: false,
       eligibility: newEligibility ? newEligibility.split('\n').filter(Boolean) : ['Eligible Indian Citizens / Entities'],
-      requiredDocuments: newDocs ? newDocs.split(',').map(s => s.trim()).filter(Boolean) : ['Aadhaar Card'],
+      requiredDocuments: newDocs ? newDocs.split(',').map(s => s.trim()).filter(Boolean) : ['Identity & Address Proof'],
       portalUrl: newUrl.trim() || 'https://india.gov.in',
       isPublished: true,
-      verificationBadge: 'Gazette Validated',
+      verificationBadge: `${session.department.code} Gazette Validated`,
     }
 
     await governmentService.gazetteService(gazettedService)
     const refreshed = await governmentService.getServices()
     setServices(refreshed)
-    setGazetteSuccessMsg(`Scheme "${gazettedService.title}" (${gazettedService.serviceCode}) gazetted and synchronized to Citizen Portal.`)
+    setGazetteSuccessMsg(`Scheme "${gazettedService.title}" (${gazettedService.serviceCode}) gazetted under ${session.department.name}.`)
     setTimeout(() => {
       setGazetteSuccessMsg('')
       setIsGazetteModalOpen(false)
-      // Reset fields
       setNewTitle('')
       setNewCode('')
-      setNewDept('')
       setNewDesc('')
       setNewAct('')
       setNewEligibility('')
@@ -226,28 +147,40 @@ export function GovernmentServicesPage() {
 
   return (
     <div className="space-y-6">
-      {/* Executive Senior Manager Header */}
+      {/* Department Executive Desk Header */}
       <div className="relative overflow-hidden rounded-2xl border border-emerald-500/20 bg-gradient-to-br from-emerald-950/20 via-card to-background p-6 shadow-sm">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="space-y-2">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-semibold uppercase tracking-wider">
               <ShieldCheck className="w-3.5 h-3.5" />
-              National Portal of India · Senior Government Manager Directorate
+              {session.department.ministry.toUpperCase()} · {session.department.code} STATUTORY DESK
             </div>
             <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-foreground flex items-center gap-2.5">
               <Landmark className="w-7 h-7 text-emerald-600 dark:text-emerald-400 shrink-0" />
-              Statutory Schemes & Civic Services Directorate
+              {session.department.name} Catalog
             </h1>
             <p className="text-sm text-muted-foreground max-w-3xl leading-relaxed">
-              Unified governance, service standards, and gazette compliance authority governing{' '}
-              <strong className="text-foreground">28 States</strong> and <strong className="text-foreground">8 Union Territories</strong>.
-              All gazetted statutory services here are synchronized and accessible in the sovereign Citizen Portal.
+              {session.department.description ||
+                `Official statutory catalog of gazetted public digital services administered by ${session.department.name}. All services are strictly managed under departmental service standards and isolated from other ministries.`}
             </p>
+            {session.department.statutoryAct && (
+              <div className="flex items-center gap-2 text-xs text-muted-foreground/90 font-medium">
+                <Scroll className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                <span className="truncate">Statutory Authority: {session.department.statutoryAct}</span>
+              </div>
+            )}
           </div>
 
           <div className="flex items-center gap-3">
             <Button
-              onClick={() => setIsGazetteModalOpen(true)}
+              onClick={() => {
+                setNewDept(session.department.name)
+                setNewMinistry(session.department.ministry)
+                setNewCode(`${session.department.code}-${Math.floor(100 + Math.random() * 900)}`)
+                setNewJurisdiction(session.department.jurisdiction)
+                setNewAct(session.department.statutoryAct || '')
+                setIsGazetteModalOpen(true)
+              }}
               className="bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm font-medium"
             >
               <Plus className="w-4 h-4 mr-2" />
@@ -256,148 +189,102 @@ export function GovernmentServicesPage() {
           </div>
         </div>
 
-        {/* National Metric Dashboard Strip */}
+        {/* Department Metric Dashboard Strip */}
         <div className="mt-6 pt-6 border-t border-border/60 grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div className="bg-card/60 backdrop-blur-xs border border-border/60 rounded-xl p-3.5">
             <span className="text-xs text-muted-foreground font-medium block flex items-center gap-1.5">
-              <Globe2 className="w-3.5 h-3.5 text-blue-500" />
-              National Service Grid
-            </span>
-            <div className="mt-1 flex items-baseline gap-1.5">
-              <span className="text-xl font-bold text-foreground">13,971</span>
-              <span className="text-xs text-emerald-600 font-semibold">+ 12,350 State</span>
-            </div>
-            <span className="text-[11px] text-muted-foreground">Central & State Portals</span>
-          </div>
-
-          <div className="bg-card/60 backdrop-blur-xs border border-border/60 rounded-xl p-3.5">
-            <span className="text-xs text-muted-foreground font-medium block flex items-center gap-1.5">
-              <MapPin className="w-3.5 h-3.5 text-emerald-500" />
-              Territorial Jurisdiction
-            </span>
-            <div className="mt-1 flex items-baseline gap-1.5">
-              <span className="text-xl font-bold text-foreground">36 Jurisdictions</span>
-            </div>
-            <span className="text-[11px] text-muted-foreground">28 States + 8 UTs Covered</span>
-          </div>
-
-          <div className="bg-card/60 backdrop-blur-xs border border-border/60 rounded-xl p-3.5">
-            <span className="text-xs text-muted-foreground font-medium block flex items-center gap-1.5">
-              <Building2 className="w-3.5 h-3.5 text-amber-500" />
-              Union Ministries
-            </span>
-            <div className="mt-1 flex items-baseline gap-1.5">
-              <span className="text-xl font-bold text-foreground">53 Ministries</span>
-            </div>
-            <span className="text-[11px] text-muted-foreground">18 Core Citizen Sectors</span>
-          </div>
-
-          <div className="bg-card/60 backdrop-blur-xs border border-border/60 rounded-xl p-3.5">
-            <span className="text-xs text-muted-foreground font-medium block flex items-center gap-1.5">
-              <Scroll className="w-3.5 h-3.5 text-purple-500" />
-              Statutory Gazette In Force
+              <FileText className="w-3.5 h-3.5 text-emerald-500" />
+              Department Schemes
             </span>
             <div className="mt-1 flex items-baseline gap-1.5">
               <span className="text-xl font-bold text-foreground">{services.length} Active</span>
             </div>
-            <span className="text-[11px] text-emerald-600 font-medium">100% Live in Citizen Portal</span>
+            <span className="text-[11px] text-muted-foreground">In-Force under {session.department.code}</span>
+          </div>
+
+          <div className="bg-card/60 backdrop-blur-xs border border-border/60 rounded-xl p-3.5">
+            <span className="text-xs text-muted-foreground font-medium block flex items-center gap-1.5">
+              <MapPin className="w-3.5 h-3.5 text-blue-500" />
+              Territorial Scope
+            </span>
+            <div className="mt-1 flex items-baseline gap-1.5">
+              <span className="text-base sm:text-lg font-bold text-foreground truncate">
+                {session.department.jurisdiction}
+              </span>
+            </div>
+            <span className="text-[11px] text-muted-foreground truncate block">
+              {session.department.jurisdictionScope || 'Statutory Regional Desk'}
+            </span>
+          </div>
+
+          <div className="bg-card/60 backdrop-blur-xs border border-border/60 rounded-xl p-3.5">
+            <span className="text-xs text-muted-foreground font-medium block flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 text-amber-500" />
+              Turnaround SLA
+            </span>
+            <div className="mt-1 flex items-baseline gap-1.5">
+              <span className="text-xl font-bold text-foreground">
+                {session.department.avgSlaDays || 4} Days
+              </span>
+            </div>
+            <span className="text-[11px] text-muted-foreground">Service Delivery Standard</span>
+          </div>
+
+          <div className="bg-card/60 backdrop-blur-xs border border-border/60 rounded-xl p-3.5">
+            <span className="text-xs text-muted-foreground font-medium block flex items-center gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5 text-purple-500" />
+              SLA Compliance
+            </span>
+            <div className="mt-1 flex items-baseline gap-1.5">
+              <span className="text-xl font-bold text-foreground">
+                {session.department.complianceRate || 98.2}%
+              </span>
+            </div>
+            <span className="text-[11px] text-emerald-600 font-medium">100% Department Isolated</span>
           </div>
         </div>
       </div>
 
       {/* Multi-tier Filter and Search System */}
-      <div className="bg-card border border-border rounded-xl p-4 space-y-3.5 shadow-xs">
-        {/* Row 1: Search & State Selector */}
-        <div className="flex flex-col sm:flex-row gap-3">
-          <div className="relative flex-1">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Search schemes by name, ministry, act, service code (e.g. IN-UIDAI-101)..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9 text-sm"
-            />
-          </div>
-
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1.5 bg-muted/40 border border-border rounded-lg px-2.5 py-1">
-              <MapPin className="w-3.5 h-3.5 text-emerald-600" />
-              <select
-                value={selectedState}
-                onChange={(e) => setSelectedState(e.target.value)}
-                className="bg-transparent text-xs font-semibold text-foreground focus:outline-none cursor-pointer"
-              >
-                {ALL_STATES_AND_UTS.map((st) => (
-                  <option key={st} value={st} className="bg-card text-foreground">
-                    {st}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <select
-              value={jurisdictionFilter}
-              onChange={(e) => setJurisdictionFilter(e.target.value as any)}
-              className="h-9 px-3 rounded-lg border border-border bg-card text-xs font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500"
-            >
-              <option value="all">All Jurisdictions</option>
-              <option value="Central">Central Govt (All-India)</option>
-              <option value="State">State Government</option>
-              <option value="Municipal">Municipal / ULB</option>
-            </select>
-          </div>
+      <div className="bg-card border border-border rounded-xl p-4 flex flex-col sm:flex-row gap-3 shadow-xs">
+        <div className="relative flex-1">
+          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder={`Search ${session.department.code} schemes by name, act, code...`}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-9 text-sm"
+          />
         </div>
 
-        {/* Row 2: Ministry and Category Filters */}
-        <div className="flex flex-col sm:flex-row gap-3 pt-2 border-t border-border/50">
-          <div className="flex-1">
-            <select
-              value={selectedMinistry}
-              onChange={(e) => setSelectedMinistry(e.target.value)}
-              className="w-full h-9 px-3 rounded-lg border border-border bg-card text-xs font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500"
-            >
-              {MINISTRIES.map((min) => (
-                <option key={min} value={min} className="bg-card text-foreground">
-                  {min}
-                </option>
-              ))}
-            </select>
-          </div>
+        <div className="flex items-center gap-2">
+          <select
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
+            className="h-9 px-3 rounded-lg border border-border bg-card text-xs font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          >
+            <option value="all">All Department Categories</option>
+            <option value="transport_driving">Transport & Logistics</option>
+            <option value="taxes_finance">Finance & Revenue</option>
+            <option value="welfare_schemes">Health & Social Welfare</option>
+            <option value="identity_civil">Identity & Civil Registry</option>
+            <option value="land_property">Land & Property</option>
+            <option value="utilities_municipal">Municipal & Urban</option>
+          </select>
 
-          <div className="flex items-center gap-2">
-            <select
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              className="h-9 px-3 rounded-lg border border-border bg-card text-xs font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          {(searchTerm || categoryFilter !== 'all') && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setSearchTerm('')
+                setCategoryFilter('all')
+              }}
+              className="text-xs text-muted-foreground hover:text-foreground h-9"
             >
-              <option value="all">All 18 Functional Sectors</option>
-              <option value="identity">Identity & Civil Documents</option>
-              <option value="tax">Finance, Revenue & Taxes</option>
-              <option value="transport">Transport, RTO & Transit</option>
-              <option value="health">Healthcare & Wellness</option>
-              <option value="welfare">Social Welfare & Subsidies</option>
-              <option value="housing">Housing & Utilities</option>
-              <option value="legal">Justice, Law & Grievances</option>
-              <option value="business">Commerce & MSME</option>
-            </select>
-
-            {(searchTerm || selectedState !== 'All India (Pan-National)' || selectedMinistry !== 'All Ministries' || categoryFilter !== 'all' || jurisdictionFilter !== 'all') && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setSearchTerm('')
-                  setSelectedState('All India (Pan-National)')
-                  setSelectedMinistry('All Ministries')
-                  setCategoryFilter('all')
-                  setJurisdictionFilter('all')
-                }}
-                className="text-xs text-muted-foreground hover:text-foreground h-9"
-              >
-                Reset Filters
-              </Button>
-            )}
-          </div>
+              Reset Filters
+            </Button>
+          )}
         </div>
       </div>
 
@@ -407,14 +294,14 @@ export function GovernmentServicesPage() {
           <div className="flex items-center gap-2">
             <FileText className="w-4 h-4 text-emerald-600" />
             <span className="text-sm font-semibold text-foreground">
-              Gazetted Statutory Catalog
+              {session.department.name} Schemes
             </span>
             <Badge variant="secondary" className="text-xs font-semibold">
               {filteredServices.length} schemes displayed
             </Badge>
           </div>
           <span className="text-xs text-muted-foreground hidden sm:inline">
-            Directly provisioned across Central Ministries & State Secretariats
+            Directly administered by {session.official.name} ({session.official.designation})
           </span>
         </div>
 
@@ -698,24 +585,19 @@ export function GovernmentServicesPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-foreground">Union Ministry</label>
-                  <select
-                    value={newMinistry}
-                    onChange={(e) => setNewMinistry(e.target.value)}
-                    className="w-full h-9 px-3 rounded-lg border border-border bg-card text-xs font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  >
-                    {MINISTRIES.filter(m => m !== 'All Ministries').map((m) => (
-                      <option key={m} value={m}>{m}</option>
-                    ))}
-                  </select>
+                  <label className="text-xs font-semibold text-foreground">Union / State Ministry</label>
+                  <Input
+                    readOnly
+                    value={session.department.ministry}
+                    className="bg-muted/40 text-muted-foreground cursor-not-allowed"
+                  />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-foreground">Department / Nodal Agency *</label>
+                  <label className="text-xs font-semibold text-foreground">Department / Directorate</label>
                   <Input
-                    required
-                    placeholder="e.g., Renewable Energy Development Agency"
-                    value={newDept}
-                    onChange={(e) => setNewDept(e.target.value)}
+                    readOnly
+                    value={session.department.name}
+                    className="bg-muted/40 text-muted-foreground cursor-not-allowed"
                   />
                 </div>
               </div>
@@ -735,17 +617,11 @@ export function GovernmentServicesPage() {
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-xs font-semibold text-foreground">Territory / State</label>
-                  <select
+                  <Input
                     value={newState}
                     onChange={(e) => setNewState(e.target.value)}
-                    className="w-full h-9 px-3 rounded-lg border border-border bg-card text-xs font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  >
-                    {ALL_STATES_AND_UTS.map((st) => (
-                      <option key={st} value={st === 'All India (Pan-National)' ? 'All India' : st}>
-                        {st}
-                      </option>
-                    ))}
-                  </select>
+                    placeholder="e.g. Karnataka / All India"
+                  />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-xs font-semibold text-foreground">Functional Sector</label>
@@ -754,15 +630,13 @@ export function GovernmentServicesPage() {
                     onChange={(e) => setNewCategory(e.target.value as any)}
                     className="w-full h-9 px-3 rounded-lg border border-border bg-card text-xs font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   >
-                    <option value="identity">Identity & Civil</option>
-                    <option value="tax">Finance & Tax</option>
-                    <option value="transport">Transport & RTO</option>
-                    <option value="health">Health & Wellness</option>
-                    <option value="welfare">Welfare & Subsidies</option>
-                    <option value="housing">Housing & Utilities</option>
-                    <option value="legal">Legal & Grievances</option>
-                    <option value="business">Commerce & MSME</option>
-                    <option value="other">Other Civic Sector</option>
+                    <option value="transport_driving">Transport & Driving</option>
+                    <option value="taxes_finance">Finance & Revenue</option>
+                    <option value="welfare_schemes">Welfare & Health</option>
+                    <option value="identity_civil">Identity & Civil</option>
+                    <option value="land_property">Land & Property</option>
+                    <option value="utilities_municipal">Municipal & Urban</option>
+                    <option value="other">Other Statutory Sector</option>
                   </select>
                 </div>
               </div>

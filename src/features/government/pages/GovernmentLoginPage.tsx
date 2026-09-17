@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { governmentService } from '@/services/government.service'
 import { ROUTES } from '@/constants/routes'
+import { useTheme } from '@/hooks'
 import {
   Landmark,
   Shield,
@@ -13,9 +14,6 @@ import {
   Building2,
   Globe2,
   Search,
-  FileText,
-  ShieldAlert,
-  Sparkles,
   ExternalLink,
   ChevronRight,
   Briefcase,
@@ -24,9 +22,14 @@ import {
   Truck,
   DollarSign,
   Sun,
+  Moon,
   Scale,
   Award,
-  BookOpen
+  BookOpen,
+  FileCheck2,
+  Clock,
+  ShieldCheck,
+  Home,
 } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
@@ -83,123 +86,237 @@ const ALL_JURISDICTIONS: TerritoryItem[] = [
   { name: 'Puducherry', code: 'PY', capital: 'Puducherry', type: 'Union Territory', portalName: 'e-District Puducherry', zone: 'Southern' },
 ]
 
-interface ServiceSector {
-  id: string
-  title: string
-  icon: any
+export interface OfficialDepartmentLogin {
+  deptId: string
+  deptCode: string
+  deptName: string
   ministry: string
-  statutoryCode: string
-  keyServices: string[]
-  metrics: string
-  color: string
+  officerName: string
+  designation: string
+  email: string
+  badgeId: string
+  scope: string
+  statutoryAct: string
+  avgSlaDays: number
+  complianceRate: number
+  keySchemes: string[]
+  icon: any
+  tagColor: string
 }
 
-const SERVICE_SECTORS: ServiceSector[] = [
+export const OFFICIAL_DEPARTMENT_LOGINS: OfficialDepartmentLogin[] = [
   {
-    id: 'identity',
-    title: 'Identity, Civil & Passports',
-    icon: Landmark,
-    ministry: 'MeitY / MEA / ECI',
-    statutoryCode: 'IN-UIDAI / MEA',
-    keyServices: ['Aadhaar Enrollment & e-KYC', 'PAN Allotment (Form 49A)', 'Passport Seva (Fresh/Tatkaal)', 'Voter ID e-EPIC', 'DigiLocker Issuance'],
-    metrics: '1.4B+ Digital IDs',
-    color: 'emerald'
-  },
-  {
-    id: 'healthcare',
-    title: 'Healthcare & Public Wellness',
-    icon: HeartPulse,
-    ministry: 'Ministry of Health & Family Welfare',
-    statutoryCode: 'IN-NHA-501',
-    keyServices: ['Ayushman Bharat PM-JAY (₹5L Cover)', 'ABHA Health Account ID', 'CGHS Dispensary Network', 'National Vaccine Registry'],
-    metrics: '550M+ Beneficiaries',
-    color: 'rose'
-  },
-  {
-    id: 'agriculture',
-    title: 'Agriculture, Farmers & Food',
-    icon: Sun,
-    ministry: 'MoAFW / DFPD',
-    statutoryCode: 'IN-AGRI-601',
-    keyServices: ['PM-Kisan Samman Nidhi (₹6,000/yr)', 'PM Fasal Bima Yojana (PMFBY)', 'One Nation One Ration Card (ONORC)', 'e-NAM Agricultural Market'],
-    metrics: '110M+ Farmers',
-    color: 'amber'
-  },
-  {
-    id: 'transport',
-    title: 'Transport, Highways & Logistics',
+    deptId: 'dept_transport',
+    deptCode: 'MORTH-KA',
+    deptName: 'Ministry of Road Transport & Highways',
+    ministry: 'Road Transport & Highways',
+    officerName: 'Shri Rajiv Patel',
+    designation: 'Joint Commissioner & Transport Controller',
+    email: 'rajiv.patel@transport.gov.in',
+    badgeId: 'GOV-OFF-2024-8841',
+    scope: 'Karnataka RTOs (KA-01 to KA-71) & Central MoRTH',
+    statutoryAct: 'Motor Vehicles Act, 1988 & Central Motor Vehicles Rules, 1989',
+    avgSlaDays: 3,
+    complianceRate: 98.4,
+    keySchemes: ['Sarathi Driving License Renewal', 'Vahan Motor Vehicle RC', 'Commercial All-India Tourist Permit', 'HSRP High Security Plates'],
     icon: Truck,
-    ministry: 'MoRTH / Ministry of Railways',
-    statutoryCode: 'IN-MORTH-301',
-    keyServices: ['Sarathi Driving License & Learner Perm.', 'Vahan Vehicle Registration (RC)', 'National FASTag Electronic Toll', 'IRCTC Rail Logistics & PNR'],
-    metrics: '350M+ Registrations',
-    color: 'blue'
+    tagColor: 'blue',
   },
   {
-    id: 'revenue',
-    title: 'Revenue, Taxes & Financial Inclusion',
+    deptId: 'dept_revenue',
+    deptCode: 'REV-BLR',
+    deptName: 'Department of Revenue & Land Records',
+    ministry: 'State Revenue Department',
+    officerName: 'Sunita Desai',
+    designation: 'District Magistrate & Sub-Registrar',
+    email: 'sunita.desai@revenue.gov.in',
+    badgeId: 'GOV-OFF-2023-1104',
+    scope: 'Bengaluru Urban & Rural Revenue Divisions',
+    statutoryAct: 'Karnataka Land Revenue Act, 1964 & Indian Registration Act, 1908',
+    avgSlaDays: 5,
+    complianceRate: 96.8,
+    keySchemes: ['Bhoomi Land Records (RTC/Pahani)', 'E-Khata Property Mutation', 'Caste & Income Certificate', 'Encumbrance Certificate (Form 15)'],
+    icon: MapPin,
+    tagColor: 'amber',
+  },
+  {
+    deptId: 'dept_health',
+    deptCode: 'MOHFW-NHA',
+    deptName: 'Ministry of Health & Family Welfare',
+    ministry: 'Health & Family Welfare / NHA',
+    officerName: 'Dr. Ramesh Gupta',
+    designation: 'Chief Health Commissioner & NHA Director',
+    email: 'ramesh.gupta@health.gov.in',
+    badgeId: 'GOV-NHA-2023-4412',
+    scope: 'All 36 States & UTs (National Health Grid)',
+    statutoryAct: 'Ayushman Bharat PM-JAY Operational Guidelines & ABDM',
+    avgSlaDays: 2,
+    complianceRate: 99.1,
+    keySchemes: ['Ayushman Bharat PM-JAY (₹5L Cashless)', 'ABHA Digital Health Account ID', 'CGHS Dispensary Network'],
+    icon: HeartPulse,
+    tagColor: 'rose',
+  },
+  {
+    deptId: 'dept_finance',
+    deptCode: 'MOF-CBDT',
+    deptName: 'Ministry of Finance & Revenue',
+    ministry: 'Ministry of Finance (CBDT / CBIC)',
+    officerName: 'Meenakshi Sundaram',
+    designation: 'Revenue Commissioner (Direct Taxes & MSME)',
+    email: 'meenakshi.s@incometax.gov.in',
+    badgeId: 'GOV-MOF-2022-7789',
+    scope: 'Central Tax Jurisdiction (Pan-India)',
+    statutoryAct: 'Income-tax Act, 1961, CGST Act, 2017 & MSMED Act',
+    avgSlaDays: 4,
+    complianceRate: 98.9,
+    keySchemes: ['Permanent Account Number (PAN) Form 49A', 'Income Tax Return (ITR-1/4)', 'GST Registration & Filings', 'Udyam MSME Registration'],
     icon: DollarSign,
-    ministry: 'Ministry of Finance (MoF)',
-    statutoryCode: 'IN-CBDT / CBIC',
-    keyServices: ['Income Tax Returns (ITR-1 to 4)', 'Goods and Services Tax (GST) Portal', 'India Post Payments Bank (IPPB)', 'PM Jan Dhan Accounts (PMJDY)'],
-    metrics: '80M+ Taxpayers',
-    color: 'teal'
+    tagColor: 'teal',
   },
   {
-    id: 'energy',
-    title: 'Clean Energy, Solar & Housing',
+    deptId: 'dept_meity',
+    deptCode: 'MEITY-UIDAI',
+    deptName: 'Ministry of Electronics & IT',
+    ministry: 'Electronics and Information Technology',
+    officerName: 'Alok Verma',
+    designation: 'Director General (UIDAI & Digital Infrastructure)',
+    email: 'alok.verma@meity.gov.in',
+    badgeId: 'GOV-UIDAI-2021-9921',
+    scope: 'Central Identity Data Repository (CIDR Pan-India)',
+    statutoryAct: 'Aadhaar Act, 2016 & Digital Personal Data Protection Act, 2023',
+    avgSlaDays: 2,
+    complianceRate: 99.5,
+    keySchemes: ['Aadhaar Enrollment & e-KYC', 'DigiLocker Digital Credential Issuance', 'APAAR Automated Permanent Academic Account'],
+    icon: Landmark,
+    tagColor: 'emerald',
+  },
+  {
+    deptId: 'dept_agri',
+    deptCode: 'MOAFW-AGRI',
+    deptName: 'Ministry of Agriculture & Farmers Welfare',
+    ministry: 'Agriculture & Farmers Welfare',
+    officerName: 'Baldev Singh',
+    designation: 'Agriculture Direct Benefit Transfer Controller',
+    email: 'baldev.singh@agri.gov.in',
+    badgeId: 'GOV-AGRI-2024-3321',
+    scope: 'National Agriculture DBT Grid (110M+ Farmers)',
+    statutoryAct: 'PM-Kisan Operational Guidelines & PMFBY Rules',
+    avgSlaDays: 4,
+    complianceRate: 97.2,
+    keySchemes: ['PM-Kisan Samman Nidhi (₹6,000/yr)', 'PM Fasal Bima Yojana (Crop Insurance)'],
     icon: Sun,
-    ministry: 'MNRE / MoHUA',
-    statutoryCode: 'IN-MNRE-1101',
-    keyServices: ['PM Surya Ghar: Muft Bijli Solar Subsidy', 'Pradhan Mantri Awas Yojana (PMAY)', 'Jal Jeevan Mission Clean Water', 'National Smart Grid Portal'],
-    metrics: '10M+ Solar Homes Target',
-    color: 'orange'
+    tagColor: 'green',
   },
   {
-    id: 'labour',
-    title: 'Labour, Employment & Skills',
+    deptId: 'dept_energy',
+    deptCode: 'MNRE-SOLAR',
+    deptName: 'Ministry of New & Renewable Energy',
+    ministry: 'New & Renewable Energy',
+    officerName: 'Priya Sharma',
+    designation: 'Solar Mission Project Director',
+    email: 'priya.sharma@mnre.gov.in',
+    badgeId: 'GOV-MNRE-2023-8812',
+    scope: 'National Solar Grid & State DISCOM Networks',
+    statutoryAct: 'Electricity Act, 2003 & National Solar Mission Directives',
+    avgSlaDays: 6,
+    complianceRate: 95.8,
+    keySchemes: ['PM Surya Ghar: Muft Bijli Rooftop Solar Subsidy', 'National Solar Net-Metering Grid Interconnect'],
+    icon: Sun,
+    tagColor: 'orange',
+  },
+  {
+    deptId: 'dept_food',
+    deptCode: 'DFPD-FOOD',
+    deptName: 'Department of Food & Public Distribution',
+    ministry: 'Consumer Affairs, Food & Public Distribution',
+    officerName: 'S. K. Mukherjee',
+    designation: 'National PDS Controller (ONORC Grid)',
+    email: 'sk.mukherjee@food.gov.in',
+    badgeId: 'GOV-DFPD-2022-5501',
+    scope: 'Pan-India 5.4 Lakh Fair Price Shops Network',
+    statutoryAct: 'National Food Security Act (NFSA), 2013 & TPDS Order',
+    avgSlaDays: 3,
+    complianceRate: 98.0,
+    keySchemes: ['One Nation One Ration Card (ONORC)', 'NFSA Priority Foodgrain Entitlement'],
     icon: Briefcase,
-    ministry: 'Ministry of Labour / Education',
-    statutoryCode: 'IN-EPFO / MOLE',
-    keyServices: ['EPFO Universal Account Number (UAN)', 'e-Shram National Worker Database', 'National Career Service (NCS) Jobs', 'National Scholarship Portal (NSP)'],
-    metrics: '290M+ Workers Registered',
-    color: 'indigo'
+    tagColor: 'yellow',
   },
   {
-    id: 'justice',
-    title: 'Justice, Law & Grievances',
+    deptId: 'dept_labour',
+    deptCode: 'MOLE-EPFO',
+    deptName: 'Ministry of Labour & Employment',
+    ministry: 'Labour & Employment / EPFO',
+    officerName: 'Vikram Seth',
+    designation: 'Regional Provident Fund Commissioner',
+    email: 'vikram.seth@epfo.gov.in',
+    badgeId: 'GOV-EPFO-2023-6623',
+    scope: 'National Social Security & Regional EPFO Offices',
+    statutoryAct: "Employees' Provident Funds Act, 1952 & Unorganized Workers Act",
+    avgSlaDays: 4,
+    complianceRate: 97.6,
+    keySchemes: ['Universal Account Number (UAN) PF Claim', 'e-Shram National Unorganized Worker Card'],
     icon: Scale,
-    ministry: 'Ministry of Law / DARPG',
-    statutoryCode: 'IN-DARPG / DOJ',
-    keyServices: ['CPGRAMS Centralized Grievance Portal', 'eCourts Case Status & Cause Lists', 'Tele-Law Marginalized Legal Aid', 'Right to Information (RTI Online)'],
-    metrics: '99% Redressal Rate',
-    color: 'purple'
+    tagColor: 'indigo',
   },
   {
-    id: 'commerce',
-    title: 'Industry, MSME & Startups',
+    deptId: 'dept_municipal',
+    deptCode: 'BBMP-CIVIC',
+    deptName: 'Bruhat Bengaluru Mahanagara Palike (BBMP)',
+    ministry: 'Urban Development Directorate',
+    officerName: 'K. N. Suresh',
+    designation: 'Chief Municipal Revenue Officer',
+    email: 'suresh.kn@bbmp.gov.in',
+    badgeId: 'GOV-BBMP-2024-1190',
+    scope: 'Bengaluru Metropolitan Corporation (8 Zones)',
+    statutoryAct: 'Karnataka Municipal Corporations Act, 1976',
+    avgSlaDays: 5,
+    complianceRate: 96.2,
+    keySchemes: ['Municipal Property Tax SAS & Khata', 'Trade License & Health NOC', 'Birth & Death Civil Registration'],
     icon: Building2,
-    ministry: 'Ministry of MSME / MoCI',
-    statutoryCode: 'IN-MSME / DPIIT',
-    keyServices: ['Udyam MSME Zero-Cost Registration', 'Startup India DPIIT Tax Exemption', 'MCA21 Corporate Company Filings', 'GeM Government e-Marketplace'],
-    metrics: '25M+ MSMEs Registered',
-    color: 'cyan'
-  }
+    tagColor: 'cyan',
+  },
+  {
+    deptId: 'dept_pan_india',
+    deptCode: 'NIC-CPGRAMS',
+    deptName: 'Department of Administrative Reforms & Grievances',
+    ministry: 'Personnel, Public Grievances and Pensions',
+    officerName: 'Dr. Anand V. Vardhan, IAS',
+    designation: 'Secretary (Public Grievances & Coordination)',
+    email: 'anand.vardhan@nic.in',
+    badgeId: 'GOV-DIR-2022-0001',
+    scope: 'Central Secretariat & Inter-State Coordination',
+    statutoryAct: 'Right to Public Services & DARPG Guidelines',
+    avgSlaDays: 5,
+    complianceRate: 96.5,
+    keySchemes: ['CPGRAMS Central Grievance Escalation', 'Inter-State Gazette Compliance Review'],
+    icon: ShieldCheck,
+    tagColor: 'purple',
+  },
 ]
 
 export function GovernmentLoginPage() {
   const navigate = useNavigate()
-  const [email, setEmail] = useState('anand.vardhan@nic.in')
+  const [selectedDeptId, setSelectedDeptId] = useState('dept_transport')
+  const [email, setEmail] = useState('rajiv.patel@transport.gov.in')
   const [password, setPassword] = useState('GovSecure#2026')
   const [hardwareDsc, setHardwareDsc] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   // Showcase state
-  const [activeTab, setActiveTab] = useState<'territories' | 'services' | 'administrative'>('territories')
+  const [activeTab, setActiveTab] = useState<'departments' | 'territories' | 'isolation'>('departments')
   const [territoryTypeFilter, setTerritoryTypeFilter] = useState<'all' | 'State' | 'Union Territory'>('all')
   const [territorySearch, setTerritorySearch] = useState('')
-  const [serviceSearch, setServiceSearch] = useState('')
+  const [deptSearch, setDeptSearch] = useState('')
+
+  const handleDeptSelect = (deptId: string) => {
+    const found = OFFICIAL_DEPARTMENT_LOGINS.find((d) => d.deptId === deptId)
+    if (found) {
+      setSelectedDeptId(found.deptId)
+      setEmail(found.email)
+      setError(null)
+    }
+  }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -215,8 +332,9 @@ export function GovernmentLoginPage() {
     }
   }
 
-  const handleQuickLogin = async (officerEmail: string) => {
+  const handleQuickLogin = async (officerEmail: string, deptId: string) => {
     setEmail(officerEmail)
+    setSelectedDeptId(deptId)
     setLoading(true)
     setError(null)
     try {
@@ -239,144 +357,266 @@ export function GovernmentLoginPage() {
     return matchesType && matchesSearch
   })
 
-  const filteredSectors = SERVICE_SECTORS.filter((sec) => {
-    const q = serviceSearch.toLowerCase()
+  const filteredDepts = OFFICIAL_DEPARTMENT_LOGINS.filter((d) => {
+    const q = deptSearch.toLowerCase()
     return (
-      sec.title.toLowerCase().includes(q) ||
-      sec.ministry.toLowerCase().includes(q) ||
-      sec.statutoryCode.toLowerCase().includes(q) ||
-      sec.keyServices.some((s) => s.toLowerCase().includes(q))
+      d.deptName.toLowerCase().includes(q) ||
+      d.deptCode.toLowerCase().includes(q) ||
+      d.officerName.toLowerCase().includes(q) ||
+      d.ministry.toLowerCase().includes(q) ||
+      d.statutoryAct.toLowerCase().includes(q)
     )
   })
 
+  const currentSelectedDept = OFFICIAL_DEPARTMENT_LOGINS.find((d) => d.deptId === selectedDeptId) || OFFICIAL_DEPARTMENT_LOGINS[0]
+  const { theme, toggleTheme } = useTheme()
+
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between relative overflow-hidden font-sans">
-      {/* Official background decorative glow & subtle grid */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(16,185,129,0.15),rgba(255,255,255,0))]" />
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b15_1px,transparent_1px),linear-gradient(to_bottom,#1e293b15_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none" />
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col justify-between relative overflow-hidden font-sans transition-colors duration-200">
+      {/* Background decorative subtle glow */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(37,99,235,0.06),rgba(255,255,255,0))] dark:bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(37,99,235,0.15),rgba(255,255,255,0))] pointer-events-none" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#e2e8f080_1px,transparent_1px),linear-gradient(to_bottom,#e2e8f080_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#1e293b15_1px,transparent_1px),linear-gradient(to_bottom,#1e293b15_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none" />
 
       {/* Top National Header Bar */}
-      <header className="relative z-20 border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-md px-4 sm:px-8 py-3.5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <header className="relative z-20 border-b border-slate-200 dark:border-slate-800/80 bg-white/90 dark:bg-slate-950/85 backdrop-blur-md px-4 sm:px-8 py-3.5 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-colors">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-600 to-teal-800 flex items-center justify-center text-white shadow-lg shadow-emerald-950/50 border border-emerald-500/30 shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-700 via-indigo-700 to-slate-900 flex items-center justify-center text-white shadow-md border border-blue-400/30 shrink-0">
             <Landmark className="w-6 h-6" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-sm sm:text-base font-bold text-white tracking-tight">
-                CIVIQONE Government
+              <span className="text-sm sm:text-base font-bold text-slate-900 dark:text-white tracking-tight font-display">
+                CIVIQONE Government Secretariat
               </span>
-              <Badge variant="outline" className="text-[10px] text-emerald-400 border-emerald-500/30 bg-emerald-950/40">
-                National Portal Gateway
+              <Badge variant="outline" className="text-[10px] text-blue-700 dark:text-blue-300 border-blue-300 dark:border-blue-700 bg-blue-50 dark:bg-blue-950/50 font-semibold">
+                Department Isolation Gateway
               </Badge>
             </div>
-            <p className="text-[11px] text-slate-400">
-              Sovereign Administrative Directorate · 28 States & 8 Union Territories
+            <p className="text-[11px] text-slate-500 dark:text-slate-400">
+              Unique Statutory Desks · 11 Dedicated Ministries · 28 States & 8 Union Territories
             </p>
           </div>
         </div>
 
-        {/* National Stats Strip */}
-        <div className="flex items-center gap-2 sm:gap-4 overflow-x-auto no-scrollbar py-1">
-          <div className="px-3 py-1.5 rounded-lg bg-slate-900/80 border border-slate-800 text-[11px] flex items-center gap-1.5 shrink-0">
-            <Globe2 className="w-3.5 h-3.5 text-emerald-400" />
-            <span className="text-slate-400">Central Services:</span>
-            <strong className="text-emerald-300 font-mono">13,971</strong>
+        {/* National Stats Strip & Theme Switcher */}
+        <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto no-scrollbar py-1">
+          <div className="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-[11px] flex items-center gap-1.5 shrink-0 shadow-xs">
+            <Building2 className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+            <span className="text-slate-500 dark:text-slate-400">Desks:</span>
+            <strong className="text-blue-700 dark:text-blue-300 font-mono">11 Departments</strong>
           </div>
-          <div className="px-3 py-1.5 rounded-lg bg-slate-900/80 border border-slate-800 text-[11px] flex items-center gap-1.5 shrink-0">
-            <MapPin className="w-3.5 h-3.5 text-blue-400" />
-            <span className="text-slate-400">State/UT Services:</span>
-            <strong className="text-blue-300 font-mono">12,350</strong>
+          <div className="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-[11px] flex items-center gap-1.5 shrink-0 shadow-xs">
+            <Shield className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+            <span className="text-slate-500 dark:text-slate-400">Data Isolation:</span>
+            <strong className="text-emerald-700 dark:text-emerald-300 font-mono">100% Partitioned</strong>
           </div>
-          <div className="px-3 py-1.5 rounded-lg bg-slate-900/80 border border-slate-800 text-[11px] flex items-center gap-1.5 shrink-0">
-            <Building2 className="w-3.5 h-3.5 text-amber-400" />
-            <span className="text-slate-400">Jurisdictions:</span>
-            <strong className="text-amber-300 font-mono">28 States · 8 UTs</strong>
+          <div className="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-[11px] flex items-center gap-1.5 shrink-0 shadow-xs">
+            <MapPin className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+            <span className="text-slate-500 dark:text-slate-400">Scope:</span>
+            <strong className="text-amber-700 dark:text-amber-300 font-mono">28 States · 8 UTs</strong>
           </div>
 
-          <div className="hidden lg:flex items-center gap-2 pl-2 border-l border-slate-800">
-            <Link
-              to={ROUTES.APP.DASHBOARD}
-              className="text-xs text-slate-400 hover:text-emerald-400 transition-colors flex items-center gap-1"
-            >
-              Citizen Portal <ExternalLink className="w-3 h-3" />
-            </Link>
-          </div>
+          {/* Theme Toggle Button */}
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shadow-xs ml-1 shrink-0"
+            title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
+            aria-label="Toggle theme"
+          >
+            {theme === 'dark' ? (
+              <>
+                <Sun className="w-4 h-4 text-amber-400" />
+                <span className="hidden sm:inline">Light</span>
+              </>
+            ) : (
+              <>
+                <Moon className="w-4 h-4 text-slate-600" />
+                <span className="hidden sm:inline">Dark</span>
+              </>
+            )}
+          </button>
+
+          <Link
+            to={ROUTES.ROOT}
+            className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors shrink-0"
+            title="Return to Home"
+          >
+            <Home className="w-4 h-4" />
+          </Link>
         </div>
       </header>
 
       {/* Main Content: Split Screen Layout */}
       <main className="relative z-10 flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col lg:flex-row gap-8 items-stretch">
         
-        {/* LEFT COLUMN: Comprehensive National Directorate Showcase */}
+        {/* LEFT COLUMN: Department Showcase & Isolation Architecture */}
         <div className="flex-1 flex flex-col justify-between space-y-6">
           <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-950/80 border border-emerald-800 text-emerald-300 text-xs font-semibold uppercase tracking-wider">
-              <Shield className="w-3.5 h-3.5" />
-              Sovereign Public Digital Governance System
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/80 border border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-300 text-xs font-semibold uppercase tracking-wider shadow-xs">
+              <Shield className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+              Sovereign Department-Isolated Governance Desks
             </div>
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-white leading-tight">
-              Directorate of Public Digital Services <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400">
-                All 28 States & 8 Union Territories
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight font-display">
+              Official Department Portals <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-indigo-700 to-sky-600 dark:from-blue-400 dark:via-indigo-300 dark:to-cyan-400">
+                Independent Desks · Strict Data Isolation
               </span>
             </h1>
-            <p className="text-xs sm:text-sm text-slate-400 max-w-2xl leading-relaxed">
-              Official gateway for designated Senior Government Managers, State Principal Secretaries, and Verification Officers.
-              Enforcing uniform statutory SLAs, gazette synchronization, and interoperable digital public infrastructure nationwide.
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-2xl leading-relaxed">
+              Every Government Department operates as an isolated statutory unit. When you log in as an officer, you access exclusively your department&apos;s schemes, case files, verification queue, and SLA metrics. No cross-departmental data is merged.
             </p>
           </div>
 
           {/* Interactive Showcase Navigator Tabs */}
-          <div className="bg-slate-900/80 backdrop-blur-md rounded-2xl border border-slate-800/80 p-5 shadow-xl flex-1 flex flex-col">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3 gap-2 flex-wrap">
-              <div className="flex items-center gap-1 bg-slate-950/80 p-1 rounded-xl border border-slate-800">
+          <div className="bg-white dark:bg-slate-900/80 backdrop-blur-md rounded-2xl border border-slate-200 dark:border-slate-800/80 p-5 shadow-sm dark:shadow-xl flex-1 flex flex-col transition-colors">
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3 gap-2 flex-wrap">
+              <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-950/80 p-1 rounded-xl border border-slate-200 dark:border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('departments')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+                    activeTab === 'departments'
+                      ? 'bg-blue-700 text-white shadow-xs'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  <Building2 className="w-3.5 h-3.5" />
+                  <span>11 Unique Departments</span>
+                </button>
+
                 <button
                   type="button"
                   onClick={() => setActiveTab('territories')}
                   className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
                     activeTab === 'territories'
-                      ? 'bg-emerald-600 text-white shadow-sm'
-                      : 'text-slate-400 hover:text-white'
+                      ? 'bg-blue-700 text-white shadow-xs'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                   }`}
                 >
-                  <MapPin className="w-3.5 h-3.5" />
-                  <span>28 States & 8 UTs ({ALL_JURISDICTIONS.length})</span>
+                  <Globe2 className="w-3.5 h-3.5" />
+                  <span>28 States & 8 UTs</span>
                 </button>
 
                 <button
                   type="button"
-                  onClick={() => setActiveTab('services')}
+                  onClick={() => setActiveTab('isolation')}
                   className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
-                    activeTab === 'services'
-                      ? 'bg-emerald-600 text-white shadow-sm'
-                      : 'text-slate-400 hover:text-white'
+                    activeTab === 'isolation'
+                      ? 'bg-blue-700 text-white shadow-xs'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                   }`}
                 >
-                  <Layers className="w-3.5 h-3.5" />
-                  <span>18 Service Sectors (26,321+)</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('administrative')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
-                    activeTab === 'administrative'
-                      ? 'bg-emerald-600 text-white shadow-sm'
-                      : 'text-slate-400 hover:text-white'
-                  }`}
-                >
-                  <Award className="w-3.5 h-3.5" />
-                  <span>All-India Services (AIS)</span>
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  <span>Statutory Architecture</span>
                 </button>
               </div>
 
-              <span className="text-[11px] font-mono text-emerald-400 bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-800/40">
-                Live Inter-State Grid
+              <span className="text-[11px] font-semibold text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 px-2.5 py-1 rounded-full border border-blue-200 dark:border-blue-800">
+                Zero Inter-Dept Data Leakage
               </span>
             </div>
 
-            {/* TAB 1: 28 States & 8 Union Territories */}
+            {/* TAB 1: 11 Unique Departments List & 1-Click Launchers */}
+            {activeTab === 'departments' && (
+              <div className="mt-4 space-y-3 flex-1 flex flex-col">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                    Click any department below to inspect its unique mandate or log in directly:
+                  </p>
+                  <div className="relative w-48 sm:w-64">
+                    <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      placeholder="Search departments, acts..."
+                      value={deptSearch}
+                      onChange={(e) => setDeptSearch(e.target.value)}
+                      className="w-full h-8 pl-8 pr-3 rounded-lg bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-blue-500"
+                    />
+                  </div>
+                </div>
+
+                {/* Departments Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[380px] overflow-y-auto pr-1">
+                  {filteredDepts.map((dept) => {
+                    const IconComp = dept.icon
+                    const isSelected = selectedDeptId === dept.deptId
+                    return (
+                      <div
+                        key={dept.deptId}
+                        onClick={() => handleDeptSelect(dept.deptId)}
+                        className={`p-3.5 rounded-xl border transition-all cursor-pointer flex flex-col justify-between ${
+                          isSelected
+                            ? 'bg-blue-50/70 dark:bg-blue-950/40 border-blue-600 shadow-sm ring-1 ring-blue-500/50'
+                            : 'bg-white dark:bg-slate-950/60 border-slate-200 dark:border-slate-800/80 hover:border-blue-400 hover:bg-slate-50/80 dark:hover:bg-slate-900/60 shadow-2xs'
+                        }`}
+                      >
+                        <div>
+                          <div className="flex items-start justify-between gap-2 mb-1.5">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <div className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center text-blue-700 dark:text-blue-400 shrink-0">
+                                <IconComp className="w-4 h-4" />
+                              </div>
+                              <div className="min-w-0">
+                                <span className="font-bold text-slate-900 dark:text-slate-200 text-xs truncate block">
+                                  {dept.deptName}
+                                </span>
+                                <span className="text-[10px] text-slate-500 dark:text-slate-400 truncate block">
+                                  {dept.officerName} · {dept.designation}
+                                </span>
+                              </div>
+                            </div>
+                            <Badge
+                              variant="outline"
+                              className="font-mono text-[9px] px-1.5 py-0.5 text-blue-700 dark:text-blue-400 border-blue-300 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/50 shrink-0"
+                            >
+                              {dept.deptCode}
+                            </Badge>
+                          </div>
+
+                          <p className="text-[11px] text-amber-700 dark:text-amber-400 font-serif italic line-clamp-1 mt-1">
+                            &quot;{dept.statutoryAct}&quot;
+                          </p>
+
+                          <div className="mt-2.5 space-y-1">
+                            {dept.keySchemes.slice(0, 2).map((scheme, idx) => (
+                              <div key={idx} className="flex items-center gap-1.5 text-[11px] text-slate-700 dark:text-slate-300 truncate">
+                                <span className="w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-400 shrink-0" />
+                                <span className="truncate">{scheme}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[10px]">
+                          <span className="text-slate-500 dark:text-slate-400">
+                            SLA: <strong className="text-blue-700 dark:text-blue-300 font-mono">{dept.avgSlaDays} Days</strong> · Comp: <strong className="text-emerald-700 dark:text-emerald-400 font-mono">{dept.complianceRate}%</strong>
+                          </span>
+                          <Button
+                            size="sm"
+                            variant={isSelected ? 'primary' : 'outline'}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleQuickLogin(dept.email, dept.deptId)
+                            }}
+                            className="h-6 px-2.5 text-[10px] bg-blue-700 hover:bg-blue-800 text-white shadow-xs"
+                          >
+                            Log In Desk <ArrowRight className="w-3 h-3 ml-1" />
+                          </Button>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+
+                <div className="pt-2 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
+                  <span>Showing {filteredDepts.length} autonomous departments</span>
+                  <span className="text-blue-700 dark:text-blue-400 font-medium">Click any card to select for sign-in</span>
+                </div>
+              </div>
+            )}
+
+            {/* TAB 2: 28 States & 8 Union Territories */}
             {activeTab === 'territories' && (
               <div className="mt-4 space-y-3 flex-1 flex flex-col">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
@@ -386,8 +626,8 @@ export function GovernmentLoginPage() {
                       onClick={() => setTerritoryTypeFilter('all')}
                       className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all ${
                         territoryTypeFilter === 'all'
-                          ? 'bg-slate-800 text-white'
-                          : 'text-slate-400 hover:text-white'
+                          ? 'bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-white'
+                          : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                       }`}
                     >
                       All 36
@@ -397,8 +637,8 @@ export function GovernmentLoginPage() {
                       onClick={() => setTerritoryTypeFilter('State')}
                       className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all ${
                         territoryTypeFilter === 'State'
-                          ? 'bg-emerald-900/50 text-emerald-300 border border-emerald-700/50'
-                          : 'text-slate-400 hover:text-white'
+                          ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300 border border-blue-300 dark:border-blue-700/50'
+                          : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                       }`}
                     >
                       28 States
@@ -408,8 +648,8 @@ export function GovernmentLoginPage() {
                       onClick={() => setTerritoryTypeFilter('Union Territory')}
                       className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all ${
                         territoryTypeFilter === 'Union Territory'
-                          ? 'bg-blue-900/50 text-blue-300 border border-blue-700/50'
-                          : 'text-slate-400 hover:text-white'
+                          ? 'bg-indigo-100 dark:bg-indigo-900/50 text-indigo-800 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-700/50'
+                          : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                       }`}
                     >
                       8 Union Territories
@@ -417,30 +657,29 @@ export function GovernmentLoginPage() {
                   </div>
 
                   <div className="relative w-full sm:w-56">
-                    <Search className="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-1/2 -translate-y-1/2" />
+                    <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
                     <input
                       type="text"
                       placeholder="Search state, capital, portal..."
                       value={territorySearch}
                       onChange={(e) => setTerritorySearch(e.target.value)}
-                      className="w-full h-8 pl-8 pr-3 rounded-lg bg-slate-950/80 border border-slate-800 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-emerald-500"
+                      className="w-full h-8 pl-8 pr-3 rounded-lg bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-blue-500"
                     />
                   </div>
                 </div>
 
-                {/* Territory Cards Grid with Scrollbar */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2 max-h-[380px] overflow-y-auto pr-1">
                   {filteredTerritories.map((item) => (
                     <div
                       key={item.code}
-                      className="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800/80 hover:border-emerald-500/40 hover:bg-slate-900/60 transition-all text-xs flex flex-col justify-between group"
+                      className="p-2.5 rounded-xl bg-white dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800/80 hover:border-blue-400 hover:bg-slate-50/80 dark:hover:bg-slate-900/60 transition-all text-xs flex flex-col justify-between group shadow-2xs"
                     >
                       <div className="flex items-start justify-between gap-1.5">
                         <div className="truncate">
-                          <span className="font-bold text-slate-200 group-hover:text-emerald-300 truncate block">
+                          <span className="font-bold text-slate-900 dark:text-slate-200 group-hover:text-blue-700 dark:group-hover:text-blue-300 truncate block">
                             {item.name}
                           </span>
-                          <span className="text-[11px] text-slate-400 truncate block">
+                          <span className="text-[11px] text-slate-500 dark:text-slate-400 truncate block">
                             Capital: {item.capital}
                           </span>
                         </div>
@@ -448,146 +687,76 @@ export function GovernmentLoginPage() {
                           variant="outline"
                           className={`font-mono text-[9px] shrink-0 ${
                             item.type === 'State'
-                              ? 'text-emerald-400 border-emerald-500/30'
-                              : 'text-blue-400 border-blue-500/30'
+                              ? 'text-blue-700 dark:text-blue-400 border-blue-300 dark:border-blue-500/30'
+                              : 'text-indigo-700 dark:text-indigo-400 border-indigo-300 dark:border-indigo-500/30'
                           }`}
                         >
                           {item.code}
                         </Badge>
                       </div>
-                      <div className="mt-2 pt-1.5 border-t border-slate-800/60 flex items-center justify-between text-[10px] text-slate-400">
-                        <span className="truncate text-slate-400">{item.portalName}</span>
-                        <span className="text-[9px] text-slate-500 shrink-0">{item.zone}</span>
+                      <div className="mt-2 pt-1.5 border-t border-slate-100 dark:border-slate-800/60 flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400">
+                        <span className="truncate">{item.portalName}</span>
+                        <span className="text-[9px] text-slate-400 shrink-0">{item.zone}</span>
                       </div>
                     </div>
                   ))}
                 </div>
 
-                <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
-                  <span>Displaying {filteredTerritories.length} jurisdictions</span>
-                  <span className="text-emerald-400 font-medium">100% Connected to Sovereign National Grid</span>
+                <div className="pt-2 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
+                  <span>Displaying {filteredTerritories.length} state & UT jurisdictions</span>
+                  <span className="text-blue-700 dark:text-blue-400 font-medium">Interoperable National Service Grid</span>
                 </div>
               </div>
             )}
 
-            {/* TAB 2: 18 Service Sectors */}
-            {activeTab === 'services' && (
-              <div className="mt-4 space-y-3 flex-1 flex flex-col">
-                <div className="flex items-center justify-between gap-3">
-                  <span className="text-xs text-slate-400 font-medium">
-                    Central & State Services Organized Across 18 Institutional Categories
-                  </span>
-                  <div className="relative w-48 sm:w-60">
-                    <Search className="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-1/2 -translate-y-1/2" />
-                    <input
-                      type="text"
-                      placeholder="Search schemes, acts, ministries..."
-                      value={serviceSearch}
-                      onChange={(e) => setServiceSearch(e.target.value)}
-                      className="w-full h-8 pl-8 pr-3 rounded-lg bg-slate-950/80 border border-slate-800 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-emerald-500"
-                    />
-                  </div>
-                </div>
-
-                {/* Sectors Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 max-h-[380px] overflow-y-auto pr-1">
-                  {filteredSectors.map((sector) => {
-                    const IconComp = sector.icon
-                    return (
-                      <div
-                        key={sector.id}
-                        className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80 hover:border-emerald-500/40 hover:bg-slate-900/60 transition-all flex flex-col justify-between"
-                      >
-                        <div>
-                          <div className="flex items-center justify-between gap-2 mb-1.5">
-                            <div className="flex items-center gap-1.5">
-                              <div className="w-6 h-6 rounded-lg bg-emerald-950/80 border border-emerald-800 flex items-center justify-center text-emerald-400 shrink-0">
-                                <IconComp className="w-3.5 h-3.5" />
-                              </div>
-                              <span className="font-bold text-slate-200 text-xs truncate">
-                                {sector.title}
-                              </span>
-                            </div>
-                            <span className="font-mono text-[9px] px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-400">
-                              {sector.statutoryCode}
-                            </span>
-                          </div>
-                          <span className="text-[10px] text-slate-400 font-medium block truncate">
-                            {sector.ministry}
-                          </span>
-                          <ul className="mt-2 space-y-1 text-[11px] text-slate-400">
-                            {sector.keyServices.slice(0, 3).map((srv, idx) => (
-                              <li key={idx} className="flex items-center gap-1.5 truncate">
-                                <span className="w-1 h-1 rounded-full bg-emerald-400 shrink-0" />
-                                <span className="truncate">{srv}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                        <div className="mt-3 pt-1.5 border-t border-slate-800/60 flex items-center justify-between text-[10px]">
-                          <span className="text-emerald-400 font-semibold">{sector.metrics}</span>
-                          <span className="text-slate-500">Statutory SLA Enforced</span>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-
-                <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
-                  <span>13,971 Central + 12,350 State Services Listed Centrally</span>
-                  <span className="text-emerald-400 font-medium">Synchronized with Citizen Portal</span>
-                </div>
-              </div>
-            )}
-
-            {/* TAB 3: All-India Services Framework */}
-            {activeTab === 'administrative' && (
-              <div className="mt-4 space-y-4 text-xs text-slate-300 flex-1 flex flex-col justify-between">
+            {/* TAB 3: Department Data Isolation Architecture */}
+            {activeTab === 'isolation' && (
+              <div className="mt-4 space-y-4 text-xs text-slate-700 dark:text-slate-300 flex-1 flex flex-col justify-between">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800">
-                    <div className="w-8 h-8 rounded-lg bg-blue-950/80 border border-blue-700 flex items-center justify-center text-blue-400 mb-2">
-                      <Award className="w-4 h-4" />
+                  <div className="p-4 rounded-xl bg-white dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 shadow-2xs">
+                    <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/80 border border-blue-200 dark:border-blue-700 flex items-center justify-center text-blue-700 dark:text-blue-400 mb-2">
+                      <Lock className="w-4 h-4" />
                     </div>
-                    <h3 className="font-bold text-white text-sm">IAS (Administrative)</h3>
-                    <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
-                      Indian Administrative Service officers governing district collectors, state secretariats, and central joint secretaries.
+                    <h3 className="font-bold text-slate-900 dark:text-white text-sm">Strict Workspace Siloing</h3>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                      Each department has a dedicated data scope. An officer logged in under Transport (MORTH-KA) sees ONLY Transport schemes and vehicle applications.
                     </p>
                   </div>
 
-                  <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800">
-                    <div className="w-8 h-8 rounded-lg bg-purple-950/80 border border-purple-700 flex items-center justify-center text-purple-400 mb-2">
-                      <Shield className="w-4 h-4" />
+                  <div className="p-4 rounded-xl bg-white dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 shadow-2xs">
+                    <div className="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-950/80 border border-amber-200 dark:border-amber-700 flex items-center justify-center text-amber-700 dark:text-amber-400 mb-2">
+                      <Scale className="w-4 h-4" />
                     </div>
-                    <h3 className="font-bold text-white text-sm">IPS (Police)</h3>
-                    <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
-                      Indian Police Service command overseeing public safety, border management, and cyber defense across all 36 states and UTs.
+                    <h3 className="font-bold text-slate-900 dark:text-white text-sm">Autonomous Gazette Desks</h3>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                      Schemes gazetted by Revenue (Bhoomi, RTC) never bleed into Health (PM-JAY) or UIDAI (Aadhaar). Every department governs its own catalog.
                     </p>
                   </div>
 
-                  <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800">
-                    <div className="w-8 h-8 rounded-lg bg-emerald-950/80 border border-emerald-700 flex items-center justify-center text-emerald-400 mb-2">
-                      <Sun className="w-4 h-4" />
+                  <div className="p-4 rounded-xl bg-white dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 shadow-2xs">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-200 dark:border-emerald-700 flex items-center justify-center text-emerald-700 dark:text-emerald-400 mb-2">
+                      <ShieldCheck className="w-4 h-4" />
                     </div>
-                    <h3 className="font-bold text-white text-sm">IFoS (Forest)</h3>
-                    <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
-                      Indian Forest Service managing national ecological security, wildlife reserves, and natural resource clearances.
+                    <h3 className="font-bold text-slate-900 dark:text-white text-sm">Independent SLAs & Audits</h3>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                      SLA turnaround timers, biometric verification scores, and compliance metrics are isolated per ministry under the Allocation of Business Rules.
                     </p>
                   </div>
                 </div>
 
-                <div className="p-4 rounded-xl bg-emerald-950/20 border border-emerald-800/40 space-y-2">
-                  <h4 className="font-bold text-emerald-300 text-xs flex items-center gap-1.5">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                    Senior Government Manager Portfolio Mandate
+                <div className="p-4 rounded-xl bg-blue-50/60 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800/40 space-y-2">
+                  <h4 className="font-bold text-blue-900 dark:text-blue-300 text-xs flex items-center gap-1.5">
+                    <CheckCircle2 className="w-4 h-4 text-blue-700 dark:text-blue-400" />
+                    Government of India Allocation of Business Rules Mandate
                   </h4>
-                  <p className="text-[11px] text-slate-300 leading-relaxed">
-                    Under the Allocation of Business Rules and the National e-Governance Plan (NeGP 2.0), the Senior Government Manager holds multi-jurisdictional oversight over the cataloging, statutory gazette promulgation, and digital delivery standards across all 28 States and 8 Union Territories.
+                  <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
+                    Statutory powers are conferred directly upon each administrative Ministry. All citizen records, application dossiers, and verification decisions are cryptographically partitioned and signed by the designated Department Controller.
                   </p>
                 </div>
 
-                <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
-                  <span>Constitutional Authority: Article 312 of the Constitution of India</span>
-                  <span className="text-emerald-400 font-medium">Inter-State Council Connected</span>
+                <div className="pt-2 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
+                  <span>Constitutional Authority: Article 77(3) & NeGP 2.0 Directives</span>
+                  <span className="text-blue-700 dark:text-blue-400 font-medium">100% Zero-Trust Data Isolation</span>
                 </div>
               </div>
             )}
@@ -595,30 +764,52 @@ export function GovernmentLoginPage() {
         </div>
 
         {/* RIGHT COLUMN: Officer Authentication Console */}
-        <div className="w-full lg:w-[420px] shrink-0 flex flex-col justify-center">
-          <div className="bg-slate-900/95 backdrop-blur-md py-7 px-6 sm:px-8 shadow-2xl rounded-2xl border border-slate-800 relative">
-            <div className="mb-6 text-center">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-600 to-teal-800 flex items-center justify-center text-white mx-auto shadow-lg shadow-emerald-950/50 border border-emerald-500/30 mb-2.5">
-                <Landmark className="w-6 h-6" />
+        <div className="w-full lg:w-[440px] shrink-0 flex flex-col justify-center">
+          <div className="bg-white dark:bg-slate-900/95 backdrop-blur-md py-7 px-6 sm:px-8 shadow-xl rounded-2xl border border-slate-200 dark:border-slate-800 relative transition-colors">
+            <div className="mb-5 text-center">
+              <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-700 via-indigo-700 to-slate-900 flex items-center justify-center text-white mx-auto shadow-md border border-blue-400/30 mb-2">
+                <Landmark className="w-5 h-5" />
               </div>
-              <h2 className="text-xl font-bold text-white tracking-tight">
-                Official Access Portal
+              <h2 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight font-display">
+                Department Officer Sign-In
               </h2>
-              <p className="text-xs text-slate-400 mt-0.5">
-                Sign in with National Gov ID / NIC Credentials
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Authenticating into <span className="text-blue-700 dark:text-blue-400 font-bold">{currentSelectedDept.deptCode}</span> Desk
               </p>
             </div>
 
             {error && (
-              <div className="mb-5 p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
+              <div className="mb-4 p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-300 text-xs flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse shrink-0" />
                 <span>{error}</span>
               </div>
             )}
 
-            <form className="space-y-4" onSubmit={handleLogin}>
+            <form className="space-y-3.5" onSubmit={handleLogin}>
+              {/* Department Dropdown Selector */}
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
+                  Department Desk
+                </label>
+                <select
+                  value={selectedDeptId}
+                  onChange={(e) => handleDeptSelect(e.target.value)}
+                  className="w-full h-10 px-3 rounded-lg bg-slate-50 dark:bg-slate-950/90 border border-slate-300 dark:border-slate-700 text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                >
+                  {OFFICIAL_DEPARTMENT_LOGINS.map((dept) => (
+                    <option key={dept.deptId} value={dept.deptId}>
+                      [{dept.deptCode}] {dept.deptName}
+                    </option>
+                  ))}
+                </select>
+                <div className="mt-1 flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400 px-0.5">
+                  <span className="truncate">{currentSelectedDept.officerName}</span>
+                  <span className="text-blue-700 dark:text-blue-400 font-mono font-bold">{currentSelectedDept.badgeId}</span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
                   Official GovID / NIC Email
                 </label>
                 <Input
@@ -626,17 +817,17 @@ export function GovernmentLoginPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="officer.name@nic.in"
-                  className="bg-slate-950/80 border-slate-700 text-white placeholder:text-slate-500 focus:border-emerald-500 focus:ring-emerald-500/20 text-xs h-10"
+                  placeholder="officer.name@gov.in"
+                  className="bg-slate-50 dark:bg-slate-950/80 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-blue-500 focus:ring-blue-500/20 text-xs h-10"
                 />
               </div>
 
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">
                     Security Passphrase / Token PIN
                   </label>
-                  <span className="text-[11px] text-emerald-400 hover:underline cursor-pointer">
+                  <span className="text-[11px] text-blue-700 dark:text-blue-400 hover:underline cursor-pointer font-medium">
                     Hardware DSC?
                   </span>
                 </div>
@@ -645,7 +836,7 @@ export function GovernmentLoginPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="bg-slate-950/80 border-slate-700 text-white placeholder:text-slate-500 focus:border-emerald-500 focus:ring-emerald-500/20 text-xs h-10"
+                  className="bg-slate-50 dark:bg-slate-950/80 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-blue-500 focus:ring-blue-500/20 text-xs h-10"
                 />
               </div>
 
@@ -655,111 +846,84 @@ export function GovernmentLoginPage() {
                   id="dscCheck"
                   checked={hardwareDsc}
                   onChange={(e) => setHardwareDsc(e.target.checked)}
-                  className="rounded border-slate-700 bg-slate-950 text-emerald-600 focus:ring-emerald-500 h-3.5 w-3.5"
+                  className="rounded border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-blue-600 focus:ring-blue-500 h-3.5 w-3.5"
                 />
-                <label htmlFor="dscCheck" className="text-xs text-slate-300 cursor-pointer">
+                <label htmlFor="dscCheck" className="text-xs text-slate-700 dark:text-slate-300 cursor-pointer">
                   Authenticate via PKI Smart Card / USB Token
                 </label>
               </div>
 
-              <div className="p-2.5 rounded-lg bg-emerald-950/30 border border-emerald-900/60 text-[11px] text-emerald-300 flex items-start gap-2">
-                <Lock className="w-3.5 h-3.5 shrink-0 mt-0.5 text-emerald-400" />
+              <div className="p-2.5 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/60 text-[11px] text-blue-900 dark:text-blue-300 flex items-start gap-2">
+                <Lock className="w-3.5 h-3.5 shrink-0 mt-0.5 text-blue-700 dark:text-blue-400" />
                 <span>
-                  All official sessions are sealed with SHA-256 digital stamps and audited on the sovereign national ledger.
+                  Logging into {currentSelectedDept.deptName} with isolated statutory jurisdiction.
                 </span>
               </div>
 
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2.5 shadow-lg shadow-emerald-900/40 text-xs"
+                className="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-2.5 shadow-md shadow-blue-700/30 text-xs"
               >
-                {loading ? 'Validating Official Credentials...' : 'Sign In to Secretariat'}
+                {loading ? 'Validating Department Access...' : `Sign In to ${currentSelectedDept.deptCode} Secretariat`}
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </form>
 
-            {/* Quick Test Official Accounts for Evaluation */}
-            <div className="mt-6 pt-5 border-t border-slate-800">
-              <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2 text-center">
-                Quick Test Official Roles
-              </p>
-              <div className="space-y-2">
-                <button
-                  type="button"
-                  onClick={() => handleQuickLogin('anand.vardhan@nic.in')}
-                  className="w-full text-left p-2 rounded-lg bg-slate-950/80 border border-emerald-800/40 hover:border-emerald-500 hover:bg-emerald-950/20 transition-all flex items-center justify-between text-xs group"
-                >
-                  <div>
-                    <span className="font-bold text-emerald-300 block">
-                      Dr. Anand V. Vardhan, IAS
-                    </span>
-                    <span className="text-[10px] text-slate-400">
-                      Senior Government Manager (All 28 States & 8 UTs)
-                    </span>
-                  </div>
-                  <UserCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleQuickLogin('rajiv.patel@transport.gov.in')}
-                  className="w-full text-left p-2 rounded-lg bg-slate-950/60 border border-slate-800 hover:border-emerald-500/50 hover:bg-emerald-950/20 transition-all flex items-center justify-between text-xs group"
-                >
-                  <div>
-                    <span className="font-semibold text-slate-200 group-hover:text-emerald-300 block">
-                      Joint Commissioner Rajiv Patel
-                    </span>
-                    <span className="text-[10px] text-slate-400">
-                      Transport & Highways (MORTH-KA)
-                    </span>
-                  </div>
-                  <UserCheck className="w-4 h-4 text-slate-400 group-hover:text-emerald-400 shrink-0" />
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleQuickLogin('sunita.desai@revenue.gov.in')}
-                  className="w-full text-left p-2 rounded-lg bg-slate-950/60 border border-slate-800 hover:border-emerald-500/50 hover:bg-emerald-950/20 transition-all flex items-center justify-between text-xs group"
-                >
-                  <div>
-                    <span className="font-semibold text-slate-200 group-hover:text-emerald-300 block">
-                      Inspector Sunita Desai
-                    </span>
-                    <span className="text-[10px] text-slate-400">
-                      Field Verification & eKYC (REV-BLR)
-                    </span>
-                  </div>
-                  <UserCheck className="w-4 h-4 text-slate-400 group-hover:text-emerald-400 shrink-0" />
-                </button>
+            {/* Quick 1-Click Logins for All 11 Unique Departments */}
+            <div className="mt-5 pt-4 border-t border-slate-200 dark:border-slate-800">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                  Direct Department Desks (11 Unique)
+                </p>
+                <span className="text-[10px] text-blue-700 dark:text-blue-400 font-mono font-bold">1-Click Sign-In</span>
               </div>
-            </div>
-
-            <div className="mt-4 pt-3 border-t border-slate-800/80 text-center">
-              <Link
-                to={ROUTES.AUTH.LOGIN}
-                className="text-xs text-slate-400 hover:text-emerald-400 transition-colors inline-flex items-center gap-1"
-              >
-                Are you a Citizen? Access Citizen Portal <ChevronRight className="w-3 h-3" />
-              </Link>
+              <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+                {OFFICIAL_DEPARTMENT_LOGINS.map((dept) => {
+                  const isCurrent = selectedDeptId === dept.deptId
+                  return (
+                    <button
+                      key={dept.deptId}
+                      type="button"
+                      onClick={() => handleQuickLogin(dept.email, dept.deptId)}
+                      className={`w-full text-left p-2 rounded-lg border transition-all flex items-center justify-between text-xs group ${
+                        isCurrent
+                          ? 'bg-blue-50 dark:bg-blue-950/40 border-blue-500 text-blue-900 dark:text-blue-300'
+                          : 'bg-slate-50/70 dark:bg-slate-950/70 border-slate-200 dark:border-slate-800 hover:border-blue-400 hover:bg-slate-100/70 dark:hover:bg-slate-900/60 text-slate-800 dark:text-slate-300'
+                      }`}
+                    >
+                      <div className="min-w-0 pr-2">
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-mono text-[9px] px-1 py-0.2 rounded bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-blue-700 dark:text-blue-400 font-bold shrink-0">
+                            {dept.deptCode}
+                          </span>
+                          <span className="font-bold text-xs truncate">
+                            {dept.officerName}
+                          </span>
+                        </div>
+                        <span className="text-[10px] text-slate-500 dark:text-slate-400 truncate block mt-0.5">
+                          {dept.deptName}
+                        </span>
+                      </div>
+                      <UserCheck className="w-3.5 h-3.5 text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 shrink-0" />
+                    </button>
+                  )
+                })}
+              </div>
             </div>
           </div>
 
-          <p className="mt-4 text-center text-[11px] text-slate-500 flex items-center justify-center gap-1.5">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+          <p className="mt-4 text-center text-[11px] text-slate-500 dark:text-slate-500 flex items-center justify-center gap-1.5">
+            <CheckCircle2 className="w-3.5 h-3.5 text-blue-700 dark:text-blue-400" />
             Official Secrets Act 1923 · DPDP Act 2023 · Cyber Defense Tier-IV
           </p>
         </div>
       </main>
 
       {/* Sovereign Footer */}
-      <footer className="relative z-20 border-t border-slate-900 bg-slate-950/90 px-4 sm:px-8 py-3 text-center text-[11px] text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-2">
+      <footer className="relative z-20 border-t border-slate-200 dark:border-slate-900 bg-white/90 dark:bg-slate-950/90 px-4 sm:px-8 py-3 text-center text-[11px] text-slate-500 dark:text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-2 transition-colors">
         <span>© 2026 National Portal of India · National Informatics Centre (NIC)</span>
-        <span className="flex items-center gap-4">
-          <Link to={ROUTES.APP.SERVICES} className="hover:text-slate-400 transition-colors">Citizen Marketplace</Link>
-          <Link to={ROUTES.ORGANIZATION.LOGIN} className="hover:text-slate-400 transition-colors">Organization Portal</Link>
-          <Link to={ROUTES.ADMIN.LOGIN} className="hover:text-slate-400 transition-colors">Admin Gateway</Link>
-        </span>
+        <span>Secretariat Level-4 Air-Gapped Security Profile</span>
       </footer>
     </div>
   )

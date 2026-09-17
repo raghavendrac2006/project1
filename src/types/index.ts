@@ -262,6 +262,8 @@ export interface CivicService {
   serviceCode?: string
   statutoryAct?: string
   portalUrl?: string
+  departmentId?: string
+  departmentCode?: string
 }
 
 export type ApplicationStatus =
@@ -289,6 +291,8 @@ export interface CivicApplication {
   serviceTitle?: string
   applicantName?: string
   department: string
+  departmentId?: string
+  departmentCode?: string
   submittedAt: string
   updatedAt: string
   estimatedCompletion?: string
@@ -550,6 +554,11 @@ export interface GovernmentDepartment {
   activeServicesCount: number
   pendingApplicationsCount: number
   nodalOfficer?: string
+  jurisdictionScope?: string
+  statutoryAct?: string
+  avgSlaDays?: number
+  complianceRate?: number
+  description?: string
 }
 
 export interface GovernmentOfficial {

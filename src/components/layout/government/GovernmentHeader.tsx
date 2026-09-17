@@ -67,10 +67,59 @@ export function GovernmentHeader({ onToggleMobileMenu, onOpenCommandPalette }: G
       </div>
 
       <div className="flex items-center gap-2">
-        <Badge variant="outline" className="hidden sm:inline-flex gap-1.5 px-2.5 py-1 text-xs border-blue-500/30 text-blue-600 dark:text-blue-400 bg-blue-500/10">
-          <Landmark className="w-3.5 h-3.5" />
-          <span>{session?.department.code || 'GOV-DESK'}</span>
-        </Badge>
+        {/* Department Switcher Dropdown */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 transition-colors text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
+              title="Switch Government Department Desk"
+            >
+              <Landmark className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+              <span className="font-mono">{session?.department.code || 'GOV-DESK'}</span>
+              <span className="hidden xl:inline text-[11px] text-muted-foreground font-normal truncate max-w-[160px]">
+                · {session?.department.name}
+              </span>
+              <span className="text-[10px] text-muted-foreground ml-0.5">▼</span>
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-80 max-h-96 overflow-y-auto">
+            <DropdownMenuLabel className="pb-1.5">
+              <span className="text-xs font-bold text-foreground block">Select Department Desk</span>
+              <span className="text-[10px] text-muted-foreground font-normal">
+                Isolated statutory jurisdiction & scheme catalog
+              </span>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {civicStorage.getGovDepartments().map((dept) => {
+              const isCurrent = session?.department.id === dept.id
+              return (
+                <DropdownMenuItem
+                  key={dept.id}
+                  onClick={async () => {
+                    await governmentService.switchDepartment(dept.id)
+                    window.location.reload()
+                  }}
+                  className={`cursor-pointer p-2 rounded-lg flex flex-col items-start gap-0.5 ${
+                    isCurrent ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 font-semibold' : ''
+                  }`}
+                >
+                  <div className="w-full flex items-center justify-between">
+                    <span className="text-xs font-bold text-foreground truncate">{dept.name}</span>
+                    <Badge variant="outline" className="font-mono text-[9px] px-1 py-0 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 shrink-0 ml-1">
+                      {dept.code}
+                    </Badge>
+                  </div>
+                  <span className="text-[10px] text-muted-foreground truncate w-full">
+                    {dept.officerDesignation || dept.ministry}
+                  </span>
+                  <span className="text-[9px] text-slate-400">
+                    SLA: {dept.avgSlaDays || 4}d · Compliance: {dept.complianceRate || 98}%
+                  </span>
+                </DropdownMenuItem>
+              )
+            })}
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         <Button
           variant="ghost"
@@ -99,16 +148,22 @@ export function GovernmentHeader({ onToggleMobileMenu, onOpenCommandPalette }: G
               </div>
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-60">
+          <DropdownMenuContent align="end" className="w-64">
             <DropdownMenuLabel>
               <p className="text-xs font-bold text-foreground">{session?.official.name}</p>
               <p className="text-[11px] text-muted-foreground truncate">{session?.official.email}</p>
+              <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium mt-0.5 truncate">
+                {session?.department.name}
+              </p>
               <div className="mt-1.5 flex items-center gap-1 text-[10px] font-mono text-blue-600 bg-blue-500/10 px-2 py-0.5 rounded">
                 <ShieldCheck className="w-3 h-3" />
                 Badge: {session?.official.badgeId}
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => navigate(ROUTES.GOVERNMENT.SERVICES)} className="cursor-pointer text-xs">
+              {session?.department.code} Services Catalog
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={() => navigate(ROUTES.GOVERNMENT.REPORTS)} className="cursor-pointer text-xs">
               Department Reports
             </DropdownMenuItem>

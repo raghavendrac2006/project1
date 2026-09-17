@@ -105,10 +105,10 @@ export function GovernmentVerificationPage() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
             <Fingerprint className="w-6 h-6 text-emerald-600" />
-            Statutory Verification Desk
+            {session.department.name} · Verification Desk
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Automated Aadhaar eKYC, Biometric Match Verification, and Digilocker Document Integrity.
+            Departmental casework dossier review under {session.department.code}. Aadhaar eKYC, biometric verification, and DigiLocker integrity.
           </p>
         </div>
 

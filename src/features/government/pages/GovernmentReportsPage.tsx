@@ -55,10 +55,10 @@ export function GovernmentReportsPage() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
             <BarChart3 className="w-6 h-6 text-emerald-600" />
-            Statutory SLA & Casework Reports
+            {session.department.name} · Statutory SLA Reports
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Performance analytics, departmental turnaround metrics, and citizen service delivery KPIs.
+            Performance analytics, turnaround metrics, and statutory service delivery for {session.department.code} ({session.department.jurisdictionScope || session.department.jurisdiction}).
           </p>
         </div>
 

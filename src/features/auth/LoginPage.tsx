@@ -12,15 +12,19 @@ import {
   Phone,
   KeyRound,
   ArrowRight,
+  Sun,
+  Moon,
+  Home,
 } from 'lucide-react'
 import { loginSchema, type LoginFormData } from '@/schemas'
-import { useAuth, useToast } from '@/hooks'
+import { useAuth, useToast, useTheme } from '@/hooks'
 import { ROUTES } from '@/constants/routes'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
 import { cn } from '@/lib/utils'
 
 export function LoginPage() {
+  const { theme, toggleTheme } = useTheme()
   const { login } = useAuth()
   const toast = useToast()
   const navigate = useNavigate()
@@ -176,7 +180,36 @@ export function LoginPage() {
       </div>
 
       {/* Right Column: Login Card */}
-      <div className="flex flex-col items-center justify-center p-6 sm:p-12 lg:p-16">
+      <div className="flex flex-col items-center justify-center p-6 sm:p-12 lg:p-16 relative">
+        {/* Top utility controls */}
+        <div className="w-full max-w-md flex items-center justify-between pb-4 mb-2">
+          <Link
+            to={ROUTES.ROOT}
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Home className="w-3.5 h-3.5" />
+            <span>Civic Gateway</span>
+          </Link>
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border bg-card hover:bg-muted text-foreground text-xs font-medium shadow-sm transition-all"
+            title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} mode`}
+          >
+            {theme === 'dark' ? (
+              <>
+                <Sun className="w-3.5 h-3.5 text-amber-500" />
+                <span>Light Mode</span>
+              </>
+            ) : (
+              <>
+                <Moon className="w-3.5 h-3.5 text-blue-600" />
+                <span>Dark Mode</span>
+              </>
+            )}
+          </button>
+        </div>
+
         <div className="w-full max-w-md space-y-6">
           {/* Mobile brand header */}
           <div className="lg:hidden flex items-center gap-3 mb-4">
