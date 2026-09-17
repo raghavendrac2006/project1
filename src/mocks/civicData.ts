@@ -1721,6 +1721,17 @@ export const INITIAL_ACCESS_HISTORY: AccessHistoryItem[] = [
 // ==========================================
 export const INITIAL_GOV_DEPARTMENTS: GovernmentDepartment[] = [
   {
+    id: 'dept_pan_india',
+    name: 'National Portal of India & Inter-State Directorate',
+    code: 'NIC-ALL-INDIA',
+    ministry: 'Ministry of Electronics and Information Technology (MeitY)',
+    jurisdiction: 'Central',
+    contactOfficer: 'Dr. Anand V. Vardhan, IAS',
+    officerDesignation: 'Senior Government Manager (28 States & 8 UTs)',
+    activeServicesCount: 28,
+    pendingApplicationsCount: 1420,
+  },
+  {
     id: 'dept_transport',
     name: 'Ministry of Road Transport & Highways',
     code: 'MORTH-KA',
@@ -1756,6 +1767,17 @@ export const INITIAL_GOV_DEPARTMENTS: GovernmentDepartment[] = [
 ]
 
 export const INITIAL_GOV_OFFICIALS: GovernmentOfficial[] = [
+  {
+    id: 'off_00',
+    name: 'Dr. Anand V. Vardhan, IAS',
+    badgeId: 'GOV-DIR-2022-0001',
+    departmentId: 'dept_pan_india',
+    departmentName: 'National Portal of India & Inter-State Directorate',
+    designation: 'Senior Government Manager (28 States & 8 UTs)',
+    role: 'COMMISSIONER',
+    avatar: '',
+    email: 'anand.vardhan@nic.in',
+  },
   {
     id: 'off_01',
     name: 'Rajiv Patel',
