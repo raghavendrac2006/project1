@@ -14,13 +14,9 @@ import {
   Users,
   Award,
   Zap,
-  TrendingUp,
-  Activity,
   Star,
   CheckCircle2,
-  XCircle,
-  CreditCard,
-  Layers,
+  TrendingUp,
   ShieldOff,
 } from 'lucide-react'
 import { useAuth } from '@/hooks'
@@ -31,16 +27,9 @@ import { StatusIndicator } from '@/components/ui/StatusIndicator'
 import { civicStorage } from '@/services/storage'
 import { ROUTES } from '@/constants/routes'
 import { citizenIntelligenceService } from '@/services/citizen-intelligence.service'
-import type { PrivacyHealthScore, ActivityFeedEvent } from '@/types'
-
-const ACTIVITY_ICONS: Record<string, React.ReactNode> = {
-  consent_granted: <CheckCircle2 className="w-4 h-4 text-emerald-500" />,
-  consent_revoked: <XCircle className="w-4 h-4 text-rose-500" />,
-  doc_verified: <FileText className="w-4 h-4 text-purple-500" />,
-  app_updated: <Layers className="w-4 h-4 text-sky-500" />,
-  login: <ShieldCheck className="w-4 h-4 text-emerald-400" />,
-  payment: <CreditCard className="w-4 h-4 text-amber-500" />,
-}
+import { PrivacyHealthRadial } from '@/components/dashboard/PrivacyHealthRadial'
+import { CitizenIntelligenceRail } from '@/features/dashboard/CitizenIntelligenceRail'
+import type { PrivacyHealthScore } from '@/types'
 
 export function DashboardPage() {
   const { user } = useAuth()
@@ -56,11 +45,9 @@ export function DashboardPage() {
 
   // Intelligence data
   const [privacyScore, setPrivacyScore] = useState<PrivacyHealthScore | null>(null)
-  const [activityFeed, setActivityFeed] = useState<ActivityFeedEvent[]>([])
 
   useEffect(() => {
     citizenIntelligenceService.getPrivacyHealthScore().then(setPrivacyScore)
-    citizenIntelligenceService.getActivityFeed().then(setActivityFeed)
   }, [])
 
   // Time-aware greeting
@@ -84,15 +71,15 @@ export function DashboardPage() {
 
   return (
     <div className="space-y-6 pb-12 animate-in fade-in duration-200">
-      {/* 1. Welcome Hero Banner */}
-      <div className="relative overflow-hidden rounded-2xl border border-border bg-card p-6 sm:p-8 shadow-card">
-        {/* Subtle background glow */}
-        <div className="absolute -top-24 -right-24 w-96 h-96 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -left-24 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+      {/* 1. Command Center Hero: Glassmorphic Welcome Grid + Privacy Radial Gauge */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+        <div className="lg:col-span-7 relative overflow-hidden rounded-2xl border border-border/80 bg-card/70 backdrop-blur-xl p-6 sm:p-8 shadow-card flex flex-col justify-between">
+          {/* Subtle ambient background glow */}
+          <div className="absolute -top-24 -right-24 w-96 h-96 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-24 -left-24 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div>
-            <div className="flex flex-wrap items-center gap-2 mb-2">
+          <div className="relative z-10">
+            <div className="flex flex-wrap items-center gap-2 mb-2.5">
               <span className="text-xs font-bold uppercase tracking-wider text-primary">
                 National Citizen Workspace
               </span>
@@ -106,23 +93,13 @@ export function DashboardPage() {
             <h1 className="font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
               {greeting}, {user?.name || 'Citizen'}
             </h1>
-            <p className="text-xs sm:text-sm text-muted-foreground mt-1 max-w-2xl leading-relaxed">
+            <p className="text-xs sm:text-sm text-muted-foreground mt-2 max-w-xl leading-relaxed">
               Your civic identity is synchronized. All statutory vaults, active service applications, family delegations, and verified credentials are encrypted under sovereign citizen privacy protocols.
             </p>
           </div>
 
-          {/* Quick primary CTA and Security Score */}
-          <div className="flex flex-wrap items-center gap-3 shrink-0">
-            <div className="p-3 rounded-xl bg-muted/60 border border-border flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-mono font-bold text-sm">
-                94%
-              </div>
-              <div className="text-left">
-                <p className="text-[11px] font-bold text-foreground leading-none">Security Score</p>
-                <p className="text-[10px] text-muted-foreground mt-0.5">Hardware 2FA Active</p>
-              </div>
-            </div>
-
+          {/* Quick Action Button Strip */}
+          <div className="relative z-10 mt-6 pt-5 border-t border-border/50 flex flex-wrap items-center gap-3">
             <Button
               variant="primary"
               size="md"
@@ -132,9 +109,37 @@ export function DashboardPage() {
               <QrCode className="w-4 h-4" />
               View Digital ID
             </Button>
+            <Button
+              variant="outline"
+              size="md"
+              className="gap-2 font-semibold rounded-xl"
+              onClick={() => navigate(ROUTES.APP.DOCUMENTS)}
+            >
+              <FileText className="w-4 h-4 text-primary" />
+              Access Vault
+            </Button>
+            <Button
+              variant="ghost"
+              size="md"
+              className="gap-1.5 text-xs text-muted-foreground hover:text-foreground font-semibold rounded-xl sm:ml-auto"
+              onClick={() => navigate(ROUTES.APP.SECURITY)}
+            >
+              <Lock className="w-3.5 h-3.5" />
+              Security Audit
+            </Button>
           </div>
         </div>
+
+        {/* Dynamic Privacy & Security Health Radial Gauge */}
+        <div className="lg:col-span-5 flex">
+          <PrivacyHealthRadial score={privacyScore} className="w-full h-full flex flex-col justify-center" />
+        </div>
       </div>
+
+      {/* Main Operational Canvas & Telemetry Rail */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Left 8 Cols: Citizen Operations Canvas */}
+        <div className="lg:col-span-8 space-y-6">
 
       {/* 2. Citizen Action Center Strip (Interactive & Proactive) */}
       {pendingActions.length > 0 && (
@@ -416,12 +421,12 @@ export function DashboardPage() {
             </div>
             <div className="space-y-2">
               {documents
-                .filter(d => d.verificationStatus === 'expiring_soon' || d.verificationStatus === 'expired')
+                .filter((d) => d.verificationStatus === 'expiring_soon' || (d.expiryDate && new Date(d.expiryDate).getTime() < Date.now()))
                 .slice(0, 3)
                 .map((doc) => {
-                  const daysLeft = Math.ceil(
-                    (new Date(doc.expiryDate || Date.now()).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
-                  )
+                  const daysLeft = doc.expiryDate
+                    ? Math.ceil((new Date(doc.expiryDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+                    : 0
                   return (
                     <div key={doc.id} className="flex items-center justify-between text-xs">
                       <span className="text-muted-foreground truncate flex-1 pr-2">{doc.name || doc.title}</span>
@@ -434,7 +439,7 @@ export function DashboardPage() {
                   )
                 })
               }
-              {documents.filter(d => d.verificationStatus === 'expiring_soon' || d.verificationStatus === 'expired').length === 0 && (
+              {documents.filter((d) => d.verificationStatus === 'expiring_soon' || (d.expiryDate && new Date(d.expiryDate).getTime() < Date.now())).length === 0 && (
                 <p className="text-xs text-emerald-600 font-semibold flex items-center gap-1">
                   <CheckCircle2 className="w-3.5 h-3.5" /> All documents current
                 </p>
@@ -444,40 +449,7 @@ export function DashboardPage() {
         </Card>
       </div>
 
-      {/* 4c. Cross-Portal Activity Timeline */}
-      {activityFeed.length > 0 && (
-        <Card className="border-border">
-          <CardContent className="p-5">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <Activity className="w-4 h-4 text-blue-500" />
-                <span className="text-sm font-bold text-foreground">Recent Activity</span>
-              </div>
-              <Button variant="ghost" size="sm" className="text-xs text-primary font-semibold" onClick={() => navigate(ROUTES.APP.PRIVACY)}>
-                Full History <ChevronRight className="w-3.5 h-3.5 ml-1" />
-              </Button>
-            </div>
-            <div className="space-y-0">
-              {activityFeed.map((event, i) => (
-                <div
-                  key={event.id}
-                  className="flex items-start gap-3 py-2.5 border-b border-border last:border-0 cursor-pointer hover:bg-muted/30 rounded-lg px-1 transition-colors"
-                  onClick={() => event.relatedRoute && navigate(event.relatedRoute)}
-                >
-                  <div className="mt-0.5 shrink-0">{ACTIVITY_ICONS[event.type] ?? <Activity className="w-4 h-4 text-muted-foreground" />}</div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-semibold text-foreground">{event.title}</p>
-                    <p className="text-[11px] text-muted-foreground">{event.description}</p>
-                  </div>
-                  <span className="text-[10px] text-muted-foreground font-mono shrink-0">
-                    {new Date(event.timestamp).toLocaleDateString([], { month: 'short', day: 'numeric' })}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+
 
       {/* 5. Quick Actions Grid */}
       <div>
@@ -747,6 +719,13 @@ export function DashboardPage() {
               </CardContent>
             </Card>
           ))}
+        </div>
+      </div>
+        </div>
+
+        {/* Right 4 Cols: Citizen Intelligence Telemetry Rail & Anomaly Radar */}
+        <div className="lg:col-span-4 lg:sticky lg:top-20 space-y-6">
+          <CitizenIntelligenceRail />
         </div>
       </div>
     </div>

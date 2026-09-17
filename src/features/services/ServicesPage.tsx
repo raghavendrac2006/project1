@@ -16,7 +16,51 @@ import {
   ShieldCheck,
   Lock,
   Users,
+  MapPin,
+  ExternalLink,
+  Scroll,
+  Globe2,
 } from 'lucide-react'
+
+const ALL_STATES_AND_UTS = [
+  'All India (Pan-National)',
+  'Andhra Pradesh',
+  'Arunachal Pradesh',
+  'Assam',
+  'Bihar',
+  'Chhattisgarh',
+  'Goa',
+  'Gujarat',
+  'Haryana',
+  'Himachal Pradesh',
+  'Jharkhand',
+  'Karnataka',
+  'Kerala',
+  'Madhya Pradesh',
+  'Maharashtra',
+  'Manipur',
+  'Meghalaya',
+  'Mizoram',
+  'Nagaland',
+  'Odisha',
+  'Punjab',
+  'Rajasthan',
+  'Sikkim',
+  'Tamil Nadu',
+  'Telangana',
+  'Tripura',
+  'Uttar Pradesh',
+  'Uttarakhand',
+  'West Bengal',
+  'Andaman and Nicobar Islands',
+  'Chandigarh',
+  'Dadra and Nagar Haveli and Daman and Diu',
+  'Delhi (NCT)',
+  'Jammu and Kashmir',
+  'Ladakh',
+  'Lakshadweep',
+  'Puducherry',
+]
 import { Card, CardContent } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
@@ -37,6 +81,7 @@ export function ServicesPage() {
   const [services, setServices] = useState<CivicService[]>(() => civicStorage.getAllMarketplaceServices())
   const [selectedProvider, setSelectedProvider] = useState<'all' | 'government' | 'organization'>('all')
   const [selectedCategory, setSelectedCategory] = useState<ServiceCategory>('all')
+  const [selectedState, setSelectedState] = useState('All India (Pan-National)')
   const [searchQuery, setSearchQuery] = useState('')
   const [onlyRecommended, setOnlyRecommended] = useState(false)
 
@@ -65,13 +110,13 @@ export function ServicesPage() {
   }, [])
 
   const categories: { id: ServiceCategory; label: string }[] = [
-    { id: 'all', label: 'All Categories' },
-    { id: 'transport_driving', label: 'Transport & Driving' },
-    { id: 'land_property', label: 'Land & Property' },
-    { id: 'welfare_schemes', label: 'Welfare & Subsidies' },
-    { id: 'identity_civil', label: 'Civil Registration' },
-    { id: 'utilities_municipal', label: 'Municipal & Utilities' },
+    { id: 'all', label: 'All Sectors' },
+    { id: 'identity_civil', label: 'Identity & Civil' },
     { id: 'taxes_finance', label: 'Revenue & Finance' },
+    { id: 'transport_driving', label: 'Transport & Driving' },
+    { id: 'welfare_schemes', label: 'Welfare & Subsidies' },
+    { id: 'land_property', label: 'Land & Property' },
+    { id: 'utilities_municipal', label: 'Municipal & Utilities' },
     { id: 'education_skills', label: 'Education & Skills' },
   ]
 
@@ -86,6 +131,16 @@ export function ServicesPage() {
       list = list.filter((s) => s.category === selectedCategory)
     }
 
+    if (selectedState !== 'All India (Pan-National)') {
+      list = list.filter(
+        (s) =>
+          s.stateOrUt === selectedState ||
+          s.jurisdictionLevel === 'Central' ||
+          s.stateOrUt === 'All India' ||
+          !s.stateOrUt
+      )
+    }
+
     if (onlyRecommended) {
       list = list.filter((s) => s.recommended || s.popular)
     }
@@ -96,6 +151,10 @@ export function ServicesPage() {
         (s) =>
           s.title.toLowerCase().includes(q) ||
           s.department.toLowerCase().includes(q) ||
+          (s.ministry && s.ministry.toLowerCase().includes(q)) ||
+          (s.serviceCode && s.serviceCode.toLowerCase().includes(q)) ||
+          (s.statutoryAct && s.statutoryAct.toLowerCase().includes(q)) ||
+          (s.stateOrUt && s.stateOrUt.toLowerCase().includes(q)) ||
           (s.providerName && s.providerName.toLowerCase().includes(q)) ||
           s.description.toLowerCase().includes(q) ||
           s.eligibility.some((e: string) => e.toLowerCase().includes(q))
@@ -103,7 +162,7 @@ export function ServicesPage() {
     }
 
     return list
-  }, [services, selectedProvider, selectedCategory, onlyRecommended, searchQuery])
+  }, [services, selectedProvider, selectedCategory, selectedState, onlyRecommended, searchQuery])
 
   const handleStartApplication = (service: CivicService) => {
     setActiveService(service)
@@ -240,16 +299,50 @@ export function ServicesPage() {
         ))}
       </div>
 
-      {/* Search Input */}
-      <div className="relative max-w-lg">
-        <Search className="w-4 h-4 text-muted-foreground absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search by service name, provider, department, or keywords..."
-          className="w-full h-11 pl-10 pr-4 rounded-xl border border-input bg-card text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-        />
+      {/* Search Input & State Jurisdiction Filter */}
+      <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
+        <div className="relative flex-1 max-w-xl">
+          <Search className="w-4 h-4 text-muted-foreground absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search by name, ministry, act, service code (e.g. IN-UIDAI-101)..."
+            className="w-full h-11 pl-10 pr-4 rounded-xl border border-input bg-card text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+          />
+        </div>
+
+        <div className="flex items-center gap-1.5 bg-card border border-border rounded-xl px-3 h-11">
+          <MapPin className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+          <select
+            value={selectedState}
+            onChange={(e) => setSelectedState(e.target.value)}
+            className="bg-transparent text-xs font-semibold text-foreground focus:outline-none cursor-pointer py-1 max-w-[200px]"
+          >
+            {ALL_STATES_AND_UTS.map((st) => (
+              <option key={st} value={st} className="bg-card text-foreground">
+                {st}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {(searchQuery || selectedState !== 'All India (Pan-National)' || selectedCategory !== 'all' || selectedProvider !== 'all' || onlyRecommended) && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setSelectedProvider('all')
+              setSelectedCategory('all')
+              setSelectedState('All India (Pan-National)')
+              setSearchQuery('')
+              setOnlyRecommended(false)
+            }}
+            className="text-xs h-11 px-3 text-muted-foreground hover:text-foreground"
+          >
+            Reset
+          </Button>
+        )}
       </div>
 
       {/* Services Grid */}
@@ -277,25 +370,33 @@ export function ServicesPage() {
               >
                 <CardContent className="p-5 flex flex-col justify-between h-full">
                   <div>
-                    {/* Provider Trust Badge */}
-                    <div className="flex items-center justify-between gap-2 mb-3">
-                      {isOrg ? (
-                        <Badge
-                          variant="outline"
-                          className="text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-semibold gap-1"
-                        >
-                          <Building2 className="w-3 h-3" />
-                          Private Service • {srv.verificationBadge || 'Verified Partner'}
-                        </Badge>
-                      ) : (
-                        <Badge
-                          variant="outline"
-                          className="text-[10px] bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30 font-semibold gap-1"
-                        >
-                          <Landmark className="w-3 h-3" />
-                          Government Service • Verified Official
-                        </Badge>
-                      )}
+                    {/* Provider Trust Badge & Service Code */}
+                    <div className="flex items-center justify-between gap-2 mb-2.5">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        {isOrg ? (
+                          <Badge
+                            variant="outline"
+                            className="text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-semibold gap-1"
+                          >
+                            <Building2 className="w-3 h-3" />
+                            Private Service • {srv.verificationBadge || 'Verified Partner'}
+                          </Badge>
+                        ) : (
+                          <Badge
+                            variant="outline"
+                            className="text-[10px] bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30 font-semibold gap-1"
+                          >
+                            <Landmark className="w-3 h-3" />
+                            Official Government Service
+                          </Badge>
+                        )}
+
+                        {srv.serviceCode && (
+                          <Badge variant="outline" className="font-mono text-[9px] font-bold text-muted-foreground border-border bg-muted/30">
+                            {srv.serviceCode}
+                          </Badge>
+                        )}
+                      </div>
 
                       {srv.popular && (
                         <Badge variant="secondary" size="sm" className="text-[9px]">
@@ -308,12 +409,27 @@ export function ServicesPage() {
                       {srv.title}
                     </h3>
 
-                    <p className="text-xs text-muted-foreground mt-1 font-medium flex items-center gap-1.5">
-                      {isOrg ? <Building2 className="w-3 h-3 text-muted-foreground" /> : <Landmark className="w-3 h-3 text-muted-foreground" />}
-                      {srv.providerName || srv.department}
-                    </p>
+                    <div className="mt-1 flex items-center justify-between gap-2 text-xs text-muted-foreground font-medium">
+                      <span className="flex items-center gap-1 truncate">
+                        {isOrg ? <Building2 className="w-3 h-3 text-muted-foreground shrink-0" /> : <Landmark className="w-3 h-3 text-muted-foreground shrink-0" />}
+                        <span className="truncate">{srv.ministry ? `${srv.ministry}` : (srv.providerName || srv.department)}</span>
+                      </span>
+                      {srv.stateOrUt && (
+                        <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground/80 shrink-0 font-medium">
+                          <MapPin className="w-2.5 h-2.5 text-muted-foreground" />
+                          {srv.stateOrUt}
+                        </span>
+                      )}
+                    </div>
 
-                    <p className="text-xs text-muted-foreground/80 mt-2 line-clamp-3 leading-relaxed">
+                    {srv.statutoryAct && (
+                      <div className="mt-1.5 flex items-center gap-1 text-[10px] text-amber-600 dark:text-amber-400 font-medium truncate">
+                        <Scroll className="w-3 h-3 shrink-0" />
+                        <span className="truncate">{srv.statutoryAct}</span>
+                      </div>
+                    )}
+
+                    <p className="text-xs text-muted-foreground/80 mt-2 line-clamp-2 leading-relaxed">
                       {srv.description}
                     </p>
 
@@ -373,7 +489,7 @@ export function ServicesPage() {
         {activeService && (
           <DialogContent className="max-w-xl p-6">
             <DialogHeader>
-              <div className="flex items-center gap-2 mb-1">
+              <div className="flex items-center gap-2 mb-1 flex-wrap">
                 {activeService.providerType === 'organization' ? (
                   <Badge variant="outline" className="text-[10px] bg-emerald-500/10 text-emerald-600 border-emerald-500/30">
                     🏢 Verified Private Organization
@@ -383,9 +499,20 @@ export function ServicesPage() {
                     🏛️ Verified Government Provider
                   </Badge>
                 )}
+                {activeService.serviceCode && (
+                  <Badge variant="outline" className="font-mono text-[10px] font-bold text-emerald-600 bg-emerald-500/10 border-emerald-500/30">
+                    {activeService.serviceCode}
+                  </Badge>
+                )}
+                {activeService.stateOrUt && (
+                  <Badge variant="secondary" className="text-[10px]">
+                    📍 {activeService.stateOrUt}
+                  </Badge>
+                )}
               </div>
               <DialogTitle className="text-lg font-bold">{activeService.title}</DialogTitle>
               <DialogDescription className="text-xs">
+                {activeService.ministry ? `${activeService.ministry} · ` : ''}
                 Offered by: <strong>{activeService.providerName || activeService.department}</strong>
               </DialogDescription>
             </DialogHeader>
@@ -400,7 +527,17 @@ export function ServicesPage() {
                 </p>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-muted/40 border border-border grid grid-cols-2 gap-3">
+              {activeService.statutoryAct && (
+                <div className="p-2.5 rounded-lg bg-muted/40 border border-border flex items-start gap-2">
+                  <Scroll className="w-3.5 h-3.5 text-amber-500 mt-0.5 shrink-0" />
+                  <div>
+                    <span className="text-[11px] font-semibold text-foreground block">Statutory Act & Legal Mandate</span>
+                    <span className="text-[11px] text-muted-foreground">{activeService.statutoryAct}</span>
+                  </div>
+                </div>
+              )}
+
+              <div className="p-3.5 rounded-xl bg-muted/40 border border-border grid grid-cols-2 sm:grid-cols-3 gap-3">
                 <div>
                   <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-mono">Processing SLA</span>
                   <p className="font-semibold text-foreground mt-0.5">{activeService.processingTime}</p>
@@ -408,9 +545,24 @@ export function ServicesPage() {
                 <div>
                   <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-mono">Statutory Fee</span>
                   <p className="font-semibold text-foreground mt-0.5">
-                    {activeService.governmentFee === 0 ? 'Exempt / Free' : `₹${activeService.governmentFee}`}
+                    {(activeService.fees ?? activeService.governmentFee) === 0 ? 'Exempt / Free' : `₹${activeService.fees ?? activeService.governmentFee}`}
                   </p>
                 </div>
+                {activeService.portalUrl && (
+                  <div className="col-span-2 sm:col-span-1">
+                    <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-mono">Sovereign Portal</span>
+                    <p className="mt-0.5">
+                      <a
+                        href={activeService.portalUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs font-semibold text-emerald-600 hover:underline inline-flex items-center gap-1"
+                      >
+                        Official Portal <ExternalLink className="w-3 h-3" />
+                      </a>
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Interactive Eligibility Self-Assessor */}

@@ -16,6 +16,15 @@ import {
   Building2,
   Sparkles,
   User,
+  ShieldCheck,
+  ShieldAlert,
+  ShieldOff,
+  CheckCircle2,
+  AlertTriangle,
+  Lock,
+  Unlock,
+  Eye,
+  QrCode,
 } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -23,12 +32,23 @@ import { Badge } from '@/components/ui/Badge'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/Dialog'
 import { StepUpAuthenticationModal } from '@/components/auth/StepUpAuthenticationModal'
+import { CredentialScannerModal, type ScannedCredentialResult } from '@/components/shared/CredentialScannerModal'
 import { documentService } from '@/services/document.service'
 import { useToast } from '@/hooks'
 import { civicStorage } from '@/services/storage'
+import { GuillochePattern } from '@/components/ui/GuillochePattern'
 import { ROUTES } from '@/constants/routes'
 import { cn } from '@/lib/utils'
 import type { CivicDocument, DocumentCategory } from '@/types'
+
+// Mock access lineage for documents
+const DOC_USAGE_MAP: Record<string, string[]> = {
+  doc_aadhaar: ['State Department of Revenue', 'Apex Health & Life Insurers'],
+  doc_pan: ['State Department of Revenue', 'Metro Urban Bank'],
+  doc_driving: ['Traffic & Transport Licensing Bureau'],
+  doc_property: ['Municipal Property Tax Board'],
+  doc_degree: ['Civil Services Commission'],
+}
 
 export function DocumentVaultPage() {
   const [documents, setDocuments] = useState<CivicDocument[]>(() => civicStorage.getDocuments())
@@ -39,6 +59,16 @@ export function DocumentVaultPage() {
   const [onlyFavorites, setOnlyFavorites] = useState(false)
   const [viewMode, setViewMode] = useState<'table' | 'grid'>('table')
   const [sortBy, setSortBy] = useState<'date' | 'title' | 'size'>('date')
+
+  // Per-document sharing block list: Set of doc IDs blocked from external sharing
+  const [blockedSharingIds, setBlockedSharingIds] = useState<Set<string>>(() => {
+    try {
+      const saved = localStorage.getItem('civiqone_blocked_doc_shares')
+      return saved ? new Set(JSON.parse(saved)) : new Set()
+    } catch {
+      return new Set()
+    }
+  })
 
   // Modals state
   const [uploadModalOpen, setUploadModalOpen] = useState(false)
@@ -58,9 +88,58 @@ export function DocumentVaultPage() {
   const [uploadIssuer, setUploadIssuer] = useState('')
   const [uploadOwner, setUploadOwner] = useState<'self' | string>('self')
   const [uploadExpiryDate, setUploadExpiryDate] = useState('')
+  const [scannerOpen, setScannerOpen] = useState(false)
 
   const toast = useToast()
   const navigate = useNavigate()
+
+  const handleScanCredential = (scanned: ScannedCredentialResult) => {
+    const existing = documents.find((d) => d.documentNumber.includes(scanned.identifier.replace(/\s/g, '')))
+    if (existing) {
+      const updated = { ...existing, verificationStatus: 'verified' as const }
+      const allDocs = documents.map((d) => (d.id === existing.id ? updated : d))
+      civicStorage.saveDocuments(allDocs)
+      setDocuments(allDocs)
+      toast.success('Document Cryptographically Re-Verified', `${existing.title} matched state ledger root.`)
+      return
+    }
+
+    const newDoc: CivicDocument = {
+      id: `doc_qr_${Date.now()}`,
+      title:
+        scanned.credentialType === 'AADHAAR'
+          ? 'Aadhaar Biometric e-Card'
+          : scanned.credentialType === 'DRIVING_LICENSE'
+          ? 'Smart Driving License'
+          : 'Treasury Clearance Receipt',
+      category:
+        scanned.credentialType === 'AADHAAR'
+          ? 'identity'
+          : scanned.credentialType === 'DRIVING_LICENSE'
+          ? 'identity'
+          : 'revenue',
+      documentNumber: scanned.identifier,
+      issuer:
+        scanned.credentialType === 'AADHAAR'
+          ? 'UIDAI'
+          : scanned.credentialType === 'DRIVING_LICENSE'
+          ? 'Ministry of Road Transport'
+          : 'State Treasury',
+      issueDate: new Date().toISOString().split('T')[0],
+      fileSize: '1.2 MB',
+      fileType: 'PDF',
+      verificationStatus: 'verified',
+      isFavorite: true,
+      tags: ['Verified QR', 'Digital Ledger', 'Zero-Knowledge Anchored'],
+      owner: 'self',
+      ownerName: scanned.holderName,
+    }
+
+    const allDocs = [newDoc, ...documents]
+    civicStorage.saveDocuments(allDocs)
+    setDocuments(allDocs)
+    toast.success('QR Credential Vaulted', `${newDoc.title} is verified and added to your sovereign vault.`)
+  }
 
   const categories: { id: DocumentCategory; label: string }[] = [
     { id: 'all', label: 'All Vault Records' },
@@ -126,6 +205,35 @@ export function DocumentVaultPage() {
     }
   }
 
+  const handleToggleDocSharing = (id: string, title: string, e?: React.MouseEvent) => {
+    e?.stopPropagation()
+    setBlockedSharingIds((prev) => {
+      const next = new Set(prev)
+      const isNowBlocked = !next.has(id)
+      if (isNowBlocked) {
+        next.add(id)
+      } else {
+        next.delete(id)
+      }
+      try {
+        localStorage.setItem('civiqone_blocked_doc_shares', JSON.stringify(Array.from(next)))
+      } catch {}
+
+      if (isNowBlocked) {
+        toast.warning(
+          'Document Shielded',
+          `${title} is temporarily locked from external organization data requests.`
+        )
+      } else {
+        toast.success(
+          'Sharing Restored',
+          `${title} can now be conditionally requested with citizen consent.`
+        )
+      }
+      return next
+    })
+  }
+
   const handleDownload = (doc: CivicDocument, e?: React.MouseEvent) => {
     e?.stopPropagation()
     setStepUpActionName(`Exporting Encrypted File: ${doc.title}`)
@@ -138,14 +246,13 @@ export function DocumentVaultPage() {
   // Simulated OCR trigger
   const handleSimulateOcr = async () => {
     setIsOcrScanning(true)
-    await new Promise((r) => setTimeout(r, 900))
+    await new Promise((r) => setTimeout(r, 1200))
     setIsOcrScanning(false)
     setOcrCompleted(true)
-    // Populate smart extraction
-    setUploadTitle('National Senior Citizen Concession Smart Card')
+    setUploadTitle('Senior Citizen Transport Pass')
     setUploadCategory('identity')
-    setUploadDocNumber('SR-PASS-KA-2026-9941')
-    setUploadIssuer('Department of Social Welfare, Karnataka')
+    setUploadDocNumber('SCP-KA-2026-8812')
+    setUploadIssuer('Bangalore Metropolitan Transport Corp.')
     setUploadExpiryDate('2031-12-31')
     setUploadOwner('fam_03') // Sunita Sharma
     toast.success('AI OCR Metadata Extracted', 'Fields automatically populated from scanned digital signature.')
@@ -209,7 +316,7 @@ export function DocumentVaultPage() {
             Sovereign Document Vault
           </h1>
           <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-            Zero-knowledge encrypted repository for national certificates, deeds, family records, and statutory proofs
+            Zero-knowledge encrypted repository for national certificates, deeds, family records, and statutory proofs.
           </p>
         </div>
 
@@ -219,28 +326,85 @@ export function DocumentVaultPage() {
               onClick={() => navigate(ROUTES.APP.DOCUMENTS_EXPIRING)}
               variant="outline"
               size="sm"
-              className="text-xs font-bold rounded-xl border-amber-500/40 text-amber-600 dark:text-amber-400 bg-amber-500/10 hover:bg-amber-500/20"
+              className="border-amber-500/30 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 text-xs font-bold gap-1.5"
             >
-              <Clock className="w-4 h-4 mr-1.5" />
-              Expiring Hub ({expiringCount})
+              <Clock className="w-3.5 h-3.5" />
+              Expiring ({expiringCount})
             </Button>
           )}
 
           <Button
+            onClick={() => setScannerOpen(true)}
+            variant="outline"
+            size="sm"
+            className="text-xs font-bold gap-1.5 border-primary/40 text-primary hover:bg-primary/10"
+          >
+            <QrCode className="w-4 h-4" />
+            Scan QR Pass
+          </Button>
+
+          <Button
+            onClick={() => setUploadModalOpen(true)}
             variant="primary"
             size="sm"
-            className="gap-2 text-xs font-bold rounded-xl shadow-sm"
-            onClick={() => setUploadModalOpen(true)}
+            className="text-xs font-bold gap-1.5 shadow-sm"
           >
             <Plus className="w-4 h-4" />
-            Intelligent Upload
+            Add Document
           </Button>
         </div>
       </div>
 
-      {/* Ownership & Family Switcher */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-border/60">
-        <div className="flex p-1 rounded-xl bg-muted border border-border w-full sm:w-fit">
+      {/* Document Health Dashboard Strip */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
+        <div className="p-3.5 rounded-xl border border-emerald-500/30 bg-emerald-500/5 shadow-sm">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+              Identity & KYC
+            </span>
+            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+          </div>
+          <p className="text-sm font-black text-foreground mt-1">100% Verified</p>
+          <span className="text-[10px] text-muted-foreground mt-0.5 block">Aadhaar, PAN & Passport active</span>
+        </div>
+
+        <div className="p-3.5 rounded-xl border border-emerald-500/30 bg-emerald-500/5 shadow-sm">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+              Tax & Revenue
+            </span>
+            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+          </div>
+          <p className="text-sm font-black text-foreground mt-1">Current</p>
+          <span className="text-[10px] text-muted-foreground mt-0.5 block">AY 2026-27 filed & verified</span>
+        </div>
+
+        <div className="p-3.5 rounded-xl border border-amber-500/30 bg-amber-500/5 shadow-sm">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+              Property & Deeds
+            </span>
+            <AlertTriangle className="w-4 h-4 text-amber-500" />
+          </div>
+          <p className="text-sm font-black text-foreground mt-1">1 Review Due</p>
+          <span className="text-[10px] text-muted-foreground mt-0.5 block">Khata certificate renewal soon</span>
+        </div>
+
+        <div className="p-3.5 rounded-xl border border-blue-500/30 bg-blue-500/5 shadow-sm">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
+              Vault Cryptography
+            </span>
+            <ShieldCheck className="w-4 h-4 text-blue-500" />
+          </div>
+          <p className="text-sm font-black text-foreground mt-1">AES-256-GCM</p>
+          <span className="text-[10px] text-muted-foreground mt-0.5 block">Zero-knowledge sealed</span>
+        </div>
+      </div>
+
+      {/* Scope Segment Tabs (Self vs Family vs All) */}
+      <div className="space-y-3">
+        <div className="inline-flex p-1 bg-muted/60 rounded-xl border border-border">
           <button
             onClick={() => setOwnerFilter('all')}
             className={cn(
@@ -377,101 +541,125 @@ export function DocumentVaultPage() {
                   <th className="py-3 px-4">Identifier / Number</th>
                   <th className="py-3 px-4">Owner</th>
                   <th className="py-3 px-4">Issuer</th>
-                  <th className="py-3 px-4">Validity / Expiry</th>
+                  <th className="py-3 px-4">External Access</th>
                   <th className="py-3 px-4">Status</th>
                   <th className="py-3 px-4 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/60">
-                {filteredDocs.map((doc) => (
-                  <tr
-                    key={doc.id}
-                    onClick={() => navigate(`/app/documents/${doc.id}`)}
-                    className="hover:bg-muted/30 transition-colors cursor-pointer group"
-                  >
-                    <td className="py-3 px-4" onClick={(e) => handleToggleFavorite(doc.id, e)}>
-                      <Star
-                        className={cn(
-                          'w-4 h-4 text-muted-foreground hover:text-amber-500 transition-colors',
-                          doc.isFavorite && 'fill-amber-500 text-amber-500'
+                {filteredDocs.map((doc) => {
+                  const isBlocked = blockedSharingIds.has(doc.id)
+                  const usedBy = DOC_USAGE_MAP[doc.id] || (doc.category === 'identity' ? ['State Department of Revenue'] : [])
+
+                  return (
+                    <tr
+                      key={doc.id}
+                      onClick={() => navigate(`/app/documents/${doc.id}`)}
+                      className="hover:bg-muted/30 transition-colors cursor-pointer group"
+                    >
+                      <td className="py-3 px-4" onClick={(e) => handleToggleFavorite(doc.id, e)}>
+                        <Star
+                          className={cn(
+                            'w-4 h-4 text-muted-foreground hover:text-amber-500 transition-colors',
+                            doc.isFavorite && 'fill-amber-500 text-amber-500'
+                          )}
+                        />
+                      </td>
+                      <td className="py-3 px-4">
+                        <div className="flex items-center gap-2.5">
+                          <div className="p-1.5 rounded-lg bg-primary/10 text-primary shrink-0">
+                            <FileText className="w-4 h-4" />
+                          </div>
+                          <div>
+                            <p className="font-bold text-foreground group-hover:text-primary transition-colors">
+                              {doc.title}
+                            </p>
+                            <span className="text-[10px] text-muted-foreground uppercase font-mono">
+                              {doc.fileType} • {doc.fileSize}
+                            </span>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-3 px-4 font-mono font-semibold text-foreground">
+                        {doc.documentNumber}
+                      </td>
+                      <td className="py-3 px-4">
+                        <span className="inline-flex items-center gap-1 text-[11px] font-medium text-foreground">
+                          {doc.owner === 'family_member' ? (
+                            <span className="px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-semibold">
+                              {doc.ownerName}
+                            </span>
+                          ) : (
+                            <span className="text-muted-foreground">Self</span>
+                          )}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 text-muted-foreground truncate max-w-[140px]">
+                        {doc.issuer}
+                      </td>
+                      <td className="py-3 px-4" onClick={(e) => e.stopPropagation()}>
+                        {usedBy.length > 0 ? (
+                          <div className="flex flex-col gap-0.5">
+                            <span className="text-[10px] font-semibold text-primary">
+                              {usedBy.length} active org{usedBy.length > 1 ? 's' : ''}
+                            </span>
+                            <span className="text-[9px] text-muted-foreground truncate max-w-[130px]" title={usedBy.join(', ')}>
+                              {usedBy[0]}
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="text-[10px] text-muted-foreground">Not shared</span>
                         )}
-                      />
-                    </td>
-                    <td className="py-3 px-4">
-                      <div className="flex items-center gap-2.5">
-                        <div className="p-1.5 rounded-lg bg-primary/10 text-primary shrink-0">
-                          <FileText className="w-4 h-4" />
-                        </div>
-                        <div>
-                          <p className="font-bold text-foreground group-hover:text-primary transition-colors">
-                            {doc.title}
-                          </p>
-                          <span className="text-[10px] text-muted-foreground uppercase font-mono">
-                            {doc.fileType} • {doc.fileSize}
+                      </td>
+                      <td className="py-3 px-4">
+                        {isBlocked ? (
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center gap-1 w-fit">
+                            <Lock className="w-2.5 h-2.5" /> Shielded
                           </span>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-3 px-4 font-mono font-semibold text-foreground">
-                      {doc.documentNumber}
-                    </td>
-                    <td className="py-3 px-4">
-                      <span className="inline-flex items-center gap-1 text-[11px] font-medium text-foreground">
-                        {doc.owner === 'family_member' ? (
-                          <span className="px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-semibold">
-                            {doc.ownerName}
+                        ) : doc.verificationStatus === 'expiring_soon' ? (
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                            Expiring Soon
                           </span>
                         ) : (
-                          <span className="text-muted-foreground">Self</span>
+                          <Badge variant="verified" size="sm">Verified</Badge>
                         )}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-muted-foreground truncate max-w-[160px]">
-                      {doc.issuer}
-                    </td>
-                    <td className="py-3 px-4">
-                      {doc.expiryDate ? (
-                        <span className={cn('font-mono', doc.verificationStatus === 'expiring_soon' && 'text-amber-600 font-bold')}>
-                          {doc.expiryDate}
-                        </span>
-                      ) : (
-                        <span className="text-muted-foreground font-mono">Lifetime</span>
-                      )}
-                    </td>
-                    <td className="py-3 px-4">
-                      {doc.verificationStatus === 'expiring_soon' ? (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400">
-                          Expiring Soon
-                        </span>
-                      ) : (
-                        <Badge variant="verified" size="sm">Verified</Badge>
-                      )}
-                    </td>
-                    <td className="py-3 px-4 text-right">
-                      <div className="flex items-center justify-end gap-1.5">
-                        <button
-                          type="button"
-                          onClick={(e) => handleDownload(doc, e)}
-                          title="Download document"
-                          className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground"
-                        >
-                          <Download className="w-3.5 h-3.5" />
-                        </button>
-                        <Button
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            navigate(`/app/documents/${doc.id}`)
-                          }}
-                          variant="ghost"
-                          size="sm"
-                          className="text-xs h-7 px-2 font-semibold"
-                        >
-                          Inspect
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                      <td className="py-3 px-4 text-right" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-end gap-1.5">
+                          <button
+                            type="button"
+                            onClick={(e) => handleToggleDocSharing(doc.id, doc.title, e)}
+                            title={isBlocked ? 'Unlock sharing' : 'Shield document from orgs'}
+                            className={cn(
+                              'p-1.5 rounded-lg text-xs transition-colors',
+                              isBlocked
+                                ? 'bg-rose-500/15 text-rose-600 hover:bg-rose-500/25'
+                                : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                            )}
+                          >
+                            {isBlocked ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(e) => handleDownload(doc, e)}
+                            title="Download document"
+                            className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground"
+                          >
+                            <Download className="w-3.5 h-3.5" />
+                          </button>
+                          <Button
+                            onClick={() => navigate(`/app/documents/${doc.id}`)}
+                            variant="ghost"
+                            size="sm"
+                            className="text-xs h-7 px-2 font-semibold"
+                          >
+                            Inspect
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           </div>
@@ -479,62 +667,95 @@ export function DocumentVaultPage() {
       ) : (
         /* Grid Cards View */
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredDocs.map((doc) => (
-            <Card
-              key={doc.id}
-              onClick={() => navigate(`/app/documents/${doc.id}`)}
-              className="cursor-pointer hover:border-primary/40 transition-all hover:shadow-card flex flex-col justify-between p-4 group"
-            >
-              <div>
-                <div className="flex items-start justify-between gap-2 mb-2">
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" size="sm">
-                      {doc.category.toUpperCase()}
-                    </Badge>
-                    {doc.owner === 'family_member' && (
-                      <span className="px-2 py-0.5 rounded text-[10px] bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold">
-                        {doc.ownerName}
-                      </span>
-                    )}
+          {filteredDocs.map((doc) => {
+            const isBlocked = blockedSharingIds.has(doc.id)
+            const usedBy = DOC_USAGE_MAP[doc.id] || (doc.category === 'identity' ? ['State Department of Revenue'] : [])
+
+            return (
+              <Card
+                key={doc.id}
+                onClick={() => navigate(`/app/documents/${doc.id}`)}
+                className="relative overflow-hidden cursor-pointer hover:border-primary/50 transition-all hover:shadow-card flex flex-col justify-between p-4 group"
+              >
+                {/* Statutory Guilloche Security Rosette Watermark */}
+                <GuillochePattern opacity={0.07} color="#0284C7" />
+
+                <div className="relative z-10">
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <Badge variant="outline" size="sm">
+                        {doc.category.toUpperCase()}
+                      </Badge>
+                      {isBlocked && (
+                        <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-rose-500/10 text-rose-600 flex items-center gap-0.5">
+                          <Lock className="w-2.5 h-2.5" /> Shielded
+                        </span>
+                      )}
+                      {doc.owner === 'family_member' && (
+                        <span className="px-2 py-0.5 rounded text-[10px] bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold">
+                          {doc.ownerName}
+                        </span>
+                      )}
+                    </div>
+                    <button
+                      onClick={(e) => handleToggleFavorite(doc.id, e)}
+                      className="p-1 rounded-lg text-muted-foreground hover:text-amber-500"
+                    >
+                      <Star className={cn('w-4 h-4', doc.isFavorite && 'fill-amber-500 text-amber-500')} />
+                    </button>
                   </div>
-                  <button
-                    onClick={(e) => handleToggleFavorite(doc.id, e)}
-                    className="p-1 rounded-lg text-muted-foreground hover:text-amber-500"
-                  >
-                    <Star className={cn('w-4 h-4', doc.isFavorite && 'fill-amber-500 text-amber-500')} />
-                  </button>
+
+                  <h3 className="text-sm font-bold text-foreground group-hover:text-primary transition-colors">
+                    {doc.title}
+                  </h3>
+                  <p className="font-mono text-xs text-muted-foreground mt-0.5">{doc.documentNumber}</p>
+                  <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1 truncate">
+                    <Building2 className="w-3 h-3 shrink-0" />
+                    {doc.issuer}
+                  </p>
+
+                  {/* Used By Lineage Tag */}
+                  {usedBy.length > 0 && (
+                    <div className="mt-2.5 pt-2 border-t border-border/40 text-[10px] text-muted-foreground">
+                      <span className="font-semibold text-foreground">Used by:</span> {usedBy.join(', ')}
+                    </div>
+                  )}
                 </div>
 
-                <h3 className="text-sm font-bold text-foreground group-hover:text-primary transition-colors">
-                  {doc.title}
-                </h3>
-                <p className="font-mono text-xs text-muted-foreground mt-0.5">{doc.documentNumber}</p>
-                <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1 truncate">
-                  <Building2 className="w-3 h-3 shrink-0" />
-                  {doc.issuer}
-                </p>
-              </div>
-
-              <div className="mt-4 pt-3 border-t border-border/50 flex items-center justify-between text-xs">
-                <span className="text-[11px] font-mono text-muted-foreground">
-                  {doc.expiryDate ? `Exp: ${doc.expiryDate}` : 'Lifetime Valid'}
-                </span>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={(e) => handleDownload(doc, e)}
-                    className="p-1 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground"
-                    title="Download"
-                  >
-                    <Download className="w-3.5 h-3.5" />
-                  </button>
-                  <span className="text-primary font-bold flex items-center gap-0.5">
-                    View <ArrowRight className="w-3 h-3" />
+                <div className="relative z-10 mt-4 pt-3 border-t border-border/50 flex items-center justify-between text-xs">
+                  <span className="text-[11px] font-mono text-muted-foreground">
+                    {doc.expiryDate ? `Exp: ${doc.expiryDate}` : 'Lifetime Valid'}
                   </span>
+                  <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                    <button
+                      type="button"
+                      onClick={(e) => handleToggleDocSharing(doc.id, doc.title, e)}
+                      title={isBlocked ? 'Unlock sharing' : 'Shield document from orgs'}
+                      className={cn(
+                        'p-1.5 rounded-lg text-xs transition-colors',
+                        isBlocked
+                          ? 'bg-rose-500/15 text-rose-600'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                      )}
+                    >
+                      {isBlocked ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => handleDownload(doc, e)}
+                      className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground"
+                      title="Download"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                    </button>
+                    <span className="text-primary font-bold flex items-center gap-0.5 ml-1">
+                      View <ArrowRight className="w-3 h-3" />
+                    </span>
+                  </div>
                 </div>
-              </div>
-            </Card>
-          ))}
+              </Card>
+            )
+          })}
         </div>
       )}
 
@@ -693,6 +914,13 @@ export function DocumentVaultPage() {
             setPendingAction(null)
           }
         }}
+      />
+
+      {/* Credential Scanner Modal */}
+      <CredentialScannerModal
+        open={scannerOpen}
+        onOpenChange={setScannerOpen}
+        onScanSuccess={handleScanCredential}
       />
     </div>
   )

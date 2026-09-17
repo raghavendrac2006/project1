@@ -7,29 +7,84 @@ import {
   Lock,
   FileText,
   Send,
+  Sparkles,
+  AlertTriangle,
+  HelpCircle,
+  RefreshCw,
+  XCircle,
+  MessageSquare,
+  Scale,
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/Dialog'
 import { organizationService, type CitizenAuthorizedProfile } from '@/services/organization.service'
+import { realtimeBus } from '@/services/eventBus'
 import { useToast } from '@/hooks'
 import { ROUTES } from '@/constants/routes'
-import type { CivicApplication, ConsentField } from '@/types'
+import type { CivicApplication, ConsentField, AiScrutinyResult, DiscrepancyItem } from '@/types'
+
+const MOCK_AI_SCRUTINY: AiScrutinyResult = {
+  confidenceScore: 89,
+  status: 'review_recommended',
+  summary: 'AI detected 1 minor identity name string permutation and 1 income bracket variance between declared value and DigiLocker OCR payload.',
+  suggestedAction: 'request_clarification',
+  discrepancies: [
+    {
+      id: 'disc_01',
+      field: 'Applicant Legal Name',
+      formValue: 'Rajesh K. Sharma',
+      extractedValue: 'Rajesh Kumar Sharma',
+      extractedOcrValue: 'Rajesh Kumar Sharma',
+      confidence: 96,
+      severity: 'low',
+      message: 'Middle name abbreviated in web form. Digilocker Aadhaar OCR matches biometric UID hash.',
+    },
+    {
+      id: 'disc_02',
+      field: 'Annual Gross Income',
+      formValue: '₹4,80,000 / annum',
+      extractedValue: '₹5,15,000 / annum (ITR-V)',
+      extractedOcrValue: '₹5,15,000 / annum (ITR-V)',
+      confidence: 92,
+      severity: 'medium',
+      message: 'Self-declaration is 7.2% below ITR-V assessment figure. Cross-check for subsidy ceiling.',
+    },
+    {
+      id: 'disc_03',
+      field: 'Bangalore PIN & Ward',
+      formValue: '560034 - Koramangala 3rd Block',
+      extractedValue: '560034 - Koramangala 3rd Block',
+      extractedOcrValue: '560034 - Koramangala 3rd Block',
+      confidence: 99,
+      severity: 'low',
+      message: 'Exact match with municipal GIS boundary and electricity utility voucher.',
+    },
+  ],
+}
 
 export function OrganizationApplicationDetailPage() {
   const { applicationId } = useParams<{ applicationId: string }>()
   const navigate = useNavigate()
-  const { success, warning } = useToast()
+  const { success, warning, info } = useToast()
 
   const [application, setApplication] = useState<CivicApplication | null>(null)
   const [profile, setProfile] = useState<CitizenAuthorizedProfile | null>(null)
   const [loading, setLoading] = useState(true)
+  const [scrutiny, setScrutiny] = useState<AiScrutinyResult>(MOCK_AI_SCRUTINY)
 
   // Request Additional Access Dialog
   const [requestModalOpen, setRequestModalOpen] = useState(false)
   const [additionalPurpose, setAdditionalPurpose] = useState('Underwriting risk verification requirement')
   const [selectedExtraFields, setSelectedExtraFields] = useState<ConsentField[]>(['address', 'income'])
+
+  // 1-Click Query Citizen Dialog
+  const [queryModalOpen, setQueryModalOpen] = useState(false)
+  const [selectedQueryTemplate, setSelectedQueryTemplate] = useState<string>('income_variance')
+  const [queryNote, setQueryNote] = useState(
+    'Please clarify the ₹35,000 variance between self-declared income and attached ITR-V slip by uploading latest 3-month salary certificate.'
+  )
 
   const loadApp = async () => {
     if (!applicationId) return
@@ -53,6 +108,15 @@ export function OrganizationApplicationDetailPage() {
   const handleStatusChange = async (newStatus: CivicApplication['status'], note: string) => {
     if (!application) return
     await organizationService.updateApplicationStatus(application.id, newStatus, note)
+    
+    // Broadcast status change across portal bus
+    realtimeBus.publish('APPLICATION_STATUS_UPDATED', {
+      applicationId: application.id,
+      status: newStatus,
+      note,
+      timestamp: new Date().toISOString(),
+    })
+
     if (newStatus === 'approved') {
       success('Application Approved', `Application #${application.applicationNumber} has been officially approved.`)
     } else {
@@ -84,6 +148,29 @@ export function OrganizationApplicationDetailPage() {
       `A new consent request has been transmitted to the citizen's Privacy Center.`
     )
     setRequestModalOpen(false)
+  }
+
+  const handleDispatchCitizenQuery = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!application) return
+
+    await handleStatusChange('action_required', `Casework Query Dispatched: ${queryNote}`)
+    setQueryModalOpen(false)
+    info(
+      'Citizen Query Transmitted',
+      'Citizen portal has been notified in real time to respond to this clarification notice.'
+    )
+  }
+
+  const handleOverrideScrutiny = () => {
+    setScrutiny((prev) => ({
+      ...prev,
+      confidenceScore: 98,
+      status: 'passed',
+      suggestedAction: 'approve',
+      summary: 'Caseworker manually accepted minor name spelling permutation and verified ITR net income after standard deduction.',
+    }))
+    success('AI Scrutiny Overridden', 'Discrepancies resolved and dossier cleared for final approval.')
   }
 
   if (loading || !application) {
@@ -124,7 +211,7 @@ export function OrganizationApplicationDetailPage() {
       </div>
 
       {/* Dossier Header Card */}
-      <div className="p-6 rounded-2xl bg-card border border-border flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="p-6 rounded-2xl bg-card border border-border flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
         <div>
           <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground font-mono">
             {application.applicationNumber}
@@ -141,8 +228,18 @@ export function OrganizationApplicationDetailPage() {
           <Button
             variant="outline"
             size="sm"
+            onClick={() => setQueryModalOpen(true)}
+            className="text-xs text-amber-600 border-amber-500/30 hover:bg-amber-500/10 gap-1.5 font-semibold"
+          >
+            <MessageSquare className="w-3.5 h-3.5" />
+            1-Click Citizen Query
+          </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => setRequestModalOpen(true)}
-            className="text-xs text-amber-600 border-amber-200 hover:bg-amber-50 dark:hover:bg-amber-950/20 gap-1.5"
+            className="text-xs text-primary border-primary/30 hover:bg-primary/10 gap-1.5"
           >
             <Lock className="w-3.5 h-3.5" />
             Request Additional Access
@@ -152,8 +249,8 @@ export function OrganizationApplicationDetailPage() {
             <Button
               variant="primary"
               size="sm"
-              onClick={() => handleStatusChange('approved', 'Dossier fully verified by staff officer.')}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs gap-1.5"
+              onClick={() => handleStatusChange('approved', 'Dossier fully verified and cleared by underwriting officer.')}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs gap-1.5 shadow-sm"
             >
               <CheckCircle2 className="w-3.5 h-3.5" />
               Approve Application
@@ -162,8 +259,105 @@ export function OrganizationApplicationDetailPage() {
         </div>
       </div>
 
+      {/* Phase 1: AI Scrutiny Co-Pilot Strip & Card */}
+      <Card className="border-primary/20 bg-gradient-to-br from-primary/5 via-card to-card relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-80 h-32 bg-primary/10 blur-3xl pointer-events-none rounded-full" />
+        <CardHeader className="p-5 border-b border-border/70">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 rounded-xl bg-primary/10 text-primary border border-primary/20">
+                <Sparkles className="w-5 h-5" />
+              </div>
+              <div>
+                <CardTitle className="text-base font-bold text-foreground flex items-center gap-2">
+                  AI Scrutiny & OCR Discrepancy Co-Pilot
+                  <Badge
+                    variant="outline"
+                    className={`text-[10px] font-bold ${
+                      scrutiny.status === 'passed'
+                        ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/30'
+                        : 'bg-amber-500/10 text-amber-600 border-amber-500/30'
+                    }`}
+                  >
+                    {scrutiny.status === 'passed' ? 'PASSED' : 'REVIEW RECOMMENDED'}
+                  </Badge>
+                </CardTitle>
+                <CardDescription className="text-xs text-muted-foreground mt-0.5">
+                  Automated computer vision comparison between citizen self-declaration and verified DigiLocker evidence.
+                </CardDescription>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="text-right">
+                <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider block">
+                  Match Confidence
+                </span>
+                <span className="text-xl font-bold font-mono text-primary">{scrutiny.confidenceScore}%</span>
+              </div>
+              {scrutiny.status !== 'passed' && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={handleOverrideScrutiny}
+                  className="text-xs text-foreground hover:bg-primary/10 border-primary/30 gap-1.5"
+                >
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                  Accept & Clear
+                </Button>
+              )}
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="p-5 space-y-4">
+          <p className="text-xs text-muted-foreground bg-muted/40 p-3 rounded-xl border border-border/60 leading-relaxed">
+            <strong>Co-Pilot Assessment:</strong> {scrutiny.summary}
+          </p>
+
+          <div className="space-y-2">
+            <h4 className="text-xs font-bold text-foreground uppercase tracking-wider flex items-center gap-1.5">
+              <Scale className="w-3.5 h-3.5 text-primary" />
+              Field-by-Field OCR Cross-Examination
+            </h4>
+            <div className="overflow-x-auto rounded-xl border border-border">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="bg-muted/50 border-b border-border text-[11px] font-bold text-muted-foreground">
+                    <th className="p-3">Dossier Field</th>
+                    <th className="p-3">Self-Declared Input</th>
+                    <th className="p-3">DigiLocker / OCR Extracted</th>
+                    <th className="p-3">Confidence</th>
+                    <th className="p-3">Finding & Rationale</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {scrutiny.discrepancies.map((d) => (
+                    <tr key={d.id} className="hover:bg-muted/20 transition-colors">
+                      <td className="p-3 font-semibold text-foreground">{d.field}</td>
+                      <td className="p-3 font-mono text-muted-foreground bg-muted/20">{d.formValue}</td>
+                      <td className="p-3 font-mono text-foreground font-semibold bg-primary/5">{d.extractedOcrValue}</td>
+                      <td className="p-3 font-mono font-bold text-primary">{d.confidence}%</td>
+                      <td className="p-3">
+                        <div className="flex items-center gap-1.5">
+                          {d.severity === 'medium' ? (
+                            <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                          ) : (
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                          )}
+                          <span className="text-[11px] text-muted-foreground">{d.message}</span>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="grid lg:grid-cols-3 gap-6">
-        {/* Left 2 Cols: Authorized Citizen Profile Fields */}
+        {/* Left 2 Cols: Authorized Citizen Profile Fields & Documents */}
         <div className="lg:col-span-2 space-y-6">
           <Card className="border-border">
             <CardHeader className="p-5 border-b border-border">
@@ -246,7 +440,7 @@ export function OrganizationApplicationDetailPage() {
           </Card>
         </div>
 
-        {/* Right Col: Timeline & Decision Controls */}
+        {/* Right Col: Processing Milestone Timeline */}
         <div className="space-y-6">
           <Card className="border-border">
             <CardHeader className="p-5 border-b border-border">
@@ -271,6 +465,84 @@ export function OrganizationApplicationDetailPage() {
           </Card>
         </div>
       </div>
+
+      {/* 1-Click Citizen Query Dispatcher Dialog */}
+      <Dialog open={queryModalOpen} onOpenChange={setQueryModalOpen}>
+        <DialogContent className="max-w-md p-6">
+          <DialogHeader>
+            <DialogTitle className="text-base font-bold flex items-center gap-2">
+              <MessageSquare className="w-4 h-4 text-amber-500" />
+              1-Click Casework Query Dispatcher
+            </DialogTitle>
+            <DialogDescription className="text-xs">
+              Dispatch an official clarification query directly into Rajesh K. Sharma&apos;s citizen portal inbox.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleDispatchCitizenQuery} className="space-y-4 my-2 text-xs">
+            <div className="space-y-2">
+              <label className="font-semibold text-foreground">Standard Query Templates</label>
+              <div className="grid grid-cols-1 gap-2">
+                {[
+                  {
+                    id: 'income_variance',
+                    title: 'Income Variance Clarification',
+                    text: 'Please clarify the variance between self-declared income and attached ITR-V slip by uploading latest 3-month salary certificate.',
+                  },
+                  {
+                    id: 'name_affidavit',
+                    title: 'Name Permutation / Gazette Notice',
+                    text: 'Please upload a formal Gazette notification or name affidavit explaining the abbreviation between your application and Aadhaar.',
+                  },
+                  {
+                    id: 'address_utility',
+                    title: 'Supplementary Municipal Address Proof',
+                    text: 'Please furnish an updated BESCOM electricity bill or water connection invoice within 7 business days.',
+                  },
+                ].map((tmpl) => (
+                  <button
+                    key={tmpl.id}
+                    type="button"
+                    onClick={() => {
+                      setSelectedQueryTemplate(tmpl.id)
+                      setQueryNote(tmpl.text)
+                    }}
+                    className={`p-2.5 rounded-xl border text-left transition-all ${
+                      selectedQueryTemplate === tmpl.id
+                        ? 'border-amber-500 bg-amber-500/10 font-bold text-foreground'
+                        : 'border-border text-muted-foreground hover:bg-muted/30'
+                    }`}
+                  >
+                    <p className="text-xs font-semibold">{tmpl.title}</p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-1">{tmpl.text}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <label className="font-semibold text-foreground">Query Notice Text to Citizen</label>
+              <textarea
+                value={queryNote}
+                onChange={(e) => setQueryNote(e.target.value)}
+                rows={3}
+                className="w-full p-2.5 rounded-xl border border-input bg-card text-xs text-foreground outline-none resize-none"
+                required
+              />
+            </div>
+
+            <DialogFooter className="pt-2">
+              <Button type="button" variant="outline" size="sm" onClick={() => setQueryModalOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" variant="primary" size="sm" className="bg-amber-600 hover:bg-amber-700 text-white font-bold gap-1.5">
+                <Send className="w-3.5 h-3.5" />
+                Dispatch & Mark Action Required
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       {/* Request Additional Access Dialog */}
       <Dialog open={requestModalOpen} onOpenChange={setRequestModalOpen}>
@@ -335,4 +607,3 @@ export function OrganizationApplicationDetailPage() {
     </div>
   )
 }
-

@@ -115,8 +115,8 @@ function buildActivityFeed(): ActivityFeedEvent[] {
       id: `act_pay_${i}`,
       type: 'payment',
       title: 'Payment Settled',
-      description: `₹${p.amount.toLocaleString()} paid for ${p.description}.`,
-      timestamp: p.paidAt || p.dueDate,
+      description: `₹${p.amount.toLocaleString()} paid for ${p.title}.`,
+      timestamp: p.paidDate || p.dueDate,
       relatedRoute: '/app/payments',
     })
   })

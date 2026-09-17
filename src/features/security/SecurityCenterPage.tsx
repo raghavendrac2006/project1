@@ -17,17 +17,24 @@ import {
   XCircle,
   Clock,
   RefreshCw,
+  Eye,
+  Check,
+  Activity,
+  AlertCircle,
+  Sparkles,
+  Search,
 } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import { StepUpAuthenticationModal } from '@/components/auth/StepUpAuthenticationModal'
 import { securityService } from '@/services/security.service'
+import { citizenIntelligenceService, LoginHeatmapPoint } from '@/services/citizen-intelligence.service'
 import { useToast, useAuth } from '@/hooks'
 import { civicStorage } from '@/services/storage'
 import { ROUTES } from '@/constants/routes'
 import { cn } from '@/lib/utils'
-import type { TrustedDevice, UserSession, AuditEvent } from '@/types'
+import type { TrustedDevice, UserSession, AuditEvent, BehavioralAnomaly } from '@/types'
 
 export function SecurityCenterPage() {
   const { user } = useAuth()
@@ -37,7 +44,11 @@ export function SecurityCenterPage() {
   const [devices, setDevices] = useState<TrustedDevice[]>([])
   const [sessions, setSessions] = useState<UserSession[]>([])
   const [auditEvents, setAuditEvents] = useState<AuditEvent[]>([])
+  const [anomalies, setAnomalies] = useState<BehavioralAnomaly[]>([])
+  const [heatmap, setHeatmap] = useState<LoginHeatmapPoint[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [isBreachChecking, setIsBreachChecking] = useState(false)
+  const [breachCheckResult, setBreachCheckResult] = useState<'clean' | 'scanned' | null>('clean')
 
   // Step-Up Modal state
   const [stepUpOpen, setStepUpOpen] = useState(false)
@@ -47,14 +58,18 @@ export function SecurityCenterPage() {
   const loadData = async () => {
     setIsLoading(true)
     try {
-      const [devList, sessList, auditList] = await Promise.all([
+      const [devList, sessList, auditList, anomList, heatList] = await Promise.all([
         securityService.getTrustedDevices(),
         securityService.getUserSessions(),
         securityService.getSecurityAuditEvents(),
+        citizenIntelligenceService.getBehavioralAnomalies(),
+        citizenIntelligenceService.getLoginHeatmap(),
       ])
       setDevices(devList)
       setSessions(sessList)
       setAuditEvents(auditList)
+      setAnomalies(anomList)
+      setHeatmap(heatList)
     } finally {
       setIsLoading(false)
     }
@@ -63,6 +78,21 @@ export function SecurityCenterPage() {
   useEffect(() => {
     loadData()
   }, [])
+
+  const handleDismissAnomaly = (id: string) => {
+    citizenIntelligenceService.dismissAnomaly(id)
+    setAnomalies((prev) => prev.map((a) => (a.id === id ? { ...a, isDismissed: true } : a)))
+    toast.info('Alert Dismissed', 'Threat alert acknowledged and moved to archive.')
+  }
+
+  const handleRunBreachCheck = () => {
+    setIsBreachChecking(true)
+    setTimeout(() => {
+      setIsBreachChecking(false)
+      setBreachCheckResult('clean')
+      toast.success('Breach Scan Clean', '0 compromised credentials or hash exposures found.')
+    }, 1200)
+  }
 
   const handleRemoveDevice = (device: TrustedDevice) => {
     setStepUpActionName(`Remove Trusted Device: ${device.deviceName}`)
@@ -107,21 +137,35 @@ export function SecurityCenterPage() {
     }
   }
 
+  // Security score computations
+  const activeAnomalies = useMemo(() => anomalies.filter((a) => !a.isDismissed), [anomalies])
+  const securityScore = useMemo(() => {
+    let score = 98
+    if (activeAnomalies.length > 0) score -= activeAnomalies.length * 4
+    if (sessions.filter((s) => s.status === 'active').length > 3) score -= 3
+    return Math.max(70, Math.min(100, score))
+  }, [activeAnomalies, sessions])
+
+  const heatmapDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+
   return (
     <div className="space-y-6 pb-12 animate-in fade-in duration-200">
       {/* Top Banner */}
-      <div className="p-6 rounded-2xl border border-border bg-gradient-to-r from-card to-sky-500/5 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="p-6 rounded-2xl border border-border bg-gradient-to-r from-card via-card to-sky-500/5 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1.5">
             <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20 uppercase tracking-wider">
               Sovereign Hardware Protection
+            </span>
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+              Grade A+ Shield
             </span>
           </div>
           <h1 className="font-display text-2xl sm:text-3xl font-black text-foreground">
             Security & Device Control Center
           </h1>
           <p className="text-xs sm:text-sm text-muted-foreground mt-1 max-w-2xl leading-relaxed">
-            Manage trusted hardware terminals, revoke active remote sessions, review real-time security audit trails, and maintain sovereign key custody.
+            Manage trusted hardware terminals, revoke active remote sessions, review behavioral anomaly alerts, and inspect immutable audit trails.
           </p>
         </div>
 
@@ -138,40 +182,292 @@ export function SecurityCenterPage() {
         </div>
       </div>
 
-      {/* Security Health Status Card */}
-      <div className="grid sm:grid-cols-3 gap-4">
-        <div className="p-4 rounded-2xl border border-border bg-card flex items-center gap-3.5 shadow-sm">
+      {/* Security Health Score Breakdown Card */}
+      <Card className="border-border bg-gradient-to-br from-card to-muted/20 shadow-sm overflow-hidden">
+        <CardContent className="p-6">
+          <div className="grid lg:grid-cols-12 gap-6 items-center">
+            {/* Score Ring / Gauge */}
+            <div className="lg:col-span-4 flex items-center gap-5 border-b lg:border-b-0 lg:border-r border-border pb-6 lg:pb-0 lg:pr-6">
+              <div className="relative flex items-center justify-center shrink-0">
+                <svg className="w-28 h-28 transform -rotate-90" viewBox="0 0 100 100">
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="40"
+                    className="stroke-muted"
+                    strokeWidth="8"
+                    fill="transparent"
+                  />
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="40"
+                    className="stroke-emerald-500 transition-all duration-1000 ease-out"
+                    strokeWidth="8"
+                    strokeDasharray={251.2}
+                    strokeDashoffset={251.2 * (1 - securityScore / 100)}
+                    strokeLinecap="round"
+                    fill="transparent"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <span className="text-2xl font-black text-foreground font-display">{securityScore}%</span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-500">OPTIMAL</span>
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center gap-1.5">
+                  <ShieldCheck className="w-5 h-5 text-emerald-500" />
+                  <h3 className="text-base font-bold text-foreground">Sovereign Defense Index</h3>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Cryptographic verification of all multi-factor and hardware bindings.
+                </p>
+                <Badge variant="verified" size="sm" className="mt-2.5">
+                  Zero Trust Enforced
+                </Badge>
+              </div>
+            </div>
+
+            {/* Sub-Score Breakdown Meters */}
+            <div className="lg:col-span-8 grid sm:grid-cols-2 gap-4">
+              <div className="p-3.5 rounded-xl border border-border/80 bg-card/60">
+                <div className="flex justify-between items-center text-xs mb-1.5">
+                  <span className="font-semibold text-foreground flex items-center gap-1.5">
+                    <Lock className="w-3.5 h-3.5 text-primary" /> FIDO2 & Hardware MFA
+                  </span>
+                  <span className="font-mono font-bold text-emerald-500">100%</span>
+                </div>
+                <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
+                  <div className="h-full bg-emerald-500 rounded-full w-full" />
+                </div>
+                <span className="text-[10px] text-muted-foreground mt-1 inline-block">
+                  Biometric authenticator active on primary devices
+                </span>
+              </div>
+
+              <div className="p-3.5 rounded-xl border border-border/80 bg-card/60">
+                <div className="flex justify-between items-center text-xs mb-1.5">
+                  <span className="font-semibold text-foreground flex items-center gap-1.5">
+                    <Laptop className="w-3.5 h-3.5 text-blue-500" /> Device Integrity
+                  </span>
+                  <span className="font-mono font-bold text-blue-500">95%</span>
+                </div>
+                <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
+                  <div className="h-full bg-blue-500 rounded-full w-[95%]" />
+                </div>
+                <span className="text-[10px] text-muted-foreground mt-1 inline-block">
+                  {devices.length} verified hardware devices bound
+                </span>
+              </div>
+
+              <div className="p-3.5 rounded-xl border border-border/80 bg-card/60">
+                <div className="flex justify-between items-center text-xs mb-1.5">
+                  <span className="font-semibold text-foreground flex items-center gap-1.5">
+                    <Activity className="w-3.5 h-3.5 text-indigo-500" /> Terminal Session Hygiene
+                  </span>
+                  <span className="font-mono font-bold text-indigo-500">92%</span>
+                </div>
+                <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
+                  <div className="h-full bg-indigo-500 rounded-full w-[92%]" />
+                </div>
+                <span className="text-[10px] text-muted-foreground mt-1 inline-block">
+                  {sessions.filter((s) => s.status === 'active').length} active remote terminal session(s)
+                </span>
+              </div>
+
+              <div className="p-3.5 rounded-xl border border-border/80 bg-card/60">
+                <div className="flex justify-between items-center text-xs mb-1.5">
+                  <span className="font-semibold text-foreground flex items-center gap-1.5">
+                    <KeyRound className="w-3.5 h-3.5 text-amber-500" /> Audit Log Tamper-Resistance
+                  </span>
+                  <span className="font-mono font-bold text-emerald-500">100%</span>
+                </div>
+                <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
+                  <div className="h-full bg-emerald-500 rounded-full w-full" />
+                </div>
+                <span className="text-[10px] text-muted-foreground mt-1 inline-block">
+                  Merkle tree root anchored to state civic ledger
+                </span>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Behavioral Threat Alert Panel */}
+      {activeAnomalies.length > 0 && (
+        <Card className="border-amber-500/30 bg-amber-500/5 shadow-sm">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5 text-amber-500" />
+                <div>
+                  <CardTitle className="text-base text-foreground">Behavioral Threat & Anomaly Radar</CardTitle>
+                  <CardDescription className="text-xs">
+                    Civic AI anomaly detection flagged {activeAnomalies.length} unusual pattern(s) requiring your attention
+                  </CardDescription>
+                </div>
+              </div>
+              <Badge variant="warning" size="sm">
+                {activeAnomalies.length} Active Notice{activeAnomalies.length > 1 ? 's' : ''}
+              </Badge>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {activeAnomalies.map((anom) => (
+              <div
+                key={anom.id}
+                className="p-3.5 rounded-xl border border-amber-500/20 bg-card flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+              >
+                <div className="flex items-start gap-3">
+                  <div
+                    className={cn(
+                      'p-2 rounded-lg shrink-0 mt-0.5',
+                      anom.severity === 'critical'
+                        ? 'bg-rose-500/15 text-rose-600'
+                        : anom.severity === 'warning'
+                        ? 'bg-amber-500/15 text-amber-600'
+                        : 'bg-blue-500/15 text-blue-600'
+                    )}
+                  >
+                    <ShieldAlert className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h4 className="text-xs font-bold text-foreground">{anom.title}</h4>
+                      <span className="text-[10px] text-muted-foreground">
+                        {new Date(anom.detectedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{anom.description}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleDismissAnomaly(anom.id)}
+                    className="text-xs h-7 px-2.5 rounded-lg border-border hover:bg-muted"
+                  >
+                    <Check className="w-3 h-3 mr-1 text-emerald-500" /> Acknowledge
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Credential Exposure Check Row */}
+      <div className="p-4 rounded-2xl border border-border bg-card shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3.5">
           <div className="p-2.5 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
-            <ShieldCheck className="w-6 h-6" />
+            <CheckCircle2 className="w-5 h-5" />
           </div>
           <div>
-            <span className="text-[11px] font-semibold text-muted-foreground uppercase">Identity Tier</span>
-            <p className="text-sm font-bold text-foreground">Level 3 Biometric Sovereign</p>
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm font-bold text-foreground">Sovereign Breach & Dark Web Sentinel</h3>
+              <Badge variant="verified" size="sm">
+                0 Exposures Detected
+              </Badge>
+            </div>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Email <span className="font-mono text-foreground font-semibold">{user?.email || 'citizen@civiqone.org'}</span> and national identity hashes scanned against 42 billion breached records.
+            </p>
           </div>
         </div>
 
-        <div className="p-4 rounded-2xl border border-border bg-card flex items-center gap-3.5 shadow-sm">
-          <div className="p-2.5 rounded-xl bg-primary/15 text-primary">
-            <Lock className="w-6 h-6" />
-          </div>
-          <div>
-            <span className="text-[11px] font-semibold text-muted-foreground uppercase">2FA & Passkeys</span>
-            <p className="text-sm font-bold text-foreground">FIDO2 Hardware Key Active</p>
-          </div>
-        </div>
-
-        <div className="p-4 rounded-2xl border border-border bg-card flex items-center gap-3.5 shadow-sm">
-          <div className="p-2.5 rounded-xl bg-indigo-500/15 text-indigo-600 dark:text-indigo-400">
-            <KeyRound className="w-6 h-6" />
-          </div>
-          <div>
-            <span className="text-[11px] font-semibold text-muted-foreground uppercase">Privacy Status</span>
-            <Link to={ROUTES.APP.PRIVACY} className="text-sm font-bold text-primary hover:underline flex items-center gap-1">
-              Consent Controls <Globe className="w-3.5 h-3.5 ml-0.5" />
-            </Link>
-          </div>
-        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleRunBreachCheck}
+          disabled={isBreachChecking}
+          className="text-xs font-semibold rounded-xl shrink-0 gap-1.5"
+        >
+          {isBreachChecking ? (
+            <>
+              <RefreshCw className="w-3.5 h-3.5 animate-spin text-primary" /> Scanning Data Dumps...
+            </>
+          ) : (
+            <>
+              <Search className="w-3.5 h-3.5 text-primary" /> Run Instant Re-Scan
+            </>
+          )}
+        </Button>
       </div>
+
+      {/* Login History 7x24 Heatmap */}
+      <Card className="border-border bg-card shadow-sm">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-base flex items-center gap-2">
+                <Clock className="w-4 h-4 text-primary" />
+                7-Day Authentication Heatmap (24-Hour Cycle)
+              </CardTitle>
+              <CardDescription className="text-xs">
+                Visual density of citizen login and sovereign signature events across days and hours
+              </CardDescription>
+            </div>
+            <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+              <span>Less</span>
+              <div className="flex gap-1">
+                <span className="w-2.5 h-2.5 rounded-sm bg-muted/40 border border-border" />
+                <span className="w-2.5 h-2.5 rounded-sm bg-emerald-500/30" />
+                <span className="w-2.5 h-2.5 rounded-sm bg-emerald-500/60" />
+                <span className="w-2.5 h-2.5 rounded-sm bg-emerald-500" />
+              </div>
+              <span>More</span>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto pb-2">
+            <div className="min-w-[620px]">
+              {/* Hour labels */}
+              <div className="grid grid-cols-[40px_repeat(24,1fr)] gap-1 mb-1.5 text-[9px] font-mono text-muted-foreground text-center">
+                <div />
+                {Array.from({ length: 24 }).map((_, h) => (
+                  <div key={h} className="truncate">
+                    {h % 3 === 0 ? `${h}h` : ''}
+                  </div>
+                ))}
+              </div>
+
+              {/* Day rows */}
+              {heatmapDays.map((day) => {
+                const dayPoints = heatmap.filter((p) => p.day === day)
+                return (
+                  <div key={day} className="grid grid-cols-[40px_repeat(24,1fr)] gap-1 items-center mb-1">
+                    <span className="text-[11px] font-bold text-muted-foreground">{day}</span>
+                    {Array.from({ length: 24 }).map((_, h) => {
+                      const point = dayPoints.find((p) => p.hour === h)
+                      const level = point?.normalizedLevel || 0
+                      return (
+                        <div
+                          key={h}
+                          title={`${day} at ${h}:00 - ${point?.count || 0} authentications`}
+                          className={cn(
+                            'h-4 rounded-sm transition-all cursor-pointer hover:scale-110',
+                            level === 0 && 'bg-muted/40 border border-border/40',
+                            level === 1 && 'bg-emerald-500/25',
+                            level === 2 && 'bg-emerald-500/50',
+                            level === 3 && 'bg-emerald-500/75',
+                            level === 4 && 'bg-emerald-500 shadow-sm shadow-emerald-500/30'
+                          )}
+                        />
+                      )
+                    })}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Main Grid: Devices & Sessions */}
       <div className="grid lg:grid-cols-2 gap-6">

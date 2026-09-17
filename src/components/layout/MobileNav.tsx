@@ -15,6 +15,9 @@ import {
   Zap,
   Users,
   KeyRound,
+  Sparkles,
+  Database,
+  Compass,
 } from 'lucide-react'
 import { ROUTES } from '@/constants/routes'
 import { cn } from '@/lib/utils'
@@ -36,6 +39,9 @@ export function MobileNav({ open, onClose }: MobileNavProps) {
     { label: 'Document Vault', path: ROUTES.APP.DOCUMENTS, icon: FileText },
     { label: 'Civic Services', path: ROUTES.APP.SERVICES, icon: Briefcase },
     { label: 'Applications', path: ROUTES.APP.APPLICATIONS, icon: Layers },
+    { label: 'Government Benefits', path: ROUTES.APP.BENEFITS, icon: Sparkles },
+    { label: 'Data Footprint', path: ROUTES.APP.DATA_DASHBOARD, icon: Database },
+    { label: 'Civic Journey', path: ROUTES.APP.JOURNEY, icon: Compass },
     { label: 'Privacy & Consent', path: ROUTES.APP.PRIVACY, icon: Lock },
     { label: 'Security Center', path: ROUTES.APP.SECURITY, icon: KeyRound },
     { label: 'Civic Payments', path: ROUTES.APP.PAYMENTS, icon: CreditCard },

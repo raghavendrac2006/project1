@@ -10,6 +10,12 @@ import {
   CheckCircle2,
   Clock,
   Sparkles,
+  MessageSquare,
+  Send,
+  User,
+  ShieldCheck,
+  RefreshCcw,
+  ExternalLink,
 } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -23,6 +29,15 @@ import { realtimeBus } from '@/services/eventBus'
 import { useToast } from '@/hooks'
 import type { CivicApplication } from '@/types'
 
+interface OfficerMessage {
+  id: string
+  sender: 'officer' | 'citizen'
+  name: string
+  role: string
+  timestamp: string
+  message: string
+}
+
 export function ApplicationDetailPage() {
   const { applicationId } = useParams<{ applicationId: string }>()
   const [application, setApplication] = useState<CivicApplication | null>(null)
@@ -31,6 +46,27 @@ export function ApplicationDetailPage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [isResolving, setIsResolving] = useState(false)
   const [isAdvancing, setIsAdvancing] = useState(false)
+
+  // Officer Message Thread state
+  const [messages, setMessages] = useState<OfficerMessage[]>([
+    {
+      id: 'msg_1',
+      sender: 'officer',
+      name: 'V. R. Deshmukh',
+      role: 'Senior Verification Officer',
+      timestamp: '2026-09-15T11:30:00Z',
+      message: 'Application intake verified. Preliminary biometric match verified against Aadhaar Vault.',
+    },
+    {
+      id: 'msg_2',
+      sender: 'officer',
+      name: 'V. R. Deshmukh',
+      role: 'Senior Verification Officer',
+      timestamp: '2026-09-16T14:15:00Z',
+      message: 'Scrutiny of residential proof requested. Please ensure electricity bill or rent agreement is less than 3 months old.',
+    },
+  ])
+  const [replyText, setReplyText] = useState('')
 
   const toast = useToast()
   const navigate = useNavigate()
@@ -83,6 +119,7 @@ export function ApplicationDetailPage() {
   }
 
   const isActionRequired = application.status === 'action_required'
+  const isRejected = application.status === 'rejected'
 
   const handleResolveAction = async () => {
     if (!selectedFile) {
@@ -98,6 +135,20 @@ export function ApplicationDetailPage() {
       )
       setApplication(updated)
       setResolveModalOpen(false)
+
+      // Append citizen note to message thread
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `msg_${Date.now()}`,
+          sender: 'citizen',
+          name: 'You (Applicant)',
+          role: 'Citizen',
+          timestamp: new Date().toISOString(),
+          message: `Uploaded updated file: ${selectedFile.name} to address scrutiny query.`,
+        },
+      ])
+
       toast.success(
         'Action Resolved & Resubmitted',
         'Your updated document has been attached and returned to the Licensing Officer for re-scrutiny.'
@@ -107,6 +158,24 @@ export function ApplicationDetailPage() {
     } finally {
       setIsResolving(false)
     }
+  }
+
+  const handleSendMessage = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!replyText.trim()) return
+
+    const newMsg: OfficerMessage = {
+      id: `msg_${Date.now()}`,
+      sender: 'citizen',
+      name: 'You (Applicant)',
+      role: 'Citizen',
+      timestamp: new Date().toISOString(),
+      message: replyText.trim(),
+    }
+
+    setMessages((prev) => [...prev, newMsg])
+    setReplyText('')
+    toast.success('Message Dispatched', 'Your note has been submitted to the departmental case file.')
   }
 
   const handleSimulateStage = async () => {
@@ -127,7 +196,7 @@ export function ApplicationDetailPage() {
   }
 
   return (
-    <div className="space-y-6 pb-12">
+    <div className="space-y-6 pb-12 animate-in fade-in duration-200">
       {/* Back button */}
       <button
         onClick={() => navigate('/app/applications')}
@@ -138,7 +207,7 @@ export function ApplicationDetailPage() {
       </button>
 
       {/* Header Banner */}
-      <div className="rounded-2xl border border-border bg-card p-6 sm:p-8 shadow-card">
+      <div className="rounded-2xl border border-border bg-card p-6 sm:p-8 shadow-sm">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div className="flex flex-wrap items-center gap-2 mb-2">
@@ -146,6 +215,9 @@ export function ApplicationDetailPage() {
                 {application.applicationNumber}
               </span>
               <StatusIndicator status={application.status} />
+              <Badge variant="outline" className="text-xs">
+                SLA: 7-Day Target
+              </Badge>
             </div>
             <h1 className="font-display text-xl sm:text-2xl font-extrabold text-foreground">
               {application.serviceName}
@@ -179,11 +251,26 @@ export function ApplicationDetailPage() {
                 Resolve Query Now
               </Button>
             )}
+
+            {isRejected && (
+              <Button
+                variant="primary"
+                size="md"
+                className="gap-2 bg-primary text-primary-foreground font-semibold shrink-0"
+                onClick={() => {
+                  toast.info('Appeal Initiated', 'Your statutory appeal docket has been opened.')
+                  setResolveModalOpen(true)
+                }}
+              >
+                <RefreshCcw className="w-4 h-4" />
+                File Statutory Appeal
+              </Button>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Animated Visual Workflow Stepper */}
+      {/* Visual Journey Stepper */}
       <Card className="border-border bg-card/70 shadow-sm overflow-hidden">
         <CardHeader className="p-4 sm:p-5 border-b border-border/70 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-muted/20">
           <div>
@@ -192,7 +279,7 @@ export function ApplicationDetailPage() {
               Statutory Workflow Progression Engine
             </CardTitle>
             <CardDescription className="text-xs text-muted-foreground">
-              Current Stage: Step {application.currentStep || 1} of {application.totalSteps || 4} • Real-time synchronization
+              Current Stage: Step {application.currentStep || 1} of {application.totalSteps || 4} • Real-time departmental synchronization
             </CardDescription>
           </div>
         </CardHeader>
@@ -248,7 +335,7 @@ export function ApplicationDetailPage() {
 
       {/* Action Required Banner */}
       {isActionRequired && (
-        <div className="p-4 rounded-xl border border-amber-500/40 bg-amber-500/10 text-card-foreground flex items-start gap-3.5 shadow-subtle animate-in fade-in">
+        <div className="p-4 rounded-xl border border-amber-500/40 bg-amber-500/10 text-card-foreground flex items-start gap-3.5 shadow-sm animate-in fade-in">
           <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
           <div className="flex-1">
             <h4 className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
@@ -269,9 +356,9 @@ export function ApplicationDetailPage() {
         </div>
       )}
 
-      {/* Double Column: Step-by-Step Progress & Document Attachments */}
+      {/* Double Column: Scrutiny Timeline & Officer Thread + Supporting Docs */}
       <div className="grid lg:grid-cols-3 gap-6">
-        {/* Left 2 Cols: Timeline */}
+        {/* Left 2 Cols: Timeline & Officer Message Thread */}
         <div className="lg:col-span-2 space-y-6">
           <Card>
             <CardHeader className="pb-4 border-b border-border/60">
@@ -284,13 +371,76 @@ export function ApplicationDetailPage() {
               <Timeline steps={application.timeline} />
             </CardContent>
           </Card>
+
+          {/* Officer Message Thread */}
+          <Card className="border-border shadow-sm">
+            <CardHeader className="pb-3 border-b border-border/60">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <MessageSquare className="w-4 h-4 text-primary" />
+                  <CardTitle className="text-base">Official Case Officer Communications</CardTitle>
+                </div>
+                <Badge variant="verified" size="sm">
+                  Encrypted Casework
+                </Badge>
+              </div>
+              <CardDescription className="text-xs">
+                Direct statutory communication thread with the assigned departmental case reviewer
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-5 space-y-4">
+              <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
+                {messages.map((m) => (
+                  <div
+                    key={m.id}
+                    className={`p-3.5 rounded-xl border text-xs leading-relaxed space-y-1 ${
+                      m.sender === 'citizen'
+                        ? 'bg-primary/5 border-primary/20 ml-6 text-foreground'
+                        : 'bg-muted/40 border-border mr-6 text-foreground'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between text-[11px] font-semibold text-muted-foreground mb-1">
+                      <span className="flex items-center gap-1.5 font-bold text-foreground">
+                        <User className="w-3 h-3 text-primary" />
+                        {m.name} ({m.role})
+                      </span>
+                      <span className="font-mono text-[10px]">
+                        {new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </div>
+                    <p>{m.message}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Reply Form */}
+              <form onSubmit={handleSendMessage} className="flex gap-2 pt-2 border-t border-border/60">
+                <input
+                  type="text"
+                  value={replyText}
+                  onChange={(e) => setReplyText(e.target.value)}
+                  placeholder="Type an official remark or question for the officer..."
+                  className="flex-1 h-9 px-3 rounded-xl border border-input bg-card text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                />
+                <Button type="submit" size="sm" variant="primary" className="h-9 px-3 text-xs gap-1.5 shrink-0">
+                  <Send className="w-3.5 h-3.5" />
+                  Reply
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Right 1 Col: Attached Documents & Details */}
+        {/* Right 1 Col: Supporting Documents & Remarks */}
         <div className="space-y-6">
           <Card>
             <CardHeader className="pb-3 border-b border-border/60">
-              <CardTitle className="text-base">Attached Documents</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-base">Supporting Documents</CardTitle>
+                <Badge variant="outline" className="text-[10px]">
+                  {application.attachedDocuments.length} Attached
+                </Badge>
+              </div>
               <CardDescription className="text-xs">
                 Verified records linked from Citizen Vault
               </CardDescription>
@@ -299,7 +449,7 @@ export function ApplicationDetailPage() {
               {application.attachedDocuments.map((doc, idx) => (
                 <div
                   key={idx}
-                  className="flex items-center justify-between p-3 rounded-xl bg-muted/40 border border-border text-xs"
+                  className="flex items-center justify-between p-3 rounded-xl bg-muted/40 border border-border text-xs hover:border-primary/40 transition-colors"
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
                     <FileText className="w-4 h-4 text-primary shrink-0" />
@@ -319,11 +469,11 @@ export function ApplicationDetailPage() {
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                Applicant Notes
+                Applicant Dossier Notes
               </CardTitle>
             </CardHeader>
             <CardContent className="text-xs text-muted-foreground leading-relaxed">
-              {application.applicantNotes || 'No special remarks provided.'}
+              {application.applicantNotes || 'No special remarks provided by applicant.'}
             </CardContent>
           </Card>
         </div>
@@ -344,7 +494,7 @@ export function ApplicationDetailPage() {
 
           <div className="space-y-4 my-2">
             <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/25 text-xs text-foreground">
-              <strong>Query:</strong> {application.actionRequiredMessage}
+              <strong>Query:</strong> {application.actionRequiredMessage || 'Additional documentation required.'}
             </div>
 
             <FileUploader

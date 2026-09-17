@@ -14,6 +14,9 @@ import {
   ChevronDown,
   Award,
   Layers,
+  Building2,
+  Landmark,
+  XCircle,
 } from 'lucide-react'
 import { ROUTES } from '@/constants/routes'
 import { Button } from '@/components/ui/Button'
@@ -60,7 +63,31 @@ export function LandingPage() {
             </div>
           </Link>
 
-          <div className="flex items-center gap-3">
+          {/* Independent Multi-Portal Quick Links */}
+          <div className="hidden md:flex items-center gap-1 border border-border/60 bg-muted/40 rounded-xl p-1">
+            <Link
+              to={ROUTES.AUTH.LOGIN}
+              className="text-xs font-semibold text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-lg hover:bg-background transition-colors"
+            >
+              Citizen
+            </Link>
+            <Link
+              to={ROUTES.ORGANIZATION.LOGIN}
+              className="text-xs font-semibold text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-lg hover:bg-background transition-colors flex items-center gap-1.5"
+            >
+              <Building2 className="w-3.5 h-3.5 text-emerald-500" />
+              Organization
+            </Link>
+            <Link
+              to={ROUTES.GOVERNMENT.LOGIN}
+              className="text-xs font-semibold text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-lg hover:bg-background transition-colors flex items-center gap-1.5"
+            >
+              <Landmark className="w-3.5 h-3.5 text-amber-500" />
+              Government
+            </Link>
+          </div>
+
+          <div className="flex items-center gap-2">
             <Link
               to={ROUTES.AUTH.LOGIN}
               className="text-xs font-bold text-muted-foreground hover:text-foreground px-3 py-2 rounded-lg transition-colors"
@@ -148,6 +175,171 @@ export function LandingPage() {
             <div className="p-3">
               <p className="font-display text-2xl sm:text-3xl font-black text-foreground">100%</p>
               <p className="text-xs font-semibold text-muted-foreground mt-1">Sovereign Citizen Ownership</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Three Sovereign Portals Gateway */}
+      <section className="py-20 bg-muted/20 border-b border-border relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="text-center max-w-3xl mx-auto mb-14">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold bg-primary/10 text-primary border border-primary/20 mb-4 shadow-sm">
+              <ShieldCheck className="w-4 h-4 text-primary" />
+              <span>Independent Multi-Portal Architecture</span>
+            </div>
+            <h2 className="font-display text-3xl sm:text-5xl font-black text-foreground tracking-tight">
+              Three Sovereign Portals.{' '}
+              <span className="bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 bg-clip-text text-transparent">
+                Complete Separation of Powers.
+              </span>
+            </h2>
+            <p className="text-sm sm:text-base text-muted-foreground mt-3 max-w-2xl mx-auto leading-relaxed">
+              Every participant operates within an independent, cryptographically isolated workspace. Select your portal gateway to begin:
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {/* Portal 1: Citizen */}
+            <div className="rounded-3xl border-2 border-blue-500/30 bg-card p-7 shadow-lg shadow-blue-500/5 hover:border-blue-500/60 transition-all flex flex-col justify-between group relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-bl-full pointer-events-none group-hover:bg-blue-500/10 transition-colors" />
+
+              <div>
+                <div className="flex items-center justify-between mb-5">
+                  <div className="h-12 w-12 rounded-2xl bg-blue-600/15 text-blue-600 dark:text-blue-400 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                    <Shield className="w-6 h-6" />
+                  </div>
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+                    Personal Vault
+                  </span>
+                </div>
+
+                <h3 className="text-xl font-bold text-foreground">Citizen Portal</h3>
+                <p className="text-xs font-mono text-blue-600 dark:text-blue-400 mt-0.5">/login ➔ /app/*</p>
+
+                <p className="text-xs text-muted-foreground mt-3 leading-relaxed">
+                  For individual citizens and families to manage biometric smart cards, tamper-proof document vaults, government welfare schemes, and fine-grained data consent.
+                </p>
+
+                <div className="mt-5 pt-4 border-t border-border/80 space-y-2 text-xs">
+                  <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-medium text-[11px]">
+                    <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                    <span>Full personal document ownership</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-rose-500 font-medium text-[11px]">
+                    <XCircle className="w-3.5 h-3.5 shrink-0" />
+                    <span>Zero access to Government desks</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-rose-500 font-medium text-[11px]">
+                    <XCircle className="w-3.5 h-3.5 shrink-0" />
+                    <span>Zero access to Enterprise operations</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-8 pt-4">
+                <Link to={ROUTES.AUTH.LOGIN} className="block">
+                  <Button size="lg" className="w-full text-xs font-bold rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/20">
+                    Enter Citizen Portal <ArrowRight className="w-4 h-4 ml-1.5" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
+
+            {/* Portal 2: Organization */}
+            <div className="rounded-3xl border-2 border-emerald-500/30 bg-card p-7 shadow-lg shadow-emerald-500/5 hover:border-emerald-500/60 transition-all flex flex-col justify-between group relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-bl-full pointer-events-none group-hover:bg-emerald-500/10 transition-colors" />
+
+              <div>
+                <div className="flex items-center justify-between mb-5">
+                  <div className="h-12 w-12 rounded-2xl bg-emerald-600/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                    <Building2 className="w-6 h-6" />
+                  </div>
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                    Commercial B2B
+                  </span>
+                </div>
+
+                <h3 className="text-xl font-bold text-foreground">Organization Gateway</h3>
+                <p className="text-xs font-mono text-emerald-600 dark:text-emerald-400 mt-0.5">/organization/login ➔ /organization/*</p>
+
+                <p className="text-xs text-muted-foreground mt-3 leading-relaxed">
+                  For banks, insurers, healthcare networks & enterprises. Request citizen data under DPDP Act 2023 consent, run Zero-Knowledge Proofs, and verify authentic records.
+                </p>
+
+                <div className="mt-5 pt-4 border-t border-border/80 space-y-2 text-xs">
+                  <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-medium text-[11px]">
+                    <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                    <span>Dispatch purpose-bounded data requests</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-medium text-[11px]">
+                    <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                    <span>ZKP cryptographic verification studio</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-rose-500 font-medium text-[11px]">
+                    <XCircle className="w-3.5 h-3.5 shrink-0" />
+                    <span>Zero unconsented access to Citizen vaults</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-rose-500 font-medium text-[11px]">
+                    <XCircle className="w-3.5 h-3.5 shrink-0" />
+                    <span>Zero access to Government Secretariat</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-8 pt-4">
+                <Link to={ROUTES.ORGANIZATION.LOGIN} className="block">
+                  <Button size="lg" className="w-full text-xs font-bold rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-500/20">
+                    Enter Organization Gateway <ArrowRight className="w-4 h-4 ml-1.5" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
+
+            {/* Portal 3: Government */}
+            <div className="rounded-3xl border-2 border-indigo-500/30 bg-card p-7 shadow-lg shadow-indigo-500/5 hover:border-indigo-500/60 transition-all flex flex-col justify-between group relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-bl-full pointer-events-none group-hover:bg-indigo-500/10 transition-colors" />
+
+              <div>
+                <div className="flex items-center justify-between mb-5">
+                  <div className="h-12 w-12 rounded-2xl bg-indigo-600/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                    <Landmark className="w-6 h-6" />
+                  </div>
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
+                    Public Secretariat
+                  </span>
+                </div>
+
+                <h3 className="text-xl font-bold text-foreground">Government Secretariat</h3>
+                <p className="text-xs font-mono text-indigo-600 dark:text-indigo-400 mt-0.5">/government/login ➔ /government/*</p>
+
+                <p className="text-xs text-muted-foreground mt-3 leading-relaxed">
+                  For authorized civil servants across 11 autonomous ministries & departments. Review verification queues, enforce departmental SLAs, and oversee statutory citizen dossiers.
+                </p>
+
+                <div className="mt-5 pt-4 border-t border-border/80 space-y-2 text-xs">
+                  <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-medium text-[11px]">
+                    <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                    <span>Lawful statutory oversight on Citizen records</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-medium text-[11px]">
+                    <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                    <span>11 isolated departmental statutory desks</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-rose-500 font-medium text-[11px]">
+                    <XCircle className="w-3.5 h-3.5 shrink-0" />
+                    <span>Zero access to private Enterprise workspaces</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-8 pt-4">
+                <Link to={ROUTES.GOVERNMENT.LOGIN} className="block">
+                  <Button size="lg" className="w-full text-xs font-bold rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/20">
+                    Enter Government Desk <ArrowRight className="w-4 h-4 ml-1.5" />
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
         </div>
@@ -355,14 +547,20 @@ export function LandingPage() {
             <span>• Sovereign Digital Civic Operating System</span>
           </div>
 
-          <div className="flex items-center gap-6">
-            <Link to={ROUTES.AUTH.LOGIN} className="hover:text-foreground transition-colors">
-              Citizen Login
+          <div className="flex flex-wrap items-center gap-4 sm:gap-6">
+            <Link to={ROUTES.AUTH.LOGIN} className="hover:text-foreground transition-colors font-medium">
+              Citizen Portal
             </Link>
-            <Link to={ROUTES.AUTH.REGISTER} className="hover:text-foreground transition-colors">
-              Register ID
+            <Link to={ROUTES.ORGANIZATION.LOGIN} className="hover:text-foreground transition-colors font-medium text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+              <Building2 className="w-3 h-3" /> Organization Gateway
             </Link>
-            <span className="text-border">|</span>
+            <Link to={ROUTES.GOVERNMENT.LOGIN} className="hover:text-foreground transition-colors font-medium text-amber-600 dark:text-amber-400 flex items-center gap-1">
+              <Landmark className="w-3 h-3" /> Government Desk
+            </Link>
+            <Link to={ROUTES.ADMIN.LOGIN} className="hover:text-foreground transition-colors font-medium">
+              Admin
+            </Link>
+            <span className="hidden sm:inline text-border">|</span>
             <span className="font-mono text-[11px]">Zero-Knowledge Sovereign Enclave</span>
           </div>
         </div>

@@ -11,7 +11,8 @@ import {
   Search,
   Award,
   FileSearch,
-  Building
+  Building,
+  QrCode,
 } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
@@ -24,6 +25,8 @@ import {
   TableHead,
   TableCell,
 } from '@/components/ui/Table'
+import { CredentialScannerModal, type ScannedCredentialResult } from '@/components/shared/CredentialScannerModal'
+import { useToast } from '@/hooks'
 
 export function GovernmentVerificationPage() {
   const [session, setSession] = useState<GovSessionData | null>(null)
@@ -31,6 +34,8 @@ export function GovernmentVerificationPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [filterStatus, setFilterStatus] = useState('all')
   const [loading, setLoading] = useState(true)
+  const [scannerOpen, setScannerOpen] = useState(false)
+  const toast = useToast()
 
   useEffect(() => {
     async function loadData() {
@@ -48,6 +53,33 @@ export function GovernmentVerificationPage() {
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600" />
       </div>
+    )
+  }
+
+  const handleScanSuccess = (scanned: ScannedCredentialResult) => {
+    const newDossier: VerificationDossier = {
+      id: `dos_scan_${Date.now()}`,
+      applicationId: `APP-QR-${scanned.identifier.replace(/\s+/g, '')}`,
+      applicantName: scanned.holderName,
+      serviceName:
+        scanned.credentialType === 'AADHAAR'
+          ? 'Aadhaar Biometric eKYC'
+          : scanned.credentialType === 'DRIVING_LICENSE'
+          ? 'Driving License Verification'
+          : 'Tax Clearance Attestation',
+      departmentCode: 'DEPT-REV-UIDAI',
+      submissionDate: new Date().toISOString().split('T')[0],
+      ekycStatus: 'verified',
+      biometricMatchScore: scanned.confidenceScore,
+      digilockerVerified: true,
+      physicalInspectionRequired: false,
+      status: 'cleared',
+    }
+
+    setDossiers((prev) => [newDossier, ...prev])
+    toast.success(
+      'Credential Verified Successfully',
+      `Matched: ${scanned.holderName} (${scanned.identifier}) with 0x hash validation.`
     )
   }
 
@@ -73,18 +105,27 @@ export function GovernmentVerificationPage() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
             <Fingerprint className="w-6 h-6 text-emerald-600" />
-            Statutory Verification Desk
+            {session.department.name} · Verification Desk
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Automated Aadhaar eKYC, Biometric Match Verification, and Digilocker Document Integrity.
+            Departmental casework dossier review under {session.department.code}. Aadhaar eKYC, biometric verification, and DigiLocker integrity.
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 px-3 py-1 text-xs">
             <ShieldCheck className="w-3.5 h-3.5 mr-1" />
             UIDAI Direct Node Active
           </Badge>
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={() => setScannerOpen(true)}
+            className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold"
+          >
+            <QrCode className="w-4 h-4" />
+            Scan Citizen QR
+          </Button>
         </div>
       </div>
 
@@ -254,6 +295,13 @@ export function GovernmentVerificationPage() {
           </TableBody>
         </Table>
       </div>
+
+      {/* Credential Scanner Dialog Modal */}
+      <CredentialScannerModal
+        open={scannerOpen}
+        onOpenChange={setScannerOpen}
+        onScanSuccess={handleScanSuccess}
+      />
     </div>
   )
 }

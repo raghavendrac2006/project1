@@ -24,6 +24,7 @@ import { identityService } from '@/services/identity.service'
 import { credentialService, type GeneratedProof } from '@/services/credential.service'
 import { useToast } from '@/hooks'
 import { civicStorage } from '@/services/storage'
+import { GuillochePattern } from '@/components/ui/GuillochePattern'
 import { cn } from '@/lib/utils'
 import type { CivicCredential } from '@/types'
 
@@ -37,6 +38,26 @@ export function IdentityPage() {
   const [generatedToken, setGeneratedToken] = useState<{ token: string; qrPayload: string; validUntil: string } | null>(null)
   const [purpose, setPurpose] = useState('Govt Checkpoint Verification')
   const [isGenerating, setIsGenerating] = useState(false)
+
+  // 3D Card Interactive Tilt & Holographic tracking
+  const [cardTilt, setCardTilt] = useState({ rotateX: 0, rotateY: 0, sheenX: 50, sheenY: 50, isHovered: false })
+
+  const handleCardMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    const x = e.clientX - rect.left
+    const y = e.clientY - rect.top
+    const centerX = rect.width / 2
+    const centerY = rect.height / 2
+    const rotateX = ((y - centerY) / centerY) * -10
+    const rotateY = ((x - centerX) / centerX) * 10
+    const sheenX = (x / rect.width) * 100
+    const sheenY = (y / rect.height) * 100
+    setCardTilt({ rotateX, rotateY, sheenX, sheenY, isHovered: true })
+  }
+
+  const handleCardMouseLeave = () => {
+    setCardTilt({ rotateX: 0, rotateY: 0, sheenX: 50, sheenY: 50, isHovered: false })
+  }
 
   // Step-Up Authentication Modal state
   const [stepUpOpen, setStepUpOpen] = useState(false)
@@ -191,10 +212,27 @@ export function IdentityPage() {
         /* ================= TAB 1: SMART CARD & LINKED REGISTRY ================= */
         <div className="grid lg:grid-cols-12 gap-8 items-start">
           {/* Left 7 Cols: Holographic Sovereign Citizen Card */}
-          <div className="lg:col-span-7 space-y-4">
-            <div className="relative rounded-3xl p-6 sm:p-8 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white shadow-2xl border border-blue-500/30 overflow-hidden group">
-              {/* Holographic shimmer effect */}
-              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-sky-400/20 via-transparent to-emerald-500/10 pointer-events-none" />
+          <div className="lg:col-span-7 space-y-4" style={{ perspective: '1200px' }}>
+            <div
+              onMouseMove={handleCardMouseMove}
+              onMouseLeave={handleCardMouseLeave}
+              style={{
+                transform: `perspective(1200px) rotateX(${cardTilt.rotateX}deg) rotateY(${cardTilt.rotateY}deg)`,
+                transition: cardTilt.isHovered ? 'transform 0.1s ease-out' : 'transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
+              }}
+              className="relative rounded-3xl p-6 sm:p-8 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white shadow-2xl border border-blue-500/40 overflow-hidden group transition-shadow hover:shadow-[0_20px_50px_rgba(14,165,233,0.3)] will-change-transform select-none"
+            >
+              {/* Bank-Grade Guilloche Security Microprint & Fine Rosettes */}
+              <GuillochePattern color="#38BDF8" opacity={0.16} />
+
+              {/* Dynamic 3D Prismatic Holographic Sheen Layer */}
+              <div
+                className="absolute inset-0 pointer-events-none transition-opacity duration-300"
+                style={{
+                  opacity: cardTilt.isHovered ? 0.85 : 0.35,
+                  background: `radial-gradient(circle at ${cardTilt.sheenX}% ${cardTilt.sheenY}%, rgba(255,255,255,0.28) 0%, rgba(56,189,248,0.18) 25%, rgba(236,72,153,0.12) 50%, transparent 75%)`,
+                }}
+              />
               <div className="absolute -top-32 -right-32 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl pointer-events-none" />
 
               {/* Card Header */}

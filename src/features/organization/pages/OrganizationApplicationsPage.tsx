@@ -33,6 +33,7 @@ export function OrganizationApplicationsPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [viewMode, setViewMode] = useState<'table' | 'kanban'>('kanban')
+  const [aiTriageOnly, setAiTriageOnly] = useState(false)
 
   const loadApps = async () => {
     const apps = await organizationService.getApplications()
@@ -60,6 +61,7 @@ export function OrganizationApplicationsPage() {
   }
 
   const filtered = applications.filter((app) => {
+    if (aiTriageOnly && app.status === 'action_required') return false
     if (statusFilter !== 'all' && app.status !== statusFilter) return false
     if (searchQuery.trim() !== '') {
       const q = searchQuery.toLowerCase()
@@ -105,6 +107,38 @@ export function OrganizationApplicationsPage() {
               Table
             </Button>
           </div>
+        </div>
+      </div>
+
+      {/* SLA Queue Bottleneck & AI Triage Header Strip */}
+      <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-500/10 via-primary/5 to-card border border-amber-500/20 flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-xl bg-amber-500/10 text-amber-600 border border-amber-500/30">
+            <Clock className="w-4 h-4" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-foreground">SLA Underwriting Performance: 94.2%</span>
+              <Badge variant="outline" className="text-[10px] bg-amber-500/10 text-amber-600 border-amber-500/30">
+                1 Casework Bottleneck
+              </Badge>
+            </div>
+            <p className="text-[11px] text-muted-foreground mt-0.5">
+              Average turnaround is 1.8 days (Target: 3 days). 1 dossier pending clarification response from citizen.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant={aiTriageOnly ? 'primary' : 'outline'}
+            onClick={() => setAiTriageOnly(!aiTriageOnly)}
+            className="text-xs gap-1.5 h-8 font-semibold"
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            {aiTriageOnly ? 'Showing High-Confidence Dossiers' : 'AI Auto-Triage Queue'}
+          </Button>
         </div>
       </div>
 

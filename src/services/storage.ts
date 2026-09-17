@@ -58,7 +58,7 @@ const STORAGE_KEYS = {
   USER: 'civiqone_user_v1',
   IDENTITY: 'civiqone_identity_v1',
   DOCUMENTS: 'civiqone_documents_v1',
-  SERVICES: 'civiqone_services_v1',
+  SERVICES: 'civiqone_services_v2',
   APPLICATIONS: 'civiqone_applications_v1',
   NOTIFICATIONS: 'civiqone_notifications_v1',
   PAYMENTS: 'civiqone_payments_v1',
@@ -72,8 +72,8 @@ const STORAGE_KEYS = {
   ACCESS_GRANTS: 'civiqone_access_grants_v1',
   ACCESS_HISTORY: 'civiqone_access_history_v1',
   AUDIT_EVENTS: 'civiqone_audit_events_v1',
-  GOV_DEPARTMENTS: 'civiqone_gov_departments_v1',
-  GOV_OFFICIALS: 'civiqone_gov_officials_v1',
+  GOV_DEPARTMENTS: 'civiqone_gov_departments_v2',
+  GOV_OFFICIALS: 'civiqone_gov_officials_v2',
   ORG_SESSION: 'civiqone_org_session_v1',
   GOV_SESSION: 'civiqone_gov_session_v1',
   ADMIN_SESSION: 'civiqone_admin_session_v1',
@@ -208,6 +208,24 @@ export const civicStorage = {
     }
     reqs.unshift(newReq)
     civicStorage.saveConsentRequests(reqs)
+
+    // Dispatch real-time notification to citizen
+    const notifs = civicStorage.getNotifications()
+    notifs.unshift({
+      id: `notif_${Date.now()}`,
+      title: `Data Access Request: ${data.organizationName}`,
+      message: `${data.organizationName} requested authorization to access your credentials for "${data.purpose}". Review and grant or deny in Privacy Center.`,
+      category: 'security',
+      priority: 'high',
+      isRead: false,
+      createdAt: new Date().toISOString(),
+      actionUrl: '/app/privacy',
+      actionLabel: 'Review Request',
+    })
+    civicStorage.saveNotifications(notifs)
+
+    // Emit real-time event
+    realtimeBus.emit('ACCESS_REQUEST_CREATED', newReq)
 
     // Log audit event
     civicStorage.addAuditEvent({
@@ -436,27 +454,19 @@ export const civicStorage = {
 
   // Multi-workspace session management
   getOrgSession: (): OrgSessionData | null => {
-    return getFromStorage<OrgSessionData | null>(STORAGE_KEYS.ORG_SESSION, {
-      member: INITIAL_ORG_MEMBERS[0],
-      organization: INITIAL_ORGANIZATIONS[0],
-    })
+    return getFromStorage<OrgSessionData | null>(STORAGE_KEYS.ORG_SESSION, null)
   },
   setOrgSession: (session: OrgSessionData): void => saveToStorage(STORAGE_KEYS.ORG_SESSION, session),
   clearOrgSession: (): void => localStorage.removeItem(STORAGE_KEYS.ORG_SESSION),
 
   getGovSession: (): GovSessionData | null => {
-    return getFromStorage<GovSessionData | null>(STORAGE_KEYS.GOV_SESSION, {
-      official: INITIAL_GOV_OFFICIALS[0],
-      department: INITIAL_GOV_DEPARTMENTS[0],
-    })
+    return getFromStorage<GovSessionData | null>(STORAGE_KEYS.GOV_SESSION, null)
   },
   setGovSession: (session: GovSessionData): void => saveToStorage(STORAGE_KEYS.GOV_SESSION, session),
   clearGovSession: (): void => localStorage.removeItem(STORAGE_KEYS.GOV_SESSION),
 
   getAdminSession: (): AdminSessionData | null => {
-    return getFromStorage<AdminSessionData | null>(STORAGE_KEYS.ADMIN_SESSION, {
-      user: INITIAL_ADMIN_USER,
-    })
+    return getFromStorage<AdminSessionData | null>(STORAGE_KEYS.ADMIN_SESSION, null)
   },
   setAdminSession: (session: AdminSessionData): void => saveToStorage(STORAGE_KEYS.ADMIN_SESSION, session),
   clearAdminSession: (): void => localStorage.removeItem(STORAGE_KEYS.ADMIN_SESSION),
