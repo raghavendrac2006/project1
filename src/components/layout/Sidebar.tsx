@@ -1,0 +1,189 @@
+import { useState, useEffect } from 'react'
+import { NavLink } from 'react-router-dom'
+import {
+  LayoutDashboard,
+  Shield,
+  FileText,
+  Briefcase,
+  Layers,
+  CreditCard,
+  Bot,
+  Bell,
+  Settings,
+  ShieldCheck,
+  ChevronLeft,
+  ChevronRight,
+  Lock,
+  Zap,
+  Users,
+  KeyRound,
+} from 'lucide-react'
+import { ROUTES } from '@/constants/routes'
+import { cn } from '@/lib/utils'
+import { useAuth } from '@/hooks'
+import { actionService } from '@/services/action.service'
+import { realtimeBus } from '@/services/eventBus'
+
+interface SidebarProps {
+  collapsed: boolean
+  onToggleCollapse: () => void
+}
+
+export function Sidebar({ collapsed, onToggleCollapse }: SidebarProps) {
+  const { user } = useAuth()
+  const [pendingActionsCount, setPendingActionsCount] = useState(0)
+
+  useEffect(() => {
+    actionService.getPendingCount().then(setPendingActionsCount)
+
+    const unsubscribe = realtimeBus.subscribe('CITIZEN_ACTION_COMPLETED', () => {
+      actionService.getPendingCount().then(setPendingActionsCount)
+    })
+
+    const handleStorage = () => {
+      actionService.getPendingCount().then(setPendingActionsCount)
+    }
+    window.addEventListener('storage', handleStorage)
+
+    return () => {
+      unsubscribe()
+      window.removeEventListener('storage', handleStorage)
+    }
+  }, [])
+
+  const navItems = [
+    { label: 'Dashboard', path: ROUTES.APP.DASHBOARD, icon: LayoutDashboard },
+    {
+      label: 'Action Center',
+      path: ROUTES.APP.ACTIONS,
+      icon: Zap,
+      badge: pendingActionsCount > 0 ? pendingActionsCount : undefined,
+    },
+    { label: 'Civic Identity', path: ROUTES.APP.IDENTITY, icon: Shield },
+    { label: 'Family Hub', path: ROUTES.APP.FAMILY, icon: Users },
+    { label: 'Document Vault', path: ROUTES.APP.DOCUMENTS, icon: FileText },
+    { label: 'Civic Services', path: ROUTES.APP.SERVICES, icon: Briefcase },
+    { label: 'Applications', path: ROUTES.APP.APPLICATIONS, icon: Layers },
+    { label: 'Privacy & Consent', path: ROUTES.APP.PRIVACY, icon: Lock },
+    { label: 'Security Center', path: ROUTES.APP.SECURITY, icon: KeyRound },
+    { label: 'Civic Payments', path: ROUTES.APP.PAYMENTS, icon: CreditCard },
+    { label: 'CIVIQONE AI', path: ROUTES.APP.ASSISTANT, icon: Bot, isHighlighted: true },
+    { label: 'Notifications', path: ROUTES.APP.NOTIFICATIONS, icon: Bell },
+    { label: 'Settings', path: ROUTES.APP.SETTINGS, icon: Settings },
+  ]
+
+  return (
+    <aside
+      className={cn(
+        'hidden lg:flex flex-col border-r border-border bg-card transition-all duration-300 select-none z-30 h-screen sticky top-0',
+        collapsed ? 'w-20' : 'w-64'
+      )}
+    >
+      {/* Brand Header */}
+      <div className="flex h-16 items-center justify-between px-4 border-b border-border/80">
+        <div className="flex items-center gap-3 overflow-hidden">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-blue-700 via-blue-600 to-sky-500 text-white shadow-md">
+            <Shield className="h-5 w-5 fill-white/20" />
+          </div>
+          {!collapsed && (
+            <div className="flex flex-col">
+              <span className="font-display text-base font-extrabold tracking-tight text-foreground flex items-center gap-1.5">
+                CIVIQ<span className="text-primary font-black">ONE</span>
+              </span>
+              <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+                Civic Operating System
+              </span>
+            </div>
+          )}
+        </div>
+
+        <button
+          onClick={onToggleCollapse}
+          className="h-7 w-7 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
+          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+        >
+          {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+        </button>
+      </div>
+
+      {/* Navigation list */}
+      <nav className="flex-1 space-y-1.5 p-3 overflow-y-auto">
+        {navItems.map((item) => {
+          const Icon = item.icon
+          return (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              title={collapsed ? item.label : undefined}
+              className={({ isActive }) =>
+                cn(
+                  'group flex items-center rounded-xl px-3 py-2.5 text-xs font-semibold transition-all duration-150 relative',
+                  isActive
+                    ? 'bg-primary text-primary-foreground shadow-sm font-bold'
+                    : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+                  collapsed ? 'justify-center px-2' : 'gap-3'
+                )
+              }
+            >
+              {({ isActive }) => (
+                <>
+                  <Icon
+                    className={cn(
+                      'h-5 w-5 shrink-0 transition-transform duration-150 group-hover:scale-105',
+                      isActive ? 'text-primary-foreground' : item.isHighlighted ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'
+                    )}
+                  />
+                  {!collapsed && <span className="truncate">{item.label}</span>}
+                  {item.badge !== undefined && !collapsed && (
+                    <span
+                      className={cn(
+                        'ml-auto text-[10px] font-extrabold px-1.5 py-0.5 rounded-full',
+                        isActive
+                          ? 'bg-primary-foreground/20 text-primary-foreground'
+                          : 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30'
+                      )}
+                    >
+                      {item.badge}
+                    </span>
+                  )}
+                  {item.badge !== undefined && collapsed && (
+                    <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-amber-500 ring-2 ring-card" />
+                  )}
+                  {item.isHighlighted && !isActive && !collapsed && !item.badge && (
+                    <span className="ml-auto text-[9px] font-extrabold tracking-wider bg-primary/10 text-primary px-1.5 py-0.5 rounded-full border border-primary/20 uppercase">
+                      AI
+                    </span>
+                  )}
+                </>
+              )}
+            </NavLink>
+          )
+        })}
+      </nav>
+
+      {/* Citizen Sovereign Badge Footer */}
+      <div className="p-3 border-t border-border/80">
+        <div
+          className={cn(
+            'flex items-center rounded-xl border border-emerald-500/25 bg-emerald-500/5 transition-all',
+            collapsed ? 'p-2 justify-center' : 'p-3 gap-2.5'
+          )}
+        >
+          <div className="h-7 w-7 rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+            <ShieldCheck className="w-4 h-4" />
+          </div>
+          {!collapsed && (
+            <div className="flex flex-col min-w-0">
+              <span className="text-[11px] font-bold text-foreground truncate">
+                {user?.name || 'Citizen Verified'}
+              </span>
+              <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold truncate">
+                Level 3 Biometric ID
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
+    </aside>
+  )
+}
