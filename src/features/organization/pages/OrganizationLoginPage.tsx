@@ -1,9 +1,8 @@
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Building2, ShieldCheck, ArrowRight, Lock, Mail, Key } from 'lucide-react'
+import { useNavigate, Link } from 'react-router-dom'
+import { Building2, ShieldCheck, ArrowRight, Lock, Mail, Key, Landmark, ExternalLink } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
-import { Badge } from '@/components/ui/Badge'
 import { Card, CardContent } from '@/components/ui/Card'
 import { organizationService } from '@/services/organization.service'
 import { ROUTES } from '@/constants/routes'
@@ -39,12 +38,54 @@ export function OrganizationLoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-muted/40 flex flex-col justify-center items-center p-4 sm:p-6">
-      <div className="w-full max-w-md space-y-6">
+    <div className="min-h-screen bg-muted/40 flex flex-col justify-center items-center p-4 sm:p-6 space-y-4">
+      {/* Multi-Portal Switcher Header */}
+      <div className="flex items-center justify-center gap-1.5 p-1.5 rounded-2xl bg-card border border-border shadow-xs w-full max-w-md">
+        <Link
+          to={ROUTES.AUTH.LOGIN}
+          className="flex-1 py-1.5 text-center text-xs font-semibold rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
+        >
+          👤 Citizen
+        </Link>
+        <button
+          type="button"
+          className="flex-1 py-1.5 text-center text-xs font-bold rounded-xl bg-emerald-500/10 text-emerald-600 border border-emerald-500/30 shadow-xs"
+        >
+          🏢 Organization
+        </button>
+        <Link
+          to={ROUTES.GOVERNMENT.LOGIN}
+          className="flex-1 py-1.5 text-center text-xs font-bold rounded-xl bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/30 hover:bg-amber-500/20 transition-all flex items-center justify-center gap-1"
+        >
+          <Landmark className="w-3.5 h-3.5 text-amber-600" />
+          🏛️ Gov Portal
+        </Link>
+      </div>
+
+      <div className="w-full max-w-md space-y-4">
+        {/* Notice to redirect to Government Portal */}
+        <div className="p-3.5 rounded-xl border border-amber-500/30 bg-amber-500/10 text-xs text-amber-900 dark:text-amber-200 flex items-start gap-2.5 shadow-xs">
+          <Landmark className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+          <div className="space-y-1">
+            <span className="font-bold block text-amber-950 dark:text-amber-100">
+              Looking for the Official Government Portal?
+            </span>
+            <p className="text-[11px] leading-relaxed text-amber-800/90 dark:text-amber-300">
+              You are on the private organization login. For the Senior Government Manager gateway covering all 28 States, 8 UTs, and 13,971 Central Services:
+            </p>
+            <Link
+              to={ROUTES.GOVERNMENT.LOGIN}
+              className="inline-flex items-center gap-1 font-bold text-amber-700 dark:text-amber-300 hover:underline pt-0.5"
+            >
+              Go to Government Portal (/government/login) <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+        </div>
+
         {/* Brand Header */}
-        <div className="text-center space-y-2">
-          <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white shadow-lg mb-2">
-            <Building2 className="w-6 h-6" />
+        <div className="text-center space-y-1.5">
+          <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white shadow-lg mb-1">
+            <Building2 className="w-5 h-5" />
           </div>
           <h1 className="text-2xl font-black tracking-tight text-foreground font-display">
             CIVIQ<span className="text-emerald-500">ORG</span> Gateway
