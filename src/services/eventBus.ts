@@ -12,6 +12,9 @@ export type RealtimeEventType =
   | 'DEVICE_REMOVED'
   | 'SESSION_REVOKED'
   | 'ALL_REMOTE_SESSIONS_REVOKED'
+  | 'NOTIFICATION_TRIGGERED'
+  | 'WEBHOOK_DISPATCHED'
+  | 'DATA_PURGE_EXECUTED'
 
 export interface RealtimeEvent<T = any> {
   type: RealtimeEventType
@@ -80,6 +83,10 @@ class RealtimeEventBus {
         // storage quota or private mode
       }
     }
+  }
+
+  publish<T = any>(type: RealtimeEventType, payload?: T) {
+    this.emit(type, payload)
   }
 
   subscribe<T = any>(type: RealtimeEventType, callback: EventCallback<T>): () => void {

@@ -19,6 +19,9 @@ import {
   ClipboardCheck,
   BrainCircuit,
   Star,
+  Cpu,
+  Code,
+  Scale,
 } from 'lucide-react'
 import { ROUTES } from '@/constants/routes'
 import { cn } from '@/lib/utils'
@@ -55,6 +58,8 @@ const NAV_SECTIONS: NavSection[] = [
   {
     title: 'Intelligence & Governance',
     items: [
+      { label: 'Zero-Knowledge Studio', path: ROUTES.ORGANIZATION.ZKP_STUDIO, icon: Cpu },
+      { label: 'DPDP Compliance & Purge', path: ROUTES.ORGANIZATION.COMPLIANCE, icon: Scale },
       { label: 'Trust Center', path: ROUTES.ORGANIZATION.TRUST, icon: Star },
       { label: 'Policy Engine', path: ROUTES.ORGANIZATION.POLICIES, icon: FileText },
       { label: 'Consent Receipts', path: ROUTES.ORGANIZATION.RECEIPTS, icon: ClipboardCheck },
@@ -63,8 +68,9 @@ const NAV_SECTIONS: NavSection[] = [
     ],
   },
   {
-    title: 'Team & Analytics',
+    title: 'Developers & Governance',
     items: [
+      { label: 'Developer & Webhooks', path: ROUTES.ORGANIZATION.DEVELOPERS, icon: Code },
       { label: 'Team Members', path: ROUTES.ORGANIZATION.MEMBERS, icon: Users },
       { label: 'Roles & Permissions', path: ROUTES.ORGANIZATION.ROLES, icon: Sliders },
       { label: 'Operational Analytics', path: ROUTES.ORGANIZATION.ANALYTICS, icon: BarChart3 },

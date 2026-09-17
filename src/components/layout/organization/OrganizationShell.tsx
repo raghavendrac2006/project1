@@ -1,9 +1,10 @@
-import React, { useState } from 'react'
+import React, { useState, Suspense } from 'react'
 import { Outlet } from 'react-router-dom'
 import { OrganizationSidebar } from './OrganizationSidebar'
 import { OrganizationHeader } from './OrganizationHeader'
 import { CommandPalette } from '@/components/shared/CommandPalette'
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs'
+import { PageLoader } from '@/components/feedback/PageLoader'
 
 export function OrganizationShell() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
@@ -27,7 +28,9 @@ export function OrganizationShell() {
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto animate-in fade-in duration-200">
           <Breadcrumbs />
-          <Outlet />
+          <Suspense fallback={<PageLoader />}>
+            <Outlet />
+          </Suspense>
         </main>
       </div>
 

@@ -10,12 +10,16 @@ import {
   Languages,
   User,
   ExternalLink,
+  Mic,
+  MicOff,
+  Radio,
 } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
-import { useToast, useLanguage } from '@/hooks'
+import { useToast, useLanguage, useSpeechRecognition } from '@/hooks'
 import { assistantService } from '@/services/assistant.service'
 import { SUPPORTED_LANGUAGES, CIVIC_ASSISTANT_CONTENT } from '@/constants/languages'
+import { cn } from '@/lib/utils'
 import type { AssistantMessage, SupportedLanguage } from '@/types'
 
 export function AssistantPage() {
@@ -26,6 +30,22 @@ export function AssistantPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const toast = useToast()
   const navigate = useNavigate()
+
+  const {
+    isListening,
+    hasSupport,
+    startListening,
+    stopListening,
+  } = useSpeechRecognition({
+    language,
+    onResult: (spoken) => {
+      setInputText((prev) => (prev ? `${prev} ${spoken}` : spoken))
+      toast.info('Voice Input Captured', `Transcribed in ${currentLanguageDetails.name}`)
+    },
+    onError: (err) => {
+      toast.error('Microphone Notice', err)
+    },
+  })
 
   useEffect(() => {
     async function loadMessages() {
@@ -246,14 +266,53 @@ export function AssistantPage() {
       </div>
 
       {/* Input Box */}
-      <div className="relative shrink-0">
+      <div className="relative shrink-0 space-y-2">
+        {/* Active Speech Recognition Banner */}
+        {isListening && (
+          <div className="flex items-center justify-between px-3.5 py-2 rounded-xl bg-rose-500/10 border border-rose-500/25 text-rose-600 dark:text-rose-400 text-xs animate-in fade-in slide-in-from-bottom-1 duration-200 shadow-sm">
+            <div className="flex items-center gap-2.5">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500"></span>
+              </span>
+              <span className="font-semibold">
+                Listening in {currentLanguageDetails.nativeName} ({currentLanguageDetails.name})... Speak clearly
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={stopListening}
+              className="text-[11px] font-bold px-2 py-0.5 rounded bg-rose-500/20 hover:bg-rose-500/30 transition-colors"
+            >
+              Done Speaking
+            </button>
+          </div>
+        )}
+
         <form
           onSubmit={(e) => {
             e.preventDefault()
             handleSendMessage()
           }}
-          className="flex items-center gap-2 bg-card border border-input rounded-2xl p-2 shadow-subtle focus-within:ring-2 focus-within:ring-ring"
+          className="flex items-center gap-2 bg-card border border-input rounded-2xl p-2 shadow-subtle focus-within:ring-2 focus-within:ring-ring transition-all"
         >
+          {/* Voice Microphone Input Button */}
+          {hasSupport && (
+            <button
+              type="button"
+              onClick={isListening ? stopListening : startListening}
+              className={cn(
+                'w-9 h-9 rounded-xl flex items-center justify-center transition-all shrink-0',
+                isListening
+                  ? 'bg-rose-500 text-white shadow-md shadow-rose-500/30 animate-pulse'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+              )}
+              title={isListening ? 'Stop listening' : `Speak in ${currentLanguageDetails.nativeName}`}
+            >
+              {isListening ? <Radio className="w-4 h-4 animate-spin" /> : <Mic className="w-4 h-4" />}
+            </button>
+          )}
+
           <input
             type="text"
             value={inputText}

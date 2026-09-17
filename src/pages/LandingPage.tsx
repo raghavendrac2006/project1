@@ -14,6 +14,8 @@ import {
   ChevronDown,
   Award,
   Layers,
+  Building2,
+  Landmark,
 } from 'lucide-react'
 import { ROUTES } from '@/constants/routes'
 import { Button } from '@/components/ui/Button'
@@ -60,7 +62,31 @@ export function LandingPage() {
             </div>
           </Link>
 
-          <div className="flex items-center gap-3">
+          {/* Independent Multi-Portal Quick Links */}
+          <div className="hidden md:flex items-center gap-1 border border-border/60 bg-muted/40 rounded-xl p-1">
+            <Link
+              to={ROUTES.AUTH.LOGIN}
+              className="text-xs font-semibold text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-lg hover:bg-background transition-colors"
+            >
+              Citizen
+            </Link>
+            <Link
+              to={ROUTES.ORGANIZATION.LOGIN}
+              className="text-xs font-semibold text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-lg hover:bg-background transition-colors flex items-center gap-1.5"
+            >
+              <Building2 className="w-3.5 h-3.5 text-emerald-500" />
+              Organization
+            </Link>
+            <Link
+              to={ROUTES.GOVERNMENT.LOGIN}
+              className="text-xs font-semibold text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-lg hover:bg-background transition-colors flex items-center gap-1.5"
+            >
+              <Landmark className="w-3.5 h-3.5 text-amber-500" />
+              Government
+            </Link>
+          </div>
+
+          <div className="flex items-center gap-2">
             <Link
               to={ROUTES.AUTH.LOGIN}
               className="text-xs font-bold text-muted-foreground hover:text-foreground px-3 py-2 rounded-lg transition-colors"
@@ -355,14 +381,20 @@ export function LandingPage() {
             <span>• Sovereign Digital Civic Operating System</span>
           </div>
 
-          <div className="flex items-center gap-6">
-            <Link to={ROUTES.AUTH.LOGIN} className="hover:text-foreground transition-colors">
-              Citizen Login
+          <div className="flex flex-wrap items-center gap-4 sm:gap-6">
+            <Link to={ROUTES.AUTH.LOGIN} className="hover:text-foreground transition-colors font-medium">
+              Citizen Portal
             </Link>
-            <Link to={ROUTES.AUTH.REGISTER} className="hover:text-foreground transition-colors">
-              Register ID
+            <Link to={ROUTES.ORGANIZATION.LOGIN} className="hover:text-foreground transition-colors font-medium text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+              <Building2 className="w-3 h-3" /> Organization Gateway
             </Link>
-            <span className="text-border">|</span>
+            <Link to={ROUTES.GOVERNMENT.LOGIN} className="hover:text-foreground transition-colors font-medium text-amber-600 dark:text-amber-400 flex items-center gap-1">
+              <Landmark className="w-3 h-3" /> Government Desk
+            </Link>
+            <Link to={ROUTES.ADMIN.LOGIN} className="hover:text-foreground transition-colors font-medium">
+              Admin
+            </Link>
+            <span className="hidden sm:inline text-border">|</span>
             <span className="font-mono text-[11px]">Zero-Knowledge Sovereign Enclave</span>
           </div>
         </div>

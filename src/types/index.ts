@@ -789,3 +789,118 @@ export interface SLACountdown {
   label: string
 }
 
+// ── Organization Advanced Modules Types ──────────────────────────────────────
+
+export interface DiscrepancyItem {
+  id?: string
+  field: string
+  formValue: string
+  extractedValue: string
+  extractedOcrValue?: string
+  confidence?: number
+  severity: 'high' | 'medium' | 'low'
+  message: string
+}
+
+export interface AiScrutinyResult {
+  confidenceScore: number // 0-100
+  status: 'passed' | 'review_recommended' | 'discrepancy_detected'
+  discrepancies: DiscrepancyItem[]
+  suggestedAction: 'approve' | 'request_clarification' | 'reject'
+  summary: string
+}
+
+// Phase 2: Zero-Knowledge Proof (ZKP)
+export interface ZkpQueryTemplate {
+  id: string
+  name: string
+  description: string
+  predicate: string // e.g. "age >= 18"
+  category: 'identity' | 'financial' | 'residency' | 'statutory'
+  targetField: string
+  zeroPiiDescription: string
+}
+
+export interface ZkpProofReceipt {
+  id: string
+  queryId: string
+  queryName: string
+  citizenId: string
+  result: boolean
+  proofHash: string
+  verifyingKey: string
+  timestamp: string
+  curve: string
+  publicInputs: Record<string, string | number | boolean>
+}
+
+// Phase 3: Developer Platform & Webhooks
+export interface ApiKeyItem {
+  id: string
+  name: string
+  keyPrefix: string // civ_live_...
+  createdAt: string
+  lastUsedAt: string | null
+  status: 'active' | 'revoked'
+  scopes: string[]
+  environment: 'production' | 'sandbox'
+}
+
+export interface WebhookEndpoint {
+  id: string
+  url: string
+  description: string
+  events: string[]
+  status: 'active' | 'failing' | 'disabled'
+  secretPrefix: string
+  createdAt: string
+  lastDeliveryAt: string | null
+}
+
+export interface WebhookDeliveryLog {
+  id: string
+  endpointId: string
+  endpointUrl: string
+  event: string
+  status: 'success' | 'failure'
+  statusCode: number
+  latencyMs: number
+  timestamp: string
+  payloadSnippet: string
+  responseSnippet: string
+  signatureHeader: string
+}
+
+// Phase 4: DPDP Compliance & Purge
+export interface ComplianceCheckItem {
+  id: string
+  framework: 'DPDP_2023' | 'ISO_27701' | 'CERT_IN'
+  clause: string
+  title: string
+  status: 'compliant' | 'warning' | 'audit_required'
+  evidence: string
+  lastAuditDate: string
+}
+
+export interface DataPurgePolicy {
+  id: string
+  name: string
+  dataType: string
+  retentionDays: number
+  autoPurgeEnabled: boolean
+  lastRunAt: string | null
+  nextScheduledAt: string
+  recordsPurgedTotal: number
+}
+
+export interface DestructionCertificate {
+  id: string
+  certificateNumber: string
+  purgePolicyName: string
+  recordsCount: number
+  timestamp: string
+  shredMethod: string // e.g., "NIST SP 800-88 Cryptographic Wipe"
+  merkleRootHash: string
+  officerSignature: string
+}
+

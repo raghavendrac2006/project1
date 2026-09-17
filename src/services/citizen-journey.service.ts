@@ -29,8 +29,8 @@ function buildTimeline(): CivicMilestone[] {
     milestones.push({
       id: `ms_doc_${i}`,
       date: doc.issueDate,
-      title: `${doc.name} Uploaded`,
-      description: `${doc.name} was added to your Document Vault and marked as ${doc.verificationStatus}.`,
+      title: `${doc.title} Uploaded`,
+      description: `${doc.title} was added to your Document Vault and marked as ${doc.verificationStatus}.`,
       type: 'document',
       icon: '📄',
       isHighlight: doc.verificationStatus === 'verified',
@@ -70,9 +70,9 @@ function buildTimeline(): CivicMilestone[] {
   payments.filter((p) => p.status === 'paid').slice(0, 2).forEach((p, i) => {
     milestones.push({
       id: `ms_pay_${i}`,
-      date: p.paidAt || p.dueDate,
+      date: p.paidDate || p.dueDate,
       title: 'Civic Due Settled',
-      description: `₹${p.amount.toLocaleString()} paid for ${p.description}. Receipt: ${p.receiptNumber || 'Pending'}.`,
+      description: `₹${p.amount.toLocaleString()} paid for ${p.title}. Receipt: ${p.receiptNumber || 'Pending'}.`,
       type: 'payment',
       icon: '💳',
       isHighlight: false,

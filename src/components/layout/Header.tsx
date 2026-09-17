@@ -12,8 +12,10 @@ import {
   Settings,
   Languages,
   Check,
+  Lock,
+  Type,
 } from 'lucide-react'
-import { useAuth, useTheme, useLanguage } from '@/hooks'
+import { useAuth, useTheme, useLanguage, useAccessibility } from '@/hooks'
 import { SUPPORTED_LANGUAGES } from '@/constants/languages'
 import { ROUTES } from '@/constants/routes'
 import {
@@ -31,12 +33,18 @@ import { civicStorage } from '@/services/storage'
 interface HeaderProps {
   onToggleMobileMenu: () => void
   onOpenCommandPalette: () => void
+  onLockSession?: () => void
 }
 
-export function Header({ onToggleMobileMenu, onOpenCommandPalette }: HeaderProps) {
+export function Header({
+  onToggleMobileMenu,
+  onOpenCommandPalette,
+  onLockSession,
+}: HeaderProps) {
   const { user, logout } = useAuth()
   const { theme, toggleTheme } = useTheme()
   const { language, setLanguage, currentLanguageDetails } = useLanguage()
+  const { fontScale, cycleFontScale } = useAccessibility()
   const navigate = useNavigate()
 
   const [notifications] = useState(() => civicStorage.getNotifications())
@@ -125,6 +133,35 @@ export function Header({ onToggleMobileMenu, onOpenCommandPalette }: HeaderProps
             <Moon className="w-4 h-4 text-slate-700" />
           )}
         </Button>
+
+        {/* Senior-Friendly Accessibility Font Scaler */}
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-9 px-2 gap-1 text-xs text-muted-foreground hover:text-foreground font-mono"
+          onClick={cycleFontScale}
+          title={`Accessibility Font Size: ${fontScale.toUpperCase()} (Click to cycle)`}
+          aria-label={`Cycle font size, current size is ${fontScale}`}
+        >
+          <Type className="w-3.5 h-3.5" />
+          <span className="font-bold text-[11px]">
+            {fontScale === 'normal' ? 'A' : fontScale === 'large' ? 'A+' : 'A++'}
+          </span>
+        </Button>
+
+        {/* Instant Privacy Lock */}
+        {onLockSession && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-9 w-9 text-muted-foreground hover:text-amber-500 transition-colors"
+            onClick={onLockSession}
+            title="Lock Privacy Session Immediately"
+            aria-label="Lock screen for privacy"
+          >
+            <Lock className="w-4 h-4" />
+          </Button>
+        )}
 
         {/* Notifications Dropdown */}
         <DropdownMenu>

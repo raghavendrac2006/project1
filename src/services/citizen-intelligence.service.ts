@@ -115,8 +115,8 @@ function buildActivityFeed(): ActivityFeedEvent[] {
       id: `act_pay_${i}`,
       type: 'payment',
       title: 'Payment Settled',
-      description: `₹${p.amount.toLocaleString()} paid for ${p.description}.`,
-      timestamp: p.paidAt || p.dueDate,
+      description: `₹${p.amount.toLocaleString()} paid for ${p.title}.`,
+      timestamp: p.paidDate || p.dueDate,
       relatedRoute: '/app/payments',
     })
   })
@@ -252,11 +252,11 @@ function buildDataFootprint(): DataFootprintField[] {
     sharedWithOrgs: data.orgs.size,
     activeGrants: data.count,
     lastSharedAt: data.lastAt,
-    riskLevel: HIGH_RISK.includes(field as ConsentField)
+    riskLevel: (HIGH_RISK.includes(field as ConsentField)
       ? 'high'
       : MED_RISK.includes(field as ConsentField)
       ? 'medium'
-      : 'low',
+      : 'low') as 'high' | 'medium' | 'low',
   })).sort((a, b) => b.sharedWithOrgs - a.sharedWithOrgs)
 }
 

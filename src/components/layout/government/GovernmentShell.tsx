@@ -1,9 +1,10 @@
-import React, { useState } from 'react'
+import React, { useState, Suspense } from 'react'
 import { Outlet } from 'react-router-dom'
 import { GovernmentSidebar } from './GovernmentSidebar'
 import { GovernmentHeader } from './GovernmentHeader'
 import { CommandPalette } from '@/components/shared/CommandPalette'
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs'
+import { PageLoader } from '@/components/feedback/PageLoader'
 
 export function GovernmentShell() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
@@ -27,7 +28,9 @@ export function GovernmentShell() {
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto animate-in fade-in duration-200">
           <Breadcrumbs />
-          <Outlet />
+          <Suspense fallback={<PageLoader />}>
+            <Outlet />
+          </Suspense>
         </main>
       </div>
 

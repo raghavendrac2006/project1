@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react'
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { AppShell } from '@/components/layout/AppShell'
 import { AuthGuard } from './AuthGuard'
@@ -6,93 +7,109 @@ import { OrganizationGuard } from './OrganizationGuard'
 import { GovernmentGuard } from './GovernmentGuard'
 import { AdminGuard } from './AdminGuard'
 import { ErrorBoundary } from '@/components/feedback/ErrorBoundary'
+import { PageLoader } from '@/components/feedback/PageLoader'
 
 // Shells for Multi-Workspaces
 import { OrganizationShell } from '@/components/layout/organization/OrganizationShell'
 import { GovernmentShell } from '@/components/layout/government/GovernmentShell'
 import { AdminShell } from '@/components/layout/admin/AdminShell'
 
+// Helper for top-level non-shell route suspense
+const withSuspense = (Component: React.ComponentType) => (
+  <Suspense fallback={<PageLoader />}>
+    <Component />
+  </Suspense>
+)
+
+// Landing
+const LandingPage = lazy(() => import('@/pages/LandingPage').then((m) => ({ default: m.LandingPage })))
+
 // Citizen Auth Pages
-import { LoginPage } from '@/features/auth/LoginPage'
-import { RegisterPage } from '@/features/auth/RegisterPage'
-import { VerifyOtpPage } from '@/features/auth/VerifyOtpPage'
-import { ForgotPasswordPage } from '@/features/auth/ForgotPasswordPage'
+const LoginPage = lazy(() => import('@/features/auth/LoginPage').then((m) => ({ default: m.LoginPage })))
+const RegisterPage = lazy(() => import('@/features/auth/RegisterPage').then((m) => ({ default: m.RegisterPage })))
+const VerifyOtpPage = lazy(() => import('@/features/auth/VerifyOtpPage').then((m) => ({ default: m.VerifyOtpPage })))
+const ForgotPasswordPage = lazy(() => import('@/features/auth/ForgotPasswordPage').then((m) => ({ default: m.ForgotPasswordPage })))
 
 // Citizen Feature Pages
-import { DashboardPage } from '@/features/dashboard/DashboardPage'
-import { ActionCenterPage } from '@/features/actions/ActionCenterPage'
-import { IdentityPage } from '@/features/identity/IdentityPage'
-import { DocumentVaultPage } from '@/features/documents/DocumentVaultPage'
-import { DocumentDetailPage } from '@/features/documents/DocumentDetailPage'
-import { ExpiringDocumentsPage } from '@/features/documents/ExpiringDocumentsPage'
-import { FamilyDashboardPage } from '@/features/family/FamilyDashboardPage'
-import { FamilyMemberDetailPage } from '@/features/family/FamilyMemberDetailPage'
-import { FamilyDelegationPage } from '@/features/family/FamilyDelegationPage'
-import { ServicesPage } from '@/features/services/ServicesPage'
-import { ApplicationsPage } from '@/features/applications/ApplicationsPage'
-import { ApplicationDetailPage } from '@/features/applications/ApplicationDetailPage'
-import { PaymentsPage } from '@/features/payments/PaymentsPage'
-import { AssistantPage } from '@/features/assistant/AssistantPage'
-import { NotificationsPage } from '@/features/notifications/NotificationsPage'
-import { PrivacyConsentCenterPage } from '@/features/privacy/PrivacyConsentCenterPage'
-import { SecurityCenterPage } from '@/features/security/SecurityCenterPage'
-import { ProfilePage } from '@/features/profile/ProfilePage'
-import { SettingsPage } from '@/features/settings/SettingsPage'
-import { LandingPage } from '@/pages/LandingPage'
+const DashboardPage = lazy(() => import('@/features/dashboard/DashboardPage').then((m) => ({ default: m.DashboardPage })))
+const ActionCenterPage = lazy(() => import('@/features/actions/ActionCenterPage').then((m) => ({ default: m.ActionCenterPage })))
+const IdentityPage = lazy(() => import('@/features/identity/IdentityPage').then((m) => ({ default: m.IdentityPage })))
+const DocumentVaultPage = lazy(() => import('@/features/documents/DocumentVaultPage').then((m) => ({ default: m.DocumentVaultPage })))
+const DocumentDetailPage = lazy(() => import('@/features/documents/DocumentDetailPage').then((m) => ({ default: m.DocumentDetailPage })))
+const ExpiringDocumentsPage = lazy(() => import('@/features/documents/ExpiringDocumentsPage').then((m) => ({ default: m.ExpiringDocumentsPage })))
+const FamilyDashboardPage = lazy(() => import('@/features/family/FamilyDashboardPage').then((m) => ({ default: m.FamilyDashboardPage })))
+const FamilyMemberDetailPage = lazy(() => import('@/features/family/FamilyMemberDetailPage').then((m) => ({ default: m.FamilyMemberDetailPage })))
+const FamilyDelegationPage = lazy(() => import('@/features/family/FamilyDelegationPage').then((m) => ({ default: m.FamilyDelegationPage })))
+const ServicesPage = lazy(() => import('@/features/services/ServicesPage').then((m) => ({ default: m.ServicesPage })))
+const ApplicationsPage = lazy(() => import('@/features/applications/ApplicationsPage').then((m) => ({ default: m.ApplicationsPage })))
+const ApplicationDetailPage = lazy(() => import('@/features/applications/ApplicationDetailPage').then((m) => ({ default: m.ApplicationDetailPage })))
+const PaymentsPage = lazy(() => import('@/features/payments/PaymentsPage').then((m) => ({ default: m.PaymentsPage })))
+const AssistantPage = lazy(() => import('@/features/assistant/AssistantPage').then((m) => ({ default: m.AssistantPage })))
+const NotificationsPage = lazy(() => import('@/features/notifications/NotificationsPage').then((m) => ({ default: m.NotificationsPage })))
+const PrivacyConsentCenterPage = lazy(() => import('@/features/privacy/PrivacyConsentCenterPage').then((m) => ({ default: m.PrivacyConsentCenterPage })))
+const SecurityCenterPage = lazy(() => import('@/features/security/SecurityCenterPage').then((m) => ({ default: m.SecurityCenterPage })))
+const BenefitsEligibilityPage = lazy(() => import('@/features/benefits/BenefitsEligibilityPage').then((m) => ({ default: m.BenefitsEligibilityPage })))
+const DataDashboardPage = lazy(() => import('@/features/data/DataDashboardPage').then((m) => ({ default: m.DataDashboardPage })))
+const CivicJourneyPage = lazy(() => import('@/features/journey/CivicJourneyPage').then((m) => ({ default: m.CivicJourneyPage })))
+const ProfilePage = lazy(() => import('@/features/profile/ProfilePage').then((m) => ({ default: m.ProfilePage })))
+const SettingsPage = lazy(() => import('@/features/settings/SettingsPage').then((m) => ({ default: m.SettingsPage })))
 
 // Organization Pages
-import { OrganizationLoginPage } from '@/features/organization/pages/OrganizationLoginPage'
-import { OrganizationDashboardPage } from '@/features/organization/pages/OrganizationDashboardPage'
-import { OrganizationServicesPage } from '@/features/organization/pages/OrganizationServicesPage'
-import { OrganizationApplicationsPage } from '@/features/organization/pages/OrganizationApplicationsPage'
-import { OrganizationApplicationDetailPage } from '@/features/organization/pages/OrganizationApplicationDetailPage'
-import { OrganizationCitizensPage } from '@/features/organization/pages/OrganizationCitizensPage'
-import { OrganizationCitizenDetailPage } from '@/features/organization/pages/OrganizationCitizenDetailPage'
-import { OrganizationAccessRequestsPage } from '@/features/organization/pages/OrganizationAccessRequestsPage'
-import { OrganizationMembersPage } from '@/features/organization/pages/OrganizationMembersPage'
-import { OrganizationRolesPage } from '@/features/organization/pages/OrganizationRolesPage'
-import { OrganizationAnalyticsPage } from '@/features/organization/pages/OrganizationAnalyticsPage'
-import { OrganizationAuditLogPage } from '@/features/organization/pages/OrganizationAuditLogPage'
-import { OrganizationProfilePage } from '@/features/organization/pages/OrganizationProfilePage'
-import { OrganizationSettingsPage } from '@/features/organization/pages/OrganizationSettingsPage'
-// Organization Advanced Modules
-import { OrganizationTrustCenterPage } from '@/features/organization/pages/OrganizationTrustCenterPage'
-import { OrganizationPolicyEnginePage } from '@/features/organization/pages/OrganizationPolicyEnginePage'
-import { OrganizationConsentReceiptsPage } from '@/features/organization/pages/OrganizationConsentReceiptsPage'
-import { OrganizationIntelligencePage } from '@/features/organization/pages/OrganizationIntelligencePage'
-import { OrganizationSecurityEventsPage } from '@/features/organization/pages/OrganizationSecurityEventsPage'
+const OrganizationLoginPage = lazy(() => import('@/features/organization/pages/OrganizationLoginPage').then((m) => ({ default: m.OrganizationLoginPage })))
+const OrganizationDashboardPage = lazy(() => import('@/features/organization/pages/OrganizationDashboardPage').then((m) => ({ default: m.OrganizationDashboardPage })))
+const OrganizationServicesPage = lazy(() => import('@/features/organization/pages/OrganizationServicesPage').then((m) => ({ default: m.OrganizationServicesPage })))
+const OrganizationApplicationsPage = lazy(() => import('@/features/organization/pages/OrganizationApplicationsPage').then((m) => ({ default: m.OrganizationApplicationsPage })))
+const OrganizationApplicationDetailPage = lazy(() => import('@/features/organization/pages/OrganizationApplicationDetailPage').then((m) => ({ default: m.OrganizationApplicationDetailPage })))
+const OrganizationCitizensPage = lazy(() => import('@/features/organization/pages/OrganizationCitizensPage').then((m) => ({ default: m.OrganizationCitizensPage })))
+const OrganizationCitizenDetailPage = lazy(() => import('@/features/organization/pages/OrganizationCitizenDetailPage').then((m) => ({ default: m.OrganizationCitizenDetailPage })))
+const OrganizationAccessRequestsPage = lazy(() => import('@/features/organization/pages/OrganizationAccessRequestsPage').then((m) => ({ default: m.OrganizationAccessRequestsPage })))
+const OrganizationMembersPage = lazy(() => import('@/features/organization/pages/OrganizationMembersPage').then((m) => ({ default: m.OrganizationMembersPage })))
+const OrganizationRolesPage = lazy(() => import('@/features/organization/pages/OrganizationRolesPage').then((m) => ({ default: m.OrganizationRolesPage })))
+const OrganizationAnalyticsPage = lazy(() => import('@/features/organization/pages/OrganizationAnalyticsPage').then((m) => ({ default: m.OrganizationAnalyticsPage })))
+const OrganizationAuditLogPage = lazy(() => import('@/features/organization/pages/OrganizationAuditLogPage').then((m) => ({ default: m.OrganizationAuditLogPage })))
+const OrganizationProfilePage = lazy(() => import('@/features/organization/pages/OrganizationProfilePage').then((m) => ({ default: m.OrganizationProfilePage })))
+const OrganizationSettingsPage = lazy(() => import('@/features/organization/pages/OrganizationSettingsPage').then((m) => ({ default: m.OrganizationSettingsPage })))
+const OrganizationTrustCenterPage = lazy(() => import('@/features/organization/pages/OrganizationTrustCenterPage').then((m) => ({ default: m.OrganizationTrustCenterPage })))
+const OrganizationPolicyEnginePage = lazy(() => import('@/features/organization/pages/OrganizationPolicyEnginePage').then((m) => ({ default: m.OrganizationPolicyEnginePage })))
+const OrganizationConsentReceiptsPage = lazy(() => import('@/features/organization/pages/OrganizationConsentReceiptsPage').then((m) => ({ default: m.OrganizationConsentReceiptsPage })))
+const OrganizationIntelligencePage = lazy(() => import('@/features/organization/pages/OrganizationIntelligencePage').then((m) => ({ default: m.OrganizationIntelligencePage })))
+const OrganizationSecurityEventsPage = lazy(() => import('@/features/organization/pages/OrganizationSecurityEventsPage').then((m) => ({ default: m.OrganizationSecurityEventsPage })))
+const OrganizationZkpStudioPage = lazy(() => import('@/features/organization/pages/OrganizationZkpStudioPage').then((m) => ({ default: m.OrganizationZkpStudioPage })))
+const OrganizationDeveloperPortalPage = lazy(() => import('@/features/organization/pages/OrganizationDeveloperPortalPage').then((m) => ({ default: m.OrganizationDeveloperPortalPage })))
+const OrganizationCompliancePage = lazy(() => import('@/features/organization/pages/OrganizationCompliancePage').then((m) => ({ default: m.OrganizationCompliancePage })))
 
 // Government Pages
-import { GovernmentLoginPage } from '@/features/government/pages/GovernmentLoginPage'
-import { GovernmentDashboardPage } from '@/features/government/pages/GovernmentDashboardPage'
-import { GovernmentServicesPage } from '@/features/government/pages/GovernmentServicesPage'
-import { GovernmentApplicationsPage } from '@/features/government/pages/GovernmentApplicationsPage'
-import { GovernmentApplicationDetailPage } from '@/features/government/pages/GovernmentApplicationDetailPage'
-import { GovernmentVerificationPage } from '@/features/government/pages/GovernmentVerificationPage'
-import { GovernmentCitizensPage } from '@/features/government/pages/GovernmentCitizensPage'
-import { GovernmentReportsPage } from '@/features/government/pages/GovernmentReportsPage'
-import { GovernmentAuditLogPage } from '@/features/government/pages/GovernmentAuditLogPage'
-import { GovernmentSettingsPage } from '@/features/government/pages/GovernmentSettingsPage'
+const GovernmentLoginPage = lazy(() => import('@/features/government/pages/GovernmentLoginPage').then((m) => ({ default: m.GovernmentLoginPage })))
+const GovernmentDashboardPage = lazy(() => import('@/features/government/pages/GovernmentDashboardPage').then((m) => ({ default: m.GovernmentDashboardPage })))
+const GovernmentServicesPage = lazy(() => import('@/features/government/pages/GovernmentServicesPage').then((m) => ({ default: m.GovernmentServicesPage })))
+const GovernmentApplicationsPage = lazy(() => import('@/features/government/pages/GovernmentApplicationsPage').then((m) => ({ default: m.GovernmentApplicationsPage })))
+const GovernmentApplicationDetailPage = lazy(() => import('@/features/government/pages/GovernmentApplicationDetailPage').then((m) => ({ default: m.GovernmentApplicationDetailPage })))
+const GovernmentVerificationPage = lazy(() => import('@/features/government/pages/GovernmentVerificationPage').then((m) => ({ default: m.GovernmentVerificationPage })))
+const GovernmentCitizensPage = lazy(() => import('@/features/government/pages/GovernmentCitizensPage').then((m) => ({ default: m.GovernmentCitizensPage })))
+const GovernmentReportsPage = lazy(() => import('@/features/government/pages/GovernmentReportsPage').then((m) => ({ default: m.GovernmentReportsPage })))
+const GovernmentAuditLogPage = lazy(() => import('@/features/government/pages/GovernmentAuditLogPage').then((m) => ({ default: m.GovernmentAuditLogPage })))
+const GovernmentSettingsPage = lazy(() => import('@/features/government/pages/GovernmentSettingsPage').then((m) => ({ default: m.GovernmentSettingsPage })))
 
 // Super Admin Pages
-import { AdminLoginPage } from '@/features/admin/pages/AdminLoginPage'
-import { AdminDashboardPage } from '@/features/admin/pages/AdminDashboardPage'
-import { AdminOrganizationsPage } from '@/features/admin/pages/AdminOrganizationsPage'
-import { AdminGovernmentPage } from '@/features/admin/pages/AdminGovernmentPage'
-import { AdminServicesPage } from '@/features/admin/pages/AdminServicesPage'
-import { AdminUsersPage } from '@/features/admin/pages/AdminUsersPage'
-import { AdminAuditPage } from '@/features/admin/pages/AdminAuditPage'
-import { AdminSettingsPage } from '@/features/admin/pages/AdminSettingsPage'
+const AdminLoginPage = lazy(() => import('@/features/admin/pages/AdminLoginPage').then((m) => ({ default: m.AdminLoginPage })))
+const AdminDashboardPage = lazy(() => import('@/features/admin/pages/AdminDashboardPage').then((m) => ({ default: m.AdminDashboardPage })))
+const AdminOrganizationsPage = lazy(() => import('@/features/admin/pages/AdminOrganizationsPage').then((m) => ({ default: m.AdminOrganizationsPage })))
+const AdminGovernmentPage = lazy(() => import('@/features/admin/pages/AdminGovernmentPage').then((m) => ({ default: m.AdminGovernmentPage })))
+const AdminServicesPage = lazy(() => import('@/features/admin/pages/AdminServicesPage').then((m) => ({ default: m.AdminServicesPage })))
+const AdminUsersPage = lazy(() => import('@/features/admin/pages/AdminUsersPage').then((m) => ({ default: m.AdminUsersPage })))
+const AdminAuditPage = lazy(() => import('@/features/admin/pages/AdminAuditPage').then((m) => ({ default: m.AdminAuditPage })))
+const AdminSettingsPage = lazy(() => import('@/features/admin/pages/AdminSettingsPage').then((m) => ({ default: m.AdminSettingsPage })))
 
 // System Pages
-import { NotFoundPage } from '@/pages/NotFoundPage'
-import { UnauthorizedPage } from '@/pages/UnauthorizedPage'
+const NotFoundPage = lazy(() => import('@/pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage })))
+const UnauthorizedPage = lazy(() => import('@/pages/UnauthorizedPage').then((m) => ({ default: m.UnauthorizedPage })))
+
 import { ROUTES } from '@/constants/routes'
 
 export const router = createBrowserRouter([
   {
     path: ROUTES.ROOT,
-    element: <LandingPage />,
+    element: withSuspense(LandingPage),
   },
 
   // ==================== CITIZEN AUTH ====================
@@ -100,7 +117,7 @@ export const router = createBrowserRouter([
     path: ROUTES.AUTH.LOGIN,
     element: (
       <GuestGuard>
-        <LoginPage />
+        {withSuspense(LoginPage)}
       </GuestGuard>
     ),
   },
@@ -108,7 +125,7 @@ export const router = createBrowserRouter([
     path: ROUTES.AUTH.REGISTER,
     element: (
       <GuestGuard>
-        <RegisterPage />
+        {withSuspense(RegisterPage)}
       </GuestGuard>
     ),
   },
@@ -116,7 +133,7 @@ export const router = createBrowserRouter([
     path: ROUTES.AUTH.VERIFY_OTP,
     element: (
       <GuestGuard>
-        <VerifyOtpPage />
+        {withSuspense(VerifyOtpPage)}
       </GuestGuard>
     ),
   },
@@ -124,7 +141,7 @@ export const router = createBrowserRouter([
     path: ROUTES.AUTH.FORGOT_PASSWORD,
     element: (
       <GuestGuard>
-        <ForgotPasswordPage />
+        {withSuspense(ForgotPasswordPage)}
       </GuestGuard>
     ),
   },
@@ -213,6 +230,18 @@ export const router = createBrowserRouter([
         element: <SecurityCenterPage />,
       },
       {
+        path: 'benefits',
+        element: <BenefitsEligibilityPage />,
+      },
+      {
+        path: 'data',
+        element: <DataDashboardPage />,
+      },
+      {
+        path: 'journey',
+        element: <CivicJourneyPage />,
+      },
+      {
         path: 'profile',
         element: <ProfilePage />,
       },
@@ -226,7 +255,7 @@ export const router = createBrowserRouter([
   // ==================== ORGANIZATION WORKSPACE ====================
   {
     path: ROUTES.ORGANIZATION.LOGIN,
-    element: <OrganizationLoginPage />,
+    element: withSuspense(OrganizationLoginPage),
   },
   {
     path: ROUTES.ORGANIZATION.ROOT,
@@ -306,7 +335,7 @@ export const router = createBrowserRouter([
         path: 'settings',
         element: <OrganizationSettingsPage />,
       },
-      // ── Advanced Intelligence & Governance Modules ──
+      // Advanced Modules
       {
         path: 'trust',
         element: <OrganizationTrustCenterPage />,
@@ -327,13 +356,25 @@ export const router = createBrowserRouter([
         path: 'security-events',
         element: <OrganizationSecurityEventsPage />,
       },
+      {
+        path: 'zkp',
+        element: <OrganizationZkpStudioPage />,
+      },
+      {
+        path: 'developers',
+        element: <OrganizationDeveloperPortalPage />,
+      },
+      {
+        path: 'compliance',
+        element: <OrganizationCompliancePage />,
+      },
     ],
   },
 
   // ==================== GOVERNMENT WORKSPACE ====================
   {
     path: ROUTES.GOVERNMENT.LOGIN,
-    element: <GovernmentLoginPage />,
+    element: withSuspense(GovernmentLoginPage),
   },
   {
     path: ROUTES.GOVERNMENT.ROOT,
@@ -403,7 +444,7 @@ export const router = createBrowserRouter([
   // ==================== SUPER ADMIN WORKSPACE ====================
   {
     path: ROUTES.ADMIN.LOGIN,
-    element: <AdminLoginPage />,
+    element: withSuspense(AdminLoginPage),
   },
   {
     path: ROUTES.ADMIN.ROOT,
@@ -453,14 +494,14 @@ export const router = createBrowserRouter([
   // ==================== SYSTEM ROUTES ====================
   {
     path: ROUTES.SYSTEM.UNAUTHORIZED,
-    element: <UnauthorizedPage />,
+    element: withSuspense(UnauthorizedPage),
   },
   {
     path: ROUTES.SYSTEM.NOT_FOUND,
-    element: <NotFoundPage />,
+    element: withSuspense(NotFoundPage),
   },
   {
     path: '*',
-    element: <NotFoundPage />,
+    element: withSuspense(NotFoundPage),
   },
 ])
