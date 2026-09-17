@@ -56,7 +56,7 @@ export function Header({
   }
 
   return (
-    <header className="sticky top-0 z-40 flex h-16 w-full items-center justify-between border-b border-border bg-card/85 backdrop-blur-md px-4 sm:px-6 transition-colors">
+    <header className="sticky top-0 z-40 flex h-16 w-full items-center justify-between border-b border-border bg-card/85 backdrop-blur-md px-4 sm:px-6 transition-colors gpu-accelerated">
       {/* Left: Mobile hamburger & Search trigger */}
       <div className="flex items-center gap-3">
         <Button

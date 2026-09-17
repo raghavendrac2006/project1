@@ -20,13 +20,17 @@ Avatar.displayName = AvatarPrimitive.Root.displayName
 export const AvatarImage = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Image>,
   React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Image>
->(({ className, ...props }, ref) => (
-  <AvatarPrimitive.Image
-    ref={ref}
-    className={cn('aspect-square h-full w-full object-cover', className)}
-    {...props}
-  />
-))
+>(({ className, src, ...props }, ref) => {
+  if (!src) return null
+  return (
+    <AvatarPrimitive.Image
+      ref={ref}
+      src={src}
+      className={cn('aspect-square h-full w-full object-cover', className)}
+      {...props}
+    />
+  )
+})
 AvatarImage.displayName = AvatarPrimitive.Image.displayName
 
 export const AvatarFallback = React.forwardRef<

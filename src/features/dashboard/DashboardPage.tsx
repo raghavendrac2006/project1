@@ -597,7 +597,7 @@ export function DashboardPage() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-xs text-primary font-semibold p-0 h-auto"
+                  className="text-xs text-primary font-semibold px-2.5 py-1 h-auto shrink-0 hover:bg-primary/10"
                   onClick={() => navigate(ROUTES.APP.FAMILY)}
                 >
                   Manage

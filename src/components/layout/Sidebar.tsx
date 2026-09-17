@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { NavLink } from 'react-router-dom'
 import {
   LayoutDashboard,
@@ -54,34 +54,37 @@ export function Sidebar({ collapsed, onToggleCollapse }: SidebarProps) {
     }
   }, [])
 
-  const navItems = [
-    { label: 'Dashboard', path: ROUTES.APP.DASHBOARD, icon: LayoutDashboard },
-    {
-      label: 'Action Center',
-      path: ROUTES.APP.ACTIONS,
-      icon: Zap,
-      badge: pendingActionsCount > 0 ? pendingActionsCount : undefined,
-    },
-    { label: 'Civic Identity', path: ROUTES.APP.IDENTITY, icon: Shield },
-    { label: 'Family Hub', path: ROUTES.APP.FAMILY, icon: Users },
-    { label: 'Document Vault', path: ROUTES.APP.DOCUMENTS, icon: FileText },
-    { label: 'Civic Services', path: ROUTES.APP.SERVICES, icon: Briefcase },
-    { label: 'Applications', path: ROUTES.APP.APPLICATIONS, icon: Layers },
-    { label: 'Government Benefits', path: ROUTES.APP.BENEFITS, icon: Sparkles },
-    { label: 'Data Footprint', path: ROUTES.APP.DATA_DASHBOARD, icon: Database },
-    { label: 'Civic Journey', path: ROUTES.APP.JOURNEY, icon: Compass },
-    { label: 'Privacy & Consent', path: ROUTES.APP.PRIVACY, icon: Lock },
-    { label: 'Security Center', path: ROUTES.APP.SECURITY, icon: KeyRound },
-    { label: 'Civic Payments', path: ROUTES.APP.PAYMENTS, icon: CreditCard },
-    { label: 'CIVIQONE AI', path: ROUTES.APP.ASSISTANT, icon: Bot, isHighlighted: true },
-    { label: 'Notifications', path: ROUTES.APP.NOTIFICATIONS, icon: Bell },
-    { label: 'Settings', path: ROUTES.APP.SETTINGS, icon: Settings },
-  ]
+  const navItems = useMemo(
+    () => [
+      { label: 'Dashboard', path: ROUTES.APP.DASHBOARD, icon: LayoutDashboard },
+      {
+        label: 'Action Center',
+        path: ROUTES.APP.ACTIONS,
+        icon: Zap,
+        badge: pendingActionsCount > 0 ? pendingActionsCount : undefined,
+      },
+      { label: 'Civic Identity', path: ROUTES.APP.IDENTITY, icon: Shield },
+      { label: 'Family Hub', path: ROUTES.APP.FAMILY, icon: Users },
+      { label: 'Document Vault', path: ROUTES.APP.DOCUMENTS, icon: FileText },
+      { label: 'Civic Services', path: ROUTES.APP.SERVICES, icon: Briefcase },
+      { label: 'Applications', path: ROUTES.APP.APPLICATIONS, icon: Layers },
+      { label: 'Government Benefits', path: ROUTES.APP.BENEFITS, icon: Sparkles },
+      { label: 'Data Footprint', path: ROUTES.APP.DATA_DASHBOARD, icon: Database },
+      { label: 'Civic Journey', path: ROUTES.APP.JOURNEY, icon: Compass },
+      { label: 'Privacy & Consent', path: ROUTES.APP.PRIVACY, icon: Lock },
+      { label: 'Security Center', path: ROUTES.APP.SECURITY, icon: KeyRound },
+      { label: 'Civic Payments', path: ROUTES.APP.PAYMENTS, icon: CreditCard },
+      { label: 'CIVIQONE AI', path: ROUTES.APP.ASSISTANT, icon: Bot, isHighlighted: true },
+      { label: 'Notifications', path: ROUTES.APP.NOTIFICATIONS, icon: Bell },
+      { label: 'Settings', path: ROUTES.APP.SETTINGS, icon: Settings },
+    ],
+    [pendingActionsCount]
+  )
 
   return (
     <aside
       className={cn(
-        'hidden lg:flex flex-col border-r border-border bg-card transition-all duration-300 select-none z-30 h-screen sticky top-0',
+        'hidden lg:flex flex-col border-r border-border bg-card transition-[width] duration-200 ease-in-out select-none z-30 h-screen sticky top-0 gpu-accelerated',
         collapsed ? 'w-20' : 'w-64'
       )}
     >
