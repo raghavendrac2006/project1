@@ -2,25 +2,21 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   ShieldAlert,
-  Radio,
-  Clock,
-  ArrowRight,
   ShieldCheck,
   X,
   Lock,
   Activity,
-  CheckCircle2,
-  AlertTriangle,
-  Flame,
-  ChevronRight,
-  Sparkles,
+  Fingerprint,
+  Volume2,
+  VolumeX,
 } from 'lucide-react'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import { useToast } from '@/hooks'
 import { citizenIntelligenceService } from '@/services/citizen-intelligence.service'
 import { consentService } from '@/services/consent.service'
+import { soundService } from '@/services/sound.service'
+import { BiometricPromptModal } from '@/components/shared/BiometricPromptModal'
 import { ROUTES } from '@/constants/routes'
 import { cn } from '@/lib/utils'
 import type { BehavioralAnomaly, ActivityFeedEvent, DataFootprintField } from '@/types'
@@ -29,7 +25,22 @@ export function CitizenIntelligenceRail() {
   const [anomalies, setAnomalies] = useState<BehavioralAnomaly[]>([])
   const [activities, setActivities] = useState<ActivityFeedEvent[]>([])
   const [footprint, setFootprint] = useState<DataFootprintField[]>([])
-  const [loading, setLoading] = useState(true)
+  const [soundActive, setSoundActive] = useState<boolean>(soundService.isEnabled())
+  const [biometricModal, setBiometricModal] = useState<{
+    open: boolean
+    title: string
+    subtitle?: string
+    actionLabel: string
+    isEmergency: boolean
+    onVerified: () => void
+  }>({
+    open: false,
+    title: '',
+    actionLabel: '',
+    isEmergency: false,
+    onVerified: () => {},
+  })
+
   const toast = useToast()
   const navigate = useNavigate()
 
@@ -44,45 +55,86 @@ export function CitizenIntelligenceRail() {
         setAnomalies(anomData.filter((a) => !a.isDismissed))
         setActivities(actData.slice(0, 5))
         setFootprint(footData.slice(0, 4))
+        if (anomData.some((a) => !a.isDismissed)) {
+          soundService.radarPing()
+        }
       } catch (err) {
         console.error('Failed to load telemetry', err)
-      } finally {
-        setLoading(false)
       }
     }
     loadTelemetry()
   }, [])
 
+  const handleToggleSound = (e?: React.MouseEvent) => {
+    e?.stopPropagation()
+    const next = soundService.toggle()
+    setSoundActive(next)
+    toast.info(
+      next ? 'Acoustic Feedback Active' : 'Acoustic Feedback Muted',
+      'Synthesized Web Audio active for biometric and radar telemetry.'
+    )
+  }
+
   const handleDismissAnomaly = (id: string, e?: React.MouseEvent) => {
     e?.stopPropagation()
+    soundService.tactileClick()
     citizenIntelligenceService.dismissAnomaly(id)
     setAnomalies((prev) => prev.filter((a) => a.id !== id))
     toast.info('Security Incident Acknowledged', 'Anomaly archived to historical audit logs.')
   }
 
-  const handleEmergencyLockdown = async (e?: React.MouseEvent) => {
+  const handleEmergencyLockdownClick = (e?: React.MouseEvent) => {
     e?.stopPropagation()
-    try {
-      const revokedCount = await consentService.emergencyLockdown()
-      toast.error(
-        'Identity Lockdown Activated',
-        `Immediately revoked active authorization grants across ${revokedCount} external organizations.`
-      )
-      setAnomalies([])
-    } catch {
-      toast.error('Lockdown failed', 'Please retry in Privacy Center.')
-    }
+    setBiometricModal({
+      open: true,
+      title: 'Emergency Identity Lockdown',
+      subtitle: 'Authenticate hardware biometrics to instantly sever external organization grants.',
+      actionLabel: 'Confirm Biometric Lockdown',
+      isEmergency: true,
+      onVerified: async () => {
+        try {
+          const revokedCount = await consentService.emergencyLockdown()
+          toast.error(
+            'Identity Lockdown Activated',
+            `Immediately revoked active authorization grants across ${revokedCount} external organizations.`
+          )
+          setAnomalies([])
+        } catch {
+          toast.error('Lockdown failed', 'Please retry in Privacy Center.')
+        }
+      },
+    })
   }
 
-  const handleAuthorizeDevice = (id: string, e?: React.MouseEvent) => {
+  const handleAuthorizeDeviceClick = (id: string, e?: React.MouseEvent) => {
     e?.stopPropagation()
-    citizenIntelligenceService.dismissAnomaly(id)
-    setAnomalies((prev) => prev.filter((a) => a.id !== id))
-    toast.success('Device Added to Trusted Ring', 'Location verified via biometric step-up.')
+    setBiometricModal({
+      open: true,
+      title: 'Authorize Device to Trusted Ring',
+      subtitle: 'Verify biometric identity to register this platform device key into your cryptographic perimeter.',
+      actionLabel: 'Bond Hardware Key',
+      isEmergency: false,
+      onVerified: () => {
+        citizenIntelligenceService.dismissAnomaly(id)
+        setAnomalies((prev) => prev.filter((a) => a.id !== id))
+        toast.success('Device Added to Trusted Ring', 'Platform authenticator registered via WebAuthn.')
+      },
+    })
   }
 
   return (
     <div className="space-y-6">
+      {/* Biometric Step-Up Verification Modal */}
+      <BiometricPromptModal
+        open={biometricModal.open}
+        onOpenChange={(open) => setBiometricModal((prev) => ({ ...prev, open }))}
+        title={biometricModal.title}
+        subtitle={biometricModal.subtitle}
+        actionLabel={biometricModal.actionLabel}
+        isEmergency={biometricModal.isEmergency}
+        onVerified={biometricModal.onVerified}
+      />
+
       {/* 1. Real-Time Anomaly Radar */}
       <div className="relative overflow-hidden rounded-2xl border border-border/80 bg-card/60 backdrop-blur-xl p-5 shadow-card space-y-4">
         {/* Radar Header */}
@@ -103,9 +155,24 @@ export function CitizenIntelligenceRail() {
             </span>
           </div>
 
-          <Badge variant={anomalies.length > 0 ? 'attention' : 'verified'} size="sm" className="text-[10px]">
-            {anomalies.length > 0 ? `${anomalies.length} Flagged Events` : 'Zero Anomalies'}
-          </Badge>
+          <div className="flex items-center gap-2">
+            {/* Ambient Sound Engine Toggle */}
+            <button
+              onClick={handleToggleSound}
+              className="p-1 rounded-lg hover:bg-muted/70 text-muted-foreground hover:text-foreground transition-colors"
+              title={soundActive ? 'Mute synthesized acoustics' : 'Enable synthesized acoustics'}
+            >
+              {soundActive ? (
+                <Volume2 className="w-3.5 h-3.5 text-primary" />
+              ) : (
+                <VolumeX className="w-3.5 h-3.5 text-muted-foreground/60" />
+              )}
+            </button>
+
+            <Badge variant={anomalies.length > 0 ? 'attention' : 'verified'} size="sm" className="text-[10px]">
+              {anomalies.length > 0 ? `${anomalies.length} Flagged Events` : 'Zero Anomalies'}
+            </Badge>
+          </div>
         </div>
 
         {/* Anomaly Cards List */}
@@ -139,18 +206,20 @@ export function CitizenIntelligenceRail() {
                   {anom.description}
                 </p>
 
-                {/* Instant Mitigations */}
+                {/* Instant Mitigations with Biometric Step-Up */}
                 <div className="flex items-center gap-2 pt-1">
                   <button
-                    onClick={(e) => handleAuthorizeDevice(anom.id, e)}
-                    className="px-2.5 py-1 rounded-lg bg-card border border-border text-[11px] font-bold text-foreground hover:bg-muted transition-colors"
+                    onClick={(e) => handleAuthorizeDeviceClick(anom.id, e)}
+                    className="px-2.5 py-1 rounded-lg bg-card border border-border text-[11px] font-bold text-foreground hover:bg-muted transition-colors flex items-center gap-1.5"
                   >
+                    <Fingerprint className="w-3 h-3 text-primary" />
                     Authorize Device
                   </button>
                   <button
-                    onClick={handleEmergencyLockdown}
-                    className="px-2.5 py-1 rounded-lg bg-rose-500/20 text-rose-600 dark:text-rose-300 hover:bg-rose-500/30 text-[11px] font-bold transition-colors"
+                    onClick={handleEmergencyLockdownClick}
+                    className="px-2.5 py-1 rounded-lg bg-rose-500/20 text-rose-600 dark:text-rose-300 hover:bg-rose-500/30 text-[11px] font-bold transition-colors flex items-center gap-1.5"
                   >
+                    <Lock className="w-3 h-3 text-rose-500" />
                     Lockdown Identity
                   </button>
                 </div>
@@ -178,7 +247,10 @@ export function CitizenIntelligenceRail() {
             </span>
           </div>
           <button
-            onClick={() => navigate(ROUTES.APP.DATA_DASHBOARD)}
+            onClick={() => {
+              soundService.tactileClick()
+              navigate(ROUTES.APP.DATA_DASHBOARD)
+            }}
             className="text-[10px] font-mono font-bold text-primary hover:underline flex items-center gap-1"
           >
             Telemetry &gt;
@@ -189,7 +261,10 @@ export function CitizenIntelligenceRail() {
           {activities.map((event) => (
             <div
               key={event.id}
-              onClick={() => event.relatedRoute && navigate(event.relatedRoute)}
+              onClick={() => {
+                soundService.tactileClick()
+                if (event.relatedRoute) navigate(event.relatedRoute)
+              }}
               className="py-2.5 flex items-start gap-3 cursor-pointer hover:bg-muted/30 -mx-2 px-2 rounded-lg transition-colors group"
             >
               <div className="w-2 h-2 rounded-full bg-primary/60 mt-1.5 shrink-0 group-hover:scale-125 transition-transform" />
@@ -249,7 +324,10 @@ export function CitizenIntelligenceRail() {
         <Button
           variant="outline"
           size="sm"
-          onClick={() => navigate(ROUTES.APP.PRIVACY)}
+          onClick={() => {
+            soundService.tactileClick()
+            navigate(ROUTES.APP.PRIVACY)
+          }}
           className="w-full text-xs font-bold gap-1.5 mt-2"
         >
           <Lock className="w-3 h-3 text-primary" />

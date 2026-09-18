@@ -24,7 +24,7 @@ import { identityService } from '@/services/identity.service'
 import { credentialService, type GeneratedProof } from '@/services/credential.service'
 import { useToast } from '@/hooks'
 import { civicStorage } from '@/services/storage'
-import { GuillochePattern } from '@/components/ui/GuillochePattern'
+import { CiviqOneCard } from '@/components/civiqone-card'
 import { cn } from '@/lib/utils'
 import type { CivicCredential } from '@/types'
 
@@ -38,26 +38,6 @@ export function IdentityPage() {
   const [generatedToken, setGeneratedToken] = useState<{ token: string; qrPayload: string; validUntil: string } | null>(null)
   const [purpose, setPurpose] = useState('Govt Checkpoint Verification')
   const [isGenerating, setIsGenerating] = useState(false)
-
-  // 3D Card Interactive Tilt & Holographic tracking
-  const [cardTilt, setCardTilt] = useState({ rotateX: 0, rotateY: 0, sheenX: 50, sheenY: 50, isHovered: false })
-
-  const handleCardMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect()
-    const x = e.clientX - rect.left
-    const y = e.clientY - rect.top
-    const centerX = rect.width / 2
-    const centerY = rect.height / 2
-    const rotateX = ((y - centerY) / centerY) * -10
-    const rotateY = ((x - centerX) / centerX) * 10
-    const sheenX = (x / rect.width) * 100
-    const sheenY = (y / rect.height) * 100
-    setCardTilt({ rotateX, rotateY, sheenX, sheenY, isHovered: true })
-  }
-
-  const handleCardMouseLeave = () => {
-    setCardTilt({ rotateX: 0, rotateY: 0, sheenX: 50, sheenY: 50, isHovered: false })
-  }
 
   // Step-Up Authentication Modal state
   const [stepUpOpen, setStepUpOpen] = useState(false)
@@ -211,142 +191,11 @@ export function IdentityPage() {
       {activeTab === 'smart_card' ? (
         /* ================= TAB 1: SMART CARD & LINKED REGISTRY ================= */
         <div className="grid lg:grid-cols-12 gap-8 items-start">
-          {/* Left 7 Cols: Holographic Sovereign Citizen Card */}
-          <div className="lg:col-span-7 space-y-4" style={{ perspective: '1200px' }}>
-            <div
-              onMouseMove={handleCardMouseMove}
-              onMouseLeave={handleCardMouseLeave}
-              style={{
-                transform: `perspective(1200px) rotateX(${cardTilt.rotateX}deg) rotateY(${cardTilt.rotateY}deg)`,
-                transition: cardTilt.isHovered ? 'transform 0.1s ease-out' : 'transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
-              }}
-              className="relative rounded-3xl p-6 sm:p-8 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white shadow-2xl border border-blue-500/40 overflow-hidden group transition-shadow hover:shadow-[0_20px_50px_rgba(14,165,233,0.3)] will-change-transform select-none"
-            >
-              {/* Bank-Grade Guilloche Security Microprint & Fine Rosettes */}
-              <GuillochePattern color="#38BDF8" opacity={0.16} />
-
-              {/* Dynamic 3D Prismatic Holographic Sheen Layer */}
-              <div
-                className="absolute inset-0 pointer-events-none transition-opacity duration-300"
-                style={{
-                  opacity: cardTilt.isHovered ? 0.85 : 0.35,
-                  background: `radial-gradient(circle at ${cardTilt.sheenX}% ${cardTilt.sheenY}%, rgba(255,255,255,0.28) 0%, rgba(56,189,248,0.18) 25%, rgba(236,72,153,0.12) 50%, transparent 75%)`,
-                }}
-              />
-              <div className="absolute -top-32 -right-32 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl pointer-events-none" />
-
-              {/* Card Header */}
-              <div className="relative z-10 flex items-start justify-between pb-6 border-b border-white/15">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-400 to-amber-600 flex items-center justify-center text-slate-950 font-bold shadow-md">
-                    <ShieldCheck className="w-6 h-6 text-slate-950" />
-                  </div>
-                  <div>
-                    <h3 className="font-display font-extrabold text-sm tracking-wider uppercase text-sky-300">
-                      Republic of India • Digital Sovereign Identity
-                    </h3>
-                    <p className="text-[10px] text-white/70 tracking-widest font-mono">
-                      CIVIQONE CITIZEN SMART SYSTEM
-                    </p>
-                  </div>
-                </div>
-
-                {/* Holographic Chip */}
-                <div className="flex flex-col items-end">
-                  <div className="w-10 h-8 rounded-md bg-gradient-to-br from-yellow-200 to-amber-400 border border-amber-300/80 shadow-inner flex items-center justify-center">
-                    <div className="w-6 h-4 border border-amber-800/40 rounded-sm grid grid-cols-2 gap-0.5" />
-                  </div>
-                  <span className="text-[9px] font-mono text-emerald-400 mt-1 font-semibold">
-                    SECURE CHIP
-                  </span>
-                </div>
-              </div>
-
-              {/* Card Body */}
-              <div className="relative z-10 py-6 grid sm:grid-cols-3 gap-6 items-center">
-                {/* Citizen Photo & Seal */}
-                <div className="flex flex-col items-center sm:items-start space-y-2">
-                  <div className="relative">
-                    <img
-                      src={identity.photoUrl}
-                      alt={identity.fullName}
-                      className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl object-cover border-2 border-sky-400/60 shadow-lg"
-                    />
-                    <div className="absolute -bottom-2 -right-2 bg-emerald-500 text-white rounded-full p-1 shadow-md">
-                      <CheckCircle2 className="w-4 h-4" />
-                    </div>
-                  </div>
-                  <span className="text-[10px] font-mono text-white/60 tracking-wider">
-                    BLOOD: {identity.bloodGroup}
-                  </span>
-                </div>
-
-                {/* Citizen Data */}
-                <div className="sm:col-span-2 space-y-3 text-left">
-                  <div>
-                    <span className="text-[10px] uppercase font-mono tracking-widest text-sky-300/80">
-                      Citizen Name
-                    </span>
-                    <p className="font-display text-lg sm:text-xl font-black text-white leading-tight">
-                      {identity.fullName}
-                    </p>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div>
-                      <span className="text-[10px] uppercase font-mono tracking-wider text-white/60">
-                        Date of Birth
-                      </span>
-                      <p className="font-semibold text-white mt-0.5">{identity.dateOfBirth}</p>
-                    </div>
-                    <div>
-                      <span className="text-[10px] uppercase font-mono tracking-wider text-white/60">
-                        Gender
-                      </span>
-                      <p className="font-semibold text-white mt-0.5">{identity.gender}</p>
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] uppercase font-mono tracking-widest text-sky-300/80">
-                        National Sovereign Identifier
-                      </span>
-                      <button
-                        onClick={handleToggleMask}
-                        className="text-[11px] text-sky-300 hover:text-white flex items-center gap-1 font-semibold"
-                      >
-                        {showFullId ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                        {showFullId ? 'Hide' : 'Reveal'}
-                      </button>
-                    </div>
-                    <p className="font-mono text-base sm:text-lg font-extrabold tracking-wider text-white mt-0.5">
-                      {showFullId ? identity.nationalId : identity.maskedNationalId}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Card Footer */}
-              <div className="relative z-10 pt-4 border-t border-white/15 flex flex-wrap items-center justify-between gap-4 text-xs font-mono text-white/70">
-                <div className="space-y-0.5">
-                  <p className="text-[10px] uppercase tracking-wider text-white/50">Digital Signature Hash</p>
-                  <p className="font-mono text-[11px] text-emerald-400 truncate max-w-[200px] sm:max-w-xs">
-                    {identity.digitalSignature}
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <div className="text-right">
-                    <p className="text-[10px] text-white/50">VALID THRU</p>
-                    <p className="text-xs font-bold text-white">{identity.expiryDate}</p>
-                  </div>
-                  <div className="w-10 h-10 bg-white p-1 rounded-lg flex items-center justify-center text-slate-950">
-                    <QrCode className="w-8 h-8" />
-                  </div>
-                </div>
-              </div>
-            </div>
+          {/* Left 7 Cols: Premium Flat Glassmorphism Flip Card */}
+          <div className="lg:col-span-7 space-y-4">
+            <CiviqOneCard
+              onViewCredentials={() => setActiveTab('credentials')}
+            />
 
             {/* Masking advice banner */}
             <div className="flex items-center justify-between p-3.5 rounded-xl border border-border bg-card text-xs text-muted-foreground">

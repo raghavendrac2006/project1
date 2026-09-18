@@ -23,12 +23,14 @@ import { useAuth } from '@/hooks'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/Dialog'
 import { StatusIndicator } from '@/components/ui/StatusIndicator'
 import { civicStorage } from '@/services/storage'
 import { ROUTES } from '@/constants/routes'
 import { citizenIntelligenceService } from '@/services/citizen-intelligence.service'
 import { PrivacyHealthRadial } from '@/components/dashboard/PrivacyHealthRadial'
 import { CitizenIntelligenceRail } from '@/features/dashboard/CitizenIntelligenceRail'
+import { CiviqOneCard } from '@/components/civiqone-card'
 import type { PrivacyHealthScore } from '@/types'
 
 export function DashboardPage() {
@@ -45,6 +47,7 @@ export function DashboardPage() {
 
   // Intelligence data
   const [privacyScore, setPrivacyScore] = useState<PrivacyHealthScore | null>(null)
+  const [digitalIdModalOpen, setDigitalIdModalOpen] = useState(false)
 
   useEffect(() => {
     citizenIntelligenceService.getPrivacyHealthScore().then(setPrivacyScore)
@@ -104,7 +107,7 @@ export function DashboardPage() {
               variant="primary"
               size="md"
               className="gap-2 shadow-sm font-semibold rounded-xl"
-              onClick={() => navigate(ROUTES.APP.IDENTITY)}
+              onClick={() => setDigitalIdModalOpen(true)}
             >
               <QrCode className="w-4 h-4" />
               View Digital ID
@@ -728,6 +731,41 @@ export function DashboardPage() {
           <CitizenIntelligenceRail />
         </div>
       </div>
+
+      {/* Interactive 3D Glassmorphic Digital ID Modal (Section 28) */}
+      <Dialog open={digitalIdModalOpen} onOpenChange={setDigitalIdModalOpen}>
+        <DialogContent className="max-w-2xl p-6 sm:p-8">
+          <DialogHeader className="mb-2">
+            <div className="flex items-center justify-between">
+              <DialogTitle className="text-base font-bold flex items-center gap-2">
+                <ShieldCheck className="w-5 h-5 text-primary" />
+                CIVIQONE Sovereign Digital ID
+              </DialogTitle>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setDigitalIdModalOpen(false)
+                  navigate(ROUTES.APP.IDENTITY)
+                }}
+                className="text-xs font-semibold rounded-xl"
+              >
+                Go to Full Identity Page <ArrowRight className="w-3.5 h-3.5 ml-1" />
+              </Button>
+            </div>
+            <DialogDescription className="text-xs">
+              Digital civic identity card with smooth front and back flip. Click or press Space to flip.
+            </DialogDescription>
+          </DialogHeader>
+
+          <CiviqOneCard
+            onViewCredentials={() => {
+              setDigitalIdModalOpen(false)
+              navigate(ROUTES.APP.IDENTITY)
+            }}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
