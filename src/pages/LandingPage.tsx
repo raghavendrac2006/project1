@@ -182,7 +182,7 @@ export function LandingPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col selection:bg-primary/20">
+    <div className="min-h-screen bg-background text-foreground flex flex-col selection:bg-primary/20 overflow-x-hidden">
 
       {/* ─── Sticky Navigation ─── */}
       <header className="sticky top-0 z-50 border-b border-border/60 glass-panel-strong">
@@ -230,6 +230,18 @@ export function LandingPage() {
 
       {/* ─── Hero Section ─── */}
       <section className="relative pt-20 pb-24 overflow-hidden civic-grid-pattern border-b border-border/60">
+        {/* Background Citizens Illustration (30% transparency) */}
+        <div className="absolute inset-0 pointer-events-none select-none overflow-hidden z-0 flex items-end justify-center">
+          <img
+            src="/citizens-hero.png"
+            alt="Indian citizens background"
+            className="w-full h-full object-cover object-bottom opacity-30 mix-blend-multiply dark:mix-blend-luminosity dark:opacity-20 pointer-events-none transition-opacity duration-700"
+          />
+          {/* Subtle gradient vignette to blend seamlessly into background & preserve text contrast */}
+          <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-background/60 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-transparent to-background/70 pointer-events-none" />
+        </div>
+
         {/* Multi-layer ambient glows */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/3 w-[700px] h-[400px] bg-gradient-to-tr from-[hsl(232_84%_54%/0.18)] via-[hsl(196_80%_50%/0.12)] to-[hsl(160_80%_42%/0.08)] blur-3xl rounded-full pointer-events-none" />
         <div className="absolute bottom-0 right-0 w-[400px] h-[300px] bg-gradient-to-tl from-[hsl(262_83%_58%/0.08)] to-transparent blur-3xl pointer-events-none" />
@@ -237,17 +249,17 @@ export function LandingPage() {
         <div className="relative max-w-5xl mx-auto px-4 sm:px-6 text-center">
           {/* Sovereign badge */}
           <div className={cn(
-            'inline-flex items-center gap-2.5 px-4 py-2 rounded-full text-xs font-bold border mb-8 shadow-sm transition-all duration-700',
+            'inline-flex items-center gap-2 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full text-[11px] sm:text-xs font-bold border mb-6 sm:mb-8 shadow-sm transition-all duration-700',
             'bg-gradient-to-r from-primary/10 via-sky-500/10 to-emerald-500/10 text-primary border-primary/20',
             heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
           )}>
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 pulse-glow" />
-            National Sovereign Identity Architecture · Version 2.4
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 pulse-glow shrink-0" />
+            <span className="truncate">National Sovereign Identity Architecture · Version 2.4</span>
           </div>
 
           {/* Hero headline */}
           <h1 className={cn(
-            'font-display text-5xl sm:text-7xl font-black tracking-[-0.03em] leading-[1.08] text-balance transition-all duration-700 delay-100',
+            'font-display text-4xl sm:text-6xl md:text-7xl font-black tracking-[-0.03em] leading-[1.1] sm:leading-[1.08] text-balance transition-all duration-700 delay-100',
             heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
           )}>
             Your Digital Identity.{' '}
@@ -257,7 +269,7 @@ export function LandingPage() {
           </h1>
 
           <p className={cn(
-            'mt-7 text-base sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed text-balance transition-all duration-700 delay-200',
+            'mt-5 sm:mt-7 text-sm sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed text-balance transition-all duration-700 delay-200',
             heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
           )}>
             Manage your credentials, encrypted document vault, family delegations, and statutory civic services from a single zero-knowledge operating system.
@@ -282,37 +294,9 @@ export function LandingPage() {
             </Link>
           </div>
 
-          {/* Citizen Hero Image Showcase */}
-          <div className={cn(
-            'mt-12 relative mx-auto max-w-4xl transition-all duration-1000 delay-400',
-            heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-          )}>
-            {/* Multi-spectrum aura behind image reflecting national civic vibrancy */}
-            <div className="absolute -inset-3 sm:-inset-6 bg-gradient-to-r from-amber-500/20 via-primary/25 to-emerald-500/20 rounded-3xl blur-2xl sm:blur-3xl opacity-70 -z-10" />
-
-            <div className="relative rounded-3xl p-2 sm:p-3 bg-card/60 border border-border/70 shadow-2xl backdrop-blur-md overflow-hidden hover-lift transition-all">
-              <div className="relative overflow-hidden rounded-2xl bg-white/95 dark:bg-card/90">
-                <img
-                  src="/citizens-hero.png"
-                  alt="Diverse citizens of India empowered by SAMAGRA Digital Operating System"
-                  className="w-full h-auto max-h-[460px] object-cover object-top transition-transform duration-700 hover:scale-[1.01]"
-                  loading="eager"
-                />
-                {/* Subtle bottom fade */}
-                <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-background/30 via-transparent to-transparent" />
-
-                {/* Floating pill badge */}
-                <div className="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 z-10 flex items-center gap-2.5 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full glass-panel-strong border border-border/80 text-[11px] sm:text-xs font-bold text-foreground shadow-lg backdrop-blur-md">
-                  <span className="h-2 w-2 rounded-full bg-emerald-500 pulse-glow" />
-                  <span>Empowering 1.4+ Billion Sovereign Citizens</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
           {/* Trust Badges */}
           <div className={cn(
-            'mt-12 pt-8 border-t border-border/50 flex flex-wrap items-center justify-center gap-6 text-xs text-muted-foreground font-semibold transition-all duration-700 delay-500',
+            'mt-14 pt-8 border-t border-border/50 flex flex-wrap items-center justify-center gap-6 text-xs text-muted-foreground font-semibold transition-all duration-700 delay-500',
             heroVisible ? 'opacity-100' : 'opacity-0'
           )}>
             {trustBadges.map(({ icon: Icon, text, color }) => (
