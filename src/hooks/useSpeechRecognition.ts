@@ -4,10 +4,14 @@ import type { SupportedLanguage } from '@/types'
 // Map portal language codes to BCP 47 locales for speech recognition
 const LANG_TO_LOCALE: Record<SupportedLanguage, string> = {
   en: 'en-IN',
+  hi: 'hi-IN',
   te: 'te-IN',
   ta: 'ta-IN',
   kn: 'kn-IN',
   ml: 'ml-IN',
+  bn: 'bn-IN',
+  mr: 'mr-IN',
+  gu: 'gu-IN',
 }
 
 interface SpeechRecognitionOptions {

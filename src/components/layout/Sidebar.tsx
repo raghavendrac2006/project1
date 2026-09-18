@@ -20,6 +20,7 @@ import {
   Sparkles,
   Database,
   Compass,
+  LifeBuoy,
 } from 'lucide-react'
 import { ROUTES } from '@/constants/routes'
 import { cn } from '@/lib/utils'
@@ -75,6 +76,7 @@ export function Sidebar({ collapsed, onToggleCollapse }: SidebarProps) {
       { label: 'Security Center', path: ROUTES.APP.SECURITY, icon: KeyRound },
       { label: 'Civic Payments', path: ROUTES.APP.PAYMENTS, icon: CreditCard },
       { label: 'CiviqOne AI', path: ROUTES.APP.ASSISTANT, icon: Bot, isHighlighted: true },
+      { label: 'Customer Care', path: ROUTES.APP.SUPPORT, icon: LifeBuoy },
       { label: 'Notifications', path: ROUTES.APP.NOTIFICATIONS, icon: Bell },
       { label: 'Settings', path: ROUTES.APP.SETTINGS, icon: Settings },
     ],

@@ -45,6 +45,7 @@ const ApplicationsPage = lazy(() => import('@/features/applications/Applications
 const ApplicationDetailPage = lazy(() => import('@/features/applications/ApplicationDetailPage').then((m) => ({ default: m.ApplicationDetailPage })))
 const PaymentsPage = lazy(() => import('@/features/payments/PaymentsPage').then((m) => ({ default: m.PaymentsPage })))
 const AssistantPage = lazy(() => import('@/features/assistant/AssistantPage').then((m) => ({ default: m.AssistantPage })))
+const CitizenCustomerCarePage = lazy(() => import('@/features/support/CitizenCustomerCarePage').then((m) => ({ default: m.CitizenCustomerCarePage })))
 const NotificationsPage = lazy(() => import('@/features/notifications/NotificationsPage').then((m) => ({ default: m.NotificationsPage })))
 const PrivacyConsentCenterPage = lazy(() => import('@/features/privacy/PrivacyConsentCenterPage').then((m) => ({ default: m.PrivacyConsentCenterPage })))
 const SecurityCenterPage = lazy(() => import('@/features/security/SecurityCenterPage').then((m) => ({ default: m.SecurityCenterPage })))
@@ -216,6 +217,10 @@ export const router = createBrowserRouter([
       {
         path: 'assistant',
         element: <AssistantPage />,
+      },
+      {
+        path: 'support',
+        element: <CitizenCustomerCarePage />,
       },
       {
         path: 'notifications',

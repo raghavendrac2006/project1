@@ -1,4 +1,4 @@
-export type SupportedLanguage = 'en' | 'te' | 'ta' | 'kn' | 'ml'
+export type SupportedLanguage = 'en' | 'hi' | 'te' | 'ta' | 'kn' | 'ml' | 'bn' | 'mr' | 'gu'
 
 export interface User {
   id: string
@@ -345,6 +345,55 @@ export interface AssistantAction {
   targetUrl?: string
 }
 
+export type DiagnosticProblemCategory =
+  | 'DEMOGRAPHIC_MISMATCH'
+  | 'PROPERTY_DISPUTE'
+  | 'RTO_REJECTION'
+  | 'SOLAR_DISCOM_DELAY'
+  | 'TARIFF_DISPUTE'
+  | 'PENSION_AUTH'
+  | 'BASIC_STATUTORY'
+
+export interface DiagnosticActionStep {
+  stepNumber: number
+  title: string
+  description: string
+  mandatoryDocument?: string
+  statutoryRule?: string
+}
+
+export interface DiagnosticRemedyOption {
+  label: string
+  action: 'auto_file_grievance' | 'open_document_vault' | 'book_officer_callback' | 'navigate' | 'download_template'
+  targetUrl?: string
+  payload?: any
+}
+
+export interface DiagnosticBlueprint {
+  problemTitle: string
+  category: DiagnosticProblemCategory
+  statutoryAct: string
+  statutorySLA: string
+  severity: 'critical' | 'high' | 'moderate'
+  rootCause: string
+  actionSteps: DiagnosticActionStep[]
+  remedies: DiagnosticRemedyOption[]
+  prefillGrievance?: {
+    department: string
+    category: string
+    subject: string
+    description: string
+    priority: 'critical' | 'high' | 'medium'
+  }
+}
+
+export type CompanionDockPosition =
+  | 'bottom-right'
+  | 'bottom-left'
+  | 'top-right'
+  | 'top-left'
+  | 'center-float'
+
 export interface AssistantMessage {
   id: string
   sender: 'user' | 'assistant'
@@ -352,6 +401,9 @@ export interface AssistantMessage {
   timestamp: string
   suggestedActions?: AssistantAction[]
   language: SupportedLanguage
+  cardType?: 'application' | 'service' | 'grievance' | 'officer' | 'payment' | 'diagnostic' | 'step_guide'
+  cardData?: Record<string, any>
+  isEscalated?: boolean
 }
 
 export interface UserSettings {
@@ -934,5 +986,114 @@ export interface DestructionCertificate {
   shredMethod: string // e.g., "NIST SP 800-88 Cryptographic Wipe"
   merkleRootHash: string
   officerSignature: string
+}
+
+// ==========================================
+// Customer Care & Citizen Support Types
+// ==========================================
+
+export type GrievanceCategory =
+  | 'service_delay'
+  | 'billing_payment'
+  | 'document_dispute'
+  | 'officer_escalation'
+  | 'technical_portal'
+  | 'civic_infrastructure'
+  | 'social_welfare'
+
+export type GrievanceUrgency = 'standard' | 'urgent' | 'critical_statutory'
+
+export type GrievanceStatus =
+  | 'lodged'
+  | 'assigned'
+  | 'investigating'
+  | 'action_proposed'
+  | 'resolved'
+  | 'escalated'
+
+export interface TicketTimelineEvent {
+  id: string
+  title: string
+  description: string
+  timestamp: string
+  status: 'completed' | 'current' | 'pending'
+  actor: string
+  department?: string
+}
+
+export interface NodalOfficer {
+  name: string
+  designation: string
+  department: string
+  phone: string
+  email: string
+  badge: string
+  avatar?: string
+}
+
+export interface CustomerCareTicket {
+  id: string
+  ticketNumber: string
+  citizenId: string
+  citizenName: string
+  category: GrievanceCategory
+  department: string
+  subject: string
+  description: string
+  urgency: GrievanceUrgency
+  status: GrievanceStatus
+  slaHours: number
+  slaDeadline: string
+  slaRemainingHours?: number
+  nodalOfficer: NodalOfficer
+  timeline: TicketTimelineEvent[]
+  relatedApplicationId?: string
+  relatedServiceId?: string
+  aiResolutionSummary?: string
+  statutoryScheme?: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface LiveChatMessage {
+  id: string
+  sender: 'citizen' | 'officer' | 'system'
+  senderName: string
+  text: string
+  timestamp: string
+  attachments?: string[]
+}
+
+export interface LiveChatSession {
+  id: string
+  officerName: string
+  officerRole: string
+  officerAvatar: string
+  officerDepartment: string
+  status: 'connecting' | 'active' | 'resolved'
+  queuePosition: number
+  startedAt: string
+  messages: LiveChatMessage[]
+}
+
+export interface KnowledgeFaqItem {
+  id: string
+  category: 'transport' | 'revenue' | 'identity' | 'payments' | 'grievances' | 'portal_help'
+  question: Record<SupportedLanguage, string>
+  answer: Record<SupportedLanguage, string>
+  tags: string[]
+  helpfulCount: number
+  relatedServiceSlug?: string
+}
+
+export interface CivicHelpline {
+  id: string
+  title: string
+  number: string
+  category: 'emergency' | 'grievance' | 'cyber' | 'women_child' | 'welfare' | 'municipal'
+  hours: string
+  tollFree: boolean
+  description: string
+  stateOrNational: string
 }
 

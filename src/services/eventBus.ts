@@ -15,6 +15,8 @@ export type RealtimeEventType =
   | 'NOTIFICATION_TRIGGERED'
   | 'WEBHOOK_DISPATCHED'
   | 'DATA_PURGE_EXECUTED'
+  | 'GRIEVANCE_TICKETS_UPDATED'
+  | 'LIVE_CHAT_UPDATED'
 
 export interface RealtimeEvent<T = any> {
   type: RealtimeEventType

@@ -4,18 +4,19 @@ import {
   Bot,
   Send,
   Sparkles,
-  Copy,
-  Volume2,
   Trash2,
   Languages,
-  User,
-  ExternalLink,
   Mic,
-  MicOff,
   Radio,
+  Download,
+  LifeBuoy,
+  ChevronDown,
+  ShieldCheck,
+  Headphones,
 } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
+import { ChatMessageBubble } from '@/components/chat/ChatMessageBubble'
 import { useToast, useLanguage, useSpeechRecognition } from '@/hooks'
 import { assistantService } from '@/services/assistant.service'
 import { SUPPORTED_LANGUAGES, CIVIC_ASSISTANT_CONTENT } from '@/constants/languages'
@@ -27,6 +28,8 @@ export function AssistantPage() {
   const [messages, setMessages] = useState<AssistantMessage[]>([])
   const [inputText, setInputText] = useState('')
   const [isTyping, setIsTyping] = useState(false)
+  const [activeCategory, setActiveCategory] = useState<'all' | 'applications' | 'grievances' | 'services' | 'officer'>('all')
+
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const toast = useToast()
   const navigate = useNavigate()
@@ -83,70 +86,89 @@ export function AssistantPage() {
     toast.info('Conversation Cleared')
   }
 
-  const handleCopy = (content: string) => {
-    navigator.clipboard.writeText(content)
-    toast.success('Copied to Clipboard')
-  }
-
-  const handleSpeak = (content: string) => {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel()
-      const utterance = new SpeechSynthesisUtterance(content)
-      utterance.lang = language === 'en' ? 'en-IN' : language
-      window.speechSynthesis.speak(utterance)
-      toast.info('Audio Playback', 'Reading message aloud.')
-    } else {
-      toast.error('Speech Unavailable', 'Your browser does not support speech synthesis.')
-    }
+  const handleExportTranscript = () => {
+    const transcriptText = messages
+      .map((m) => `[${m.timestamp}] ${m.sender.toUpperCase()}: ${m.content}`)
+      .join('\n\n')
+    const blob = new Blob([transcriptText], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `civiqone-ai-transcript-${new Date().toISOString().split('T')[0]}.txt`
+    a.click()
+    URL.revokeObjectURL(url)
+    toast.success('Transcript Exported', 'Downloaded as text document.')
   }
 
   const preset = CIVIC_ASSISTANT_CONTENT[language] || CIVIC_ASSISTANT_CONTENT.en
 
   return (
-    <div className="flex flex-col h-[calc(100vh-10rem)] max-w-5xl mx-auto space-y-4">
-      {/* Assistant Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl border border-border bg-card shadow-subtle shrink-0">
+    <div className="flex flex-col h-[calc(100vh-8.5rem)] max-w-5xl mx-auto space-y-3">
+      {/* ── Assistant Header ── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-3xl border border-border bg-card shadow-subtle shrink-0">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-700 via-primary to-sky-500 text-white flex items-center justify-center shadow-md">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-700 via-primary to-sky-500 text-white flex items-center justify-center shadow-md shrink-0">
             <Bot className="w-6 h-6" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="font-display text-base font-bold text-foreground">
-                CiviqOne Intelligent Civic Copilot
+              <h1 className="font-display text-base sm:text-lg font-bold text-foreground">
+                CiviqOne Intelligent Civic AI Agent
               </h1>
               <Badge variant="verified" size="sm">
-                Active AI
+                9 Regional Languages
               </Badge>
             </div>
             <p className="text-xs text-muted-foreground">
-              Autonomous statutory guidance grounded in official government frameworks
+              Autonomous statutory guidance, grievance assistance & document intelligence grounded in government frameworks
             </p>
           </div>
         </div>
 
-        {/* Controls: Language Selector & Clear */}
+        {/* Controls: Language Selector, Customer Care link, Export & Clear */}
         <div className="flex items-center gap-2 self-end sm:self-auto">
-          <div className="flex items-center gap-1 bg-muted/60 p-1 rounded-xl border border-border">
-            <Languages className="w-3.5 h-3.5 text-muted-foreground ml-2" />
+          {/* Support Hub Shortcut */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate('/app/support')}
+            className="h-9 px-3 gap-1.5 rounded-xl text-xs font-semibold"
+          >
+            <LifeBuoy className="w-3.5 h-3.5 text-primary" />
+            <span>Support Hub</span>
+          </Button>
+
+          {/* Language Dropdown */}
+          <div className="relative">
             <select
               value={language}
               onChange={(e) => setLanguage(e.target.value as SupportedLanguage)}
-              className="bg-transparent text-xs font-semibold text-foreground outline-none pr-2 pl-1 cursor-pointer"
+              className="bg-muted/70 hover:bg-muted border border-border text-xs font-semibold text-foreground rounded-xl py-2 pl-3 pr-7 cursor-pointer outline-none transition-colors appearance-none"
             >
               {SUPPORTED_LANGUAGES.map((l) => (
                 <option key={l.code} value={l.code}>
-                  {l.flag} {l.nativeName}
+                  {l.flag} {l.nativeName} ({l.name})
                 </option>
               ))}
             </select>
+            <ChevronDown className="w-3.5 h-3.5 text-muted-foreground absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
           </div>
 
           <Button
             variant="ghost"
             size="icon"
+            onClick={handleExportTranscript}
+            className="h-9 w-9 text-muted-foreground hover:text-foreground rounded-xl"
+            title="Export conversation transcript"
+          >
+            <Download className="w-4 h-4" />
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={handleClear}
-            className="h-9 w-9 text-muted-foreground hover:text-foreground"
+            className="h-9 w-9 text-muted-foreground hover:text-foreground rounded-xl"
             title="Clear conversation"
           >
             <Trash2 className="w-4 h-4" />
@@ -154,94 +176,55 @@ export function AssistantPage() {
         </div>
       </div>
 
-      {/* Messages Scroll Area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 rounded-2xl border border-border bg-card/60 backdrop-blur-sm shadow-subtle">
-        {messages.map((msg) => {
-          const isAssistant = msg.sender === 'assistant'
-          return (
-            <div
-              key={msg.id}
-              className={`flex gap-3 max-w-2xl ${isAssistant ? 'mr-auto' : 'ml-auto flex-row-reverse'}`}
-            >
-              <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 shadow-subtle ${
-                  isAssistant ? 'bg-primary text-primary-foreground' : 'bg-muted text-foreground'
-                }`}
-              >
-                {isAssistant ? <Bot className="w-4 h-4" /> : <User className="w-4 h-4" />}
-              </div>
+      {/* ── Mode Switcher Filter Bar ── */}
+      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar shrink-0 px-1">
+        {[
+          { id: 'all', label: 'All Civic Inquiries' },
+          { id: 'applications', label: 'Application Tracking' },
+          { id: 'grievances', label: 'Grievance & Redressal' },
+          { id: 'services', label: 'Welfare Schemes & Subsidies' },
+          { id: 'officer', label: 'Live Officer Escalation' },
+        ].map((cat) => (
+          <button
+            key={cat.id}
+            onClick={() => setActiveCategory(cat.id as any)}
+            className={cn(
+              'px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors whitespace-nowrap cursor-pointer',
+              activeCategory === cat.id
+                ? 'bg-primary text-white shadow-sm'
+                : 'bg-card text-muted-foreground hover:text-foreground hover:bg-muted border border-border/70'
+            )}
+          >
+            {cat.label}
+          </button>
+        ))}
+      </div>
 
-              <div className="space-y-2">
-                <div
-                  className={`p-4 rounded-2xl text-xs sm:text-sm leading-relaxed ${
-                    isAssistant
-                      ? 'bg-card border border-border text-foreground shadow-subtle rounded-tl-sm'
-                      : 'bg-primary text-primary-foreground shadow-sm rounded-tr-sm'
-                  }`}
-                >
-                  <p className="whitespace-pre-line">{msg.content}</p>
-
-                  {/* Actions inside assistant bubbles */}
-                  {msg.suggestedActions && msg.suggestedActions.length > 0 && (
-                    <div className="mt-3 pt-3 border-t border-border/60 flex flex-wrap gap-2">
-                      {msg.suggestedActions.map((act, i) => (
-                        <button
-                          key={i}
-                          onClick={() => {
-                            if (act.targetUrl) navigate(act.targetUrl)
-                          }}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-primary/10 hover:bg-primary/20 text-primary border border-primary/25 transition-colors"
-                        >
-                          <span>{act.label}</span>
-                          <ExternalLink className="w-3 h-3" />
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* Bubble footer actions */}
-                <div
-                  className={`flex items-center gap-2 text-[10px] text-muted-foreground ${
-                    isAssistant ? 'justify-start pl-1' : 'justify-end pr-1'
-                  }`}
-                >
-                  <span>{msg.timestamp}</span>
-                  {isAssistant && (
-                    <>
-                      <span>•</span>
-                      <button
-                        onClick={() => handleCopy(msg.content)}
-                        className="hover:text-foreground transition-colors"
-                        title="Copy message"
-                      >
-                        <Copy className="w-3 h-3" />
-                      </button>
-                      <button
-                        onClick={() => handleSpeak(msg.content)}
-                        className="hover:text-foreground transition-colors"
-                        title="Read aloud"
-                      >
-                        <Volume2 className="w-3 h-3" />
-                      </button>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-          )
-        })}
+      {/* ── Messages Scroll Area ── */}
+      <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 rounded-3xl border border-border bg-card/60 backdrop-blur-sm shadow-subtle">
+        {messages.map((msg) => (
+          <ChatMessageBubble
+            key={msg.id}
+            message={msg}
+            currentLanguage={language}
+            onCardAction={(action, payload) => {
+              if (action === 'connect_officer') {
+                navigate('/app/support?tab=live')
+              }
+            }}
+          />
+        ))}
 
         {isTyping && (
           <div className="flex gap-3 mr-auto max-w-md items-center">
-            <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center shrink-0">
-              <Bot className="w-4 h-4 animate-spin-slow" />
+            <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center shrink-0 shadow-sm">
+              <Bot className="w-4 h-4 animate-spin" />
             </div>
             <div className="p-3.5 rounded-2xl bg-card border border-border text-xs text-muted-foreground flex items-center gap-2 shadow-subtle">
               <span className="w-2 h-2 rounded-full bg-primary animate-bounce" />
               <span className="w-2 h-2 rounded-full bg-primary animate-bounce [animation-delay:0.2s]" />
               <span className="w-2 h-2 rounded-full bg-primary animate-bounce [animation-delay:0.4s]" />
-              <span className="ml-1 font-mono text-[11px]">Synthesizing civic intelligence...</span>
+              <span className="ml-1 font-mono text-[11px]">Synthesizing civic intelligence across databases...</span>
             </div>
           </div>
         )}
@@ -249,8 +232,8 @@ export function AssistantPage() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Suggested Prompt Chips */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar shrink-0">
+      {/* ── Suggested Prompt Chips ── */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar shrink-0 px-1">
         <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider shrink-0 flex items-center gap-1">
           <Sparkles className="w-3 h-3 text-primary" /> Suggestions:
         </span>
@@ -265,11 +248,11 @@ export function AssistantPage() {
         ))}
       </div>
 
-      {/* Input Box */}
+      {/* ── Input Box ── */}
       <div className="relative shrink-0 space-y-2">
         {/* Active Speech Recognition Banner */}
         {isListening && (
-          <div className="flex items-center justify-between px-3.5 py-2 rounded-xl bg-rose-500/10 border border-rose-500/25 text-rose-600 dark:text-rose-400 text-xs animate-in fade-in slide-in-from-bottom-1 duration-200 shadow-sm">
+          <div className="flex items-center justify-between px-4 py-2.5 rounded-2xl bg-rose-500/10 border border-rose-500/25 text-rose-600 dark:text-rose-400 text-xs animate-in fade-in slide-in-from-bottom-1 duration-200 shadow-sm">
             <div className="flex items-center gap-2.5">
               <span className="relative flex h-2.5 w-2.5">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
@@ -282,7 +265,7 @@ export function AssistantPage() {
             <button
               type="button"
               onClick={stopListening}
-              className="text-[11px] font-bold px-2 py-0.5 rounded bg-rose-500/20 hover:bg-rose-500/30 transition-colors"
+              className="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 transition-colors"
             >
               Done Speaking
             </button>
@@ -302,7 +285,7 @@ export function AssistantPage() {
               type="button"
               onClick={isListening ? stopListening : startListening}
               className={cn(
-                'w-9 h-9 rounded-xl flex items-center justify-center transition-all shrink-0',
+                'w-10 h-10 rounded-xl flex items-center justify-center transition-all shrink-0',
                 isListening
                   ? 'bg-rose-500 text-white shadow-md shadow-rose-500/30 animate-pulse'
                   : 'text-muted-foreground hover:text-foreground hover:bg-muted'
@@ -317,14 +300,15 @@ export function AssistantPage() {
             type="text"
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
-            placeholder={`Ask CiviqOne AI in ${currentLanguageDetails.nativeName} or English...`}
+            placeholder={`Ask CiviqOne AI in ${currentLanguageDetails.nativeName} or English (e.g. check my driving license status, file complaint, solar subsidy)...`}
             className="flex-1 bg-transparent px-3 text-xs sm:text-sm text-foreground placeholder:text-muted-foreground outline-none"
           />
+
           <Button
             type="submit"
             size="sm"
             disabled={!inputText.trim() || isTyping}
-            className="h-9 px-4 gap-1.5 rounded-xl font-semibold shrink-0"
+            className="h-10 px-5 gap-1.5 rounded-xl font-semibold shrink-0 shadow-md shadow-primary/20"
           >
             <span>Send</span>
             <Send className="w-3.5 h-3.5" />

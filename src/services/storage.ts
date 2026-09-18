@@ -25,6 +25,12 @@ import {
   INITIAL_USER_SESSIONS,
   INITIAL_CONSENT_RECEIPTS,
 } from '@/mocks/civicData'
+import {
+  INITIAL_TICKETS,
+  INITIAL_HELPLINES,
+  INITIAL_FAQS,
+  DEFAULT_NODAL_OFFICER,
+} from '@/mocks/supportData'
 import type {
   User,
   CitizenIdentity,
@@ -52,6 +58,11 @@ import type {
   TrustedDevice,
   UserSession,
   ConsentReceipt,
+  CustomerCareTicket,
+  LiveChatSession,
+  KnowledgeFaqItem,
+  CivicHelpline,
+  GrievanceStatus,
 } from '@/types'
 
 const STORAGE_KEYS = {
@@ -83,6 +94,8 @@ const STORAGE_KEYS = {
   TRUSTED_DEVICES: 'civiqone_trusted_devices_v1',
   USER_SESSIONS: 'civiqone_user_sessions_v1',
   CONSENT_RECEIPTS: 'civiqone_consent_receipts_v1',
+  TICKETS: 'civiqone_tickets_v1',
+  LIVE_CHATS: 'civiqone_live_chats_v1',
 } as const
 
 function getFromStorage<T>(key: string, fallback: T): T {
@@ -545,6 +558,114 @@ export const civicStorage = {
     receipts.unshift(receipt)
     saveToStorage(STORAGE_KEYS.CONSENT_RECEIPTS, receipts)
   },
+
+  // Customer Care & Grievances
+  getTickets: (): CustomerCareTicket[] => getFromStorage(STORAGE_KEYS.TICKETS, INITIAL_TICKETS),
+  saveTickets: (tickets: CustomerCareTicket[]): void => {
+    saveToStorage(STORAGE_KEYS.TICKETS, tickets)
+    realtimeBus.emit('GRIEVANCE_TICKETS_UPDATED', tickets)
+  },
+  getTicketById: (id: string): CustomerCareTicket | undefined => {
+    return civicStorage.getTickets().find((t) => t.id === id || t.ticketNumber === id)
+  },
+  createTicket: (
+    data: Omit<CustomerCareTicket, 'id' | 'createdAt' | 'updatedAt' | 'timeline'>
+  ): CustomerCareTicket => {
+    const tickets = civicStorage.getTickets()
+    const now = new Date()
+    const newTicket: CustomerCareTicket = {
+      ...data,
+      id: `ticket_${Date.now()}`,
+      nodalOfficer: data.nodalOfficer || DEFAULT_NODAL_OFFICER,
+      timeline: [
+        {
+          id: `tl_${Date.now()}`,
+          title: 'Grievance Registered with Portal',
+          description: `Assigned to ${data.department} Nodal Cell under statutory citizen charter.`,
+          timestamp: now.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) + ', ' + now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          status: 'completed',
+          actor: 'Citizen Self-Service Portal',
+          department: data.department,
+        },
+      ],
+      createdAt: now.toISOString(),
+      updatedAt: now.toISOString(),
+    }
+    tickets.unshift(newTicket)
+    civicStorage.saveTickets(tickets)
+
+    // Add citizen action item for tracking
+    civicStorage.addAction({
+      title: `Track Grievance #${newTicket.ticketNumber}`,
+      description: `${newTicket.subject} — SLA Target: ${newTicket.slaHours} hours`,
+      category: 'application_query',
+      urgency: newTicket.urgency === 'urgent' || newTicket.urgency === 'critical_statutory' ? 'high' : 'medium',
+      dueDate: new Date(Date.now() + newTicket.slaHours * 3600000).toISOString().split('T')[0],
+      isCompleted: false,
+      targetRoute: '/app/support?tab=tickets',
+      sourceEntity: 'Citizen Care Nodal Desk',
+      actionLabel: 'Track Grievance',
+    })
+
+    return newTicket
+  },
+  updateTicketStatus: (
+    id: string,
+    status: GrievanceStatus,
+    comment?: string
+  ): CustomerCareTicket | undefined => {
+    const tickets = civicStorage.getTickets()
+    const target = tickets.find((t) => t.id === id)
+    if (!target) return undefined
+
+    target.status = status
+    target.updatedAt = new Date().toISOString()
+    if (comment) {
+      target.timeline.unshift({
+        id: `tl_${Date.now()}`,
+        title: `Status Updated to ${status.replace('_', ' ').toUpperCase()}`,
+        description: comment,
+        timestamp: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) + ', ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        status: status === 'resolved' ? 'completed' : 'current',
+        actor: target.nodalOfficer.name,
+        department: target.department,
+      })
+    }
+    civicStorage.saveTickets(tickets)
+    return target
+  },
+
+  // Live Chat Sessions
+  getLiveChatSession: (): LiveChatSession => {
+    const initialSession: LiveChatSession = {
+      id: 'session_live_01',
+      officerName: 'Vikramaditya Rao',
+      officerRole: 'Senior Grievance Redressal Officer',
+      officerDepartment: 'Centralized Citizen Support (Indiranagar / East)',
+      officerAvatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80',
+      status: 'active',
+      queuePosition: 1,
+      startedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      messages: [
+        {
+          id: 'msg_officer_welcome',
+          sender: 'officer',
+          senderName: 'Officer Vikramaditya Rao',
+          text: 'Namaste Aarav ji. I am Officer Vikramaditya Rao from the Citizen Assistance Nodal Desk. I have your verified citizen profile loaded. How may I resolve your issue today?',
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        },
+      ],
+    }
+    return getFromStorage(STORAGE_KEYS.LIVE_CHATS, initialSession)
+  },
+  saveLiveChatSession: (session: LiveChatSession): void => {
+    saveToStorage(STORAGE_KEYS.LIVE_CHATS, session)
+    realtimeBus.emit('LIVE_CHAT_UPDATED', session)
+  },
+
+  // Helplines & Knowledge FAQs
+  getHelplines: (): CivicHelpline[] => INITIAL_HELPLINES,
+  getKnowledgeFaqs: (): KnowledgeFaqItem[] => INITIAL_FAQS,
 
   // Reset helper
   resetAllToDefault: (): void => {

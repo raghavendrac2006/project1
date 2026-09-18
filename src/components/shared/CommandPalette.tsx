@@ -19,6 +19,7 @@ import {
   Landmark,
   CheckCircle2,
   Sliders,
+  LifeBuoy,
 } from 'lucide-react'
 import { Dialog, DialogContent } from '@/components/ui/Dialog'
 import { civicStorage } from '@/services/storage'
@@ -143,6 +144,7 @@ export function CommandPalette({ open, onOpenChange, workspace = 'citizen' }: Co
       { id: 'nav-app', title: 'Applications Tracker', category: 'Navigation', icon: <Layers className="w-4 h-4" />, url: ROUTES.APP.APPLICATIONS },
       { id: 'nav-prv', title: 'Privacy & Data Consent Center', category: 'Navigation', icon: <Lock className="w-4 h-4" />, url: ROUTES.APP.PRIVACY },
       { id: 'nav-ai', title: 'CiviqOne AI Assistant', category: 'Navigation', icon: <Bot className="w-4 h-4" />, url: ROUTES.APP.ASSISTANT },
+      { id: 'nav-sup', title: 'Customer Care & Grievance Redressal', category: 'Navigation', icon: <LifeBuoy className="w-4 h-4" />, url: ROUTES.APP.SUPPORT },
       { id: 'nav-pay', title: 'Civic Payments & Dues', category: 'Navigation', icon: <CreditCard className="w-4 h-4" />, url: ROUTES.APP.PAYMENTS },
       { id: 'nav-notif', title: 'Notification Center', category: 'Navigation', icon: <Bell className="w-4 h-4" />, url: ROUTES.APP.NOTIFICATIONS },
       { id: 'nav-set', title: 'Security & Account Settings', category: 'Navigation', icon: <Settings className="w-4 h-4" />, url: ROUTES.APP.SETTINGS },

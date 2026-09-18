@@ -15,6 +15,7 @@ import {
   Lock,
   Type,
   Contrast,
+  LifeBuoy,
 } from 'lucide-react'
 import { useAuth, useTheme, useLanguage, useAccessibility } from '@/hooks'
 import { SUPPORTED_LANGUAGES } from '@/constants/languages'
@@ -179,6 +180,18 @@ export function Header({
             <Lock className="w-4 h-4" />
           </Button>
         )}
+
+        {/* Customer Care & Grievance Redressal Button */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-9 w-9 text-muted-foreground hover:text-foreground"
+          onClick={() => navigate(ROUTES.APP.SUPPORT)}
+          title="Citizen Customer Care & Grievance Redressal"
+          aria-label="Customer Care & Support"
+        >
+          <LifeBuoy className="w-4 h-4" />
+        </Button>
 
         {/* Notifications Dropdown */}
         <DropdownMenu>

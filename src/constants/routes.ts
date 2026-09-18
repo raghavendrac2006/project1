@@ -32,6 +32,7 @@ export const ROUTES = {
     DATA_DASHBOARD: '/app/data',
     JOURNEY: '/app/journey',
     ASSISTANT: '/app/assistant',
+    SUPPORT: '/app/support',
     PROFILE: '/app/profile',
     SETTINGS: '/app/settings',
   },

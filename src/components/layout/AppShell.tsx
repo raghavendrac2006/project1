@@ -5,6 +5,7 @@ import { Header } from './Header'
 import { MobileNav } from './MobileNav'
 import { Breadcrumbs } from './Breadcrumbs'
 import { CommandPalette } from '@/components/shared/CommandPalette'
+import { CitizenFloatingChatbot } from '@/components/chat'
 import { PageLoader } from '@/components/feedback/PageLoader'
 import { SessionLockOverlay } from '@/components/shared/SessionLockOverlay'
 import { useInactivityLock } from '@/hooks'
@@ -50,6 +51,9 @@ export function AppShell() {
         open={commandPaletteOpen}
         onOpenChange={setCommandPaletteOpen}
       />
+
+      {/* Global Citizen Multilingual AI Chatbot & Care Assistant */}
+      <CitizenFloatingChatbot />
 
       {/* Inactivity Privacy Lock Overlay */}
       <SessionLockOverlay
