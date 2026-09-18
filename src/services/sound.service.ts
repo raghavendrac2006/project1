@@ -1,11 +1,11 @@
 /**
  * sound.service.ts
- * Synthesized Web Audio acoustic engine for CIVIQONE.
+ * Synthesized Web Audio acoustic engine for SAMAGRA.
  * Generates calibrated, zero-latency micro-sounds completely in-browser
  * without external audio files or network overhead.
  */
 
-const STORAGE_KEY = 'civiqone_sound_enabled'
+const STORAGE_KEY = 'samagra_sound_enabled'
 
 class SoundService {
   private ctx: AudioContext | null = null

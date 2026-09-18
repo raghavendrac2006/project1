@@ -17,7 +17,7 @@ export const securityService = {
     civicStorage.addAuditEvent({
       workspace: 'citizen',
       actor: 'Rajesh K. Sharma',
-      actorId: 'usr_civiq_99182',
+      actorId: 'usr_samagra_99182',
       role: 'CITIZEN',
       action: 'REMOVED_TRUSTED_DEVICE',
       resource: target ? target.deviceName : `Device #${id}`,
@@ -40,7 +40,7 @@ export const securityService = {
     civicStorage.addAuditEvent({
       workspace: 'citizen',
       actor: 'Rajesh K. Sharma',
-      actorId: 'usr_civiq_99182',
+      actorId: 'usr_samagra_99182',
       role: 'CITIZEN',
       action: 'REVOKED_ACTIVE_SESSION',
       resource: `Session #${id}`,
@@ -62,12 +62,12 @@ export const securityService = {
       }
       return s
     })
-    localStorage.setItem('civiqone_user_sessions_v1', JSON.stringify(updated))
+    localStorage.setItem('samagra_user_sessions_v1', JSON.stringify(updated))
 
     civicStorage.addAuditEvent({
       workspace: 'citizen',
       actor: 'Rajesh K. Sharma',
-      actorId: 'usr_civiq_99182',
+      actorId: 'usr_samagra_99182',
       role: 'CITIZEN',
       action: 'REVOKED_ALL_REMOTE_SESSIONS',
       resource: `${revokedCount} Remote Sessions Terminated`,

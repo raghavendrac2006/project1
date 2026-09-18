@@ -57,7 +57,7 @@ export function GovernmentSidebar({ collapsed, onToggleCollapse }: GovernmentSid
           {!collapsed && (
             <div className="flex flex-col min-w-0">
               <span className="font-display text-sm font-extrabold tracking-tight text-foreground truncate flex items-center gap-1.5">
-                CIVIQ<span className="text-blue-500 font-black">GOV</span>
+                SAMAGRA<span className="text-blue-500 font-black">GOV</span>
               </span>
               <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider truncate">
                 Sovereign Portal

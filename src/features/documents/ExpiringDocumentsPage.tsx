@@ -52,7 +52,7 @@ export function ExpiringDocumentsPage() {
             Expiring Documents & Credentials
           </h1>
           <p className="text-xs sm:text-sm text-muted-foreground mt-1 max-w-2xl">
-            CIVIQONE monitors your statutory certificates, licenses, and permits. Renew within the statutory grace window to avoid late penalty surcharges.
+            SAMAGRA monitors your statutory certificates, licenses, and permits. Renew within the statutory grace window to avoid late penalty surcharges.
           </p>
         </div>
 

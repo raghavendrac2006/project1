@@ -40,7 +40,7 @@ export const CiviqOneCardVerificationDialog: React.FC<CiviqOneCardVerificationDi
             </div>
             <div>
               <DialogTitle className="text-base font-bold">
-                CIVIQONE Identity Verification
+                SAMAGRA Identity Verification
               </DialogTitle>
               <DialogDescription className="text-xs">
                 Official cryptographic attestation & verifier disclosure
@@ -53,7 +53,7 @@ export const CiviqOneCardVerificationDialog: React.FC<CiviqOneCardVerificationDi
         <div className="my-3 p-5 rounded-2xl border border-emerald-500/30 bg-emerald-500/5 dark:bg-emerald-950/20 space-y-4">
           <div className="flex items-center justify-between">
             <span className="font-display font-black text-sm tracking-tight text-foreground">
-              CIVIQONE IDENTITY
+              SAMAGRA IDENTITY
             </span>
             <CiviqOneCardBadge status={data.verificationStatus} />
           </div>

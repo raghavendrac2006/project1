@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 
 const DEFAULT_TIMEOUT_MS = 15 * 60 * 1000 // 15 minutes
-const STORAGE_LOCK_KEY = 'civiqone_session_locked_v1'
+const STORAGE_LOCK_KEY = 'samagra_session_locked_v1'
 
 interface UseInactivityLockOptions {
   timeoutMs?: number
@@ -14,7 +14,7 @@ export function useInactivityLock({
 }: UseInactivityLockOptions = {}) {
   const [isLocked, setIsLocked] = useState<boolean>(() => {
     try {
-      return sessionStorage.getItem(STORAGE_LOCK_KEY) === 'true'
+      return (sessionStorage.getItem(STORAGE_LOCK_KEY) || sessionStorage.getItem('civiqone_session_locked_v1')) === 'true'
     } catch {
       return false
     }

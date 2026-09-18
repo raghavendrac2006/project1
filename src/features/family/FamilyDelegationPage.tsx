@@ -201,7 +201,7 @@ export function FamilyDelegationPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="text-xs text-muted-foreground leading-relaxed">
-            Adult household members (spouse, elder parents) retain sole sovereign power to revoke any individual permission at any time through their personal CIVIQONE portal terminal.
+            Adult household members (spouse, elder parents) retain sole sovereign power to revoke any individual permission at any time through their personal SAMAGRA portal terminal.
           </CardContent>
         </Card>
       </div>

@@ -31,7 +31,7 @@ class RealtimeEventBus {
   constructor() {
     if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
       try {
-        this.channel = new BroadcastChannel('civiqone_realtime_events')
+        this.channel = new BroadcastChannel('samagra_realtime_events')
         this.channel.onmessage = (messageEvent) => {
           const data: RealtimeEvent = messageEvent.data
           this.notifyLocal(data)
@@ -44,7 +44,7 @@ class RealtimeEventBus {
     // Storage event fallback for cross-tab sync in older/restricted environments
     if (typeof window !== 'undefined') {
       window.addEventListener('storage', (e) => {
-        if (e.key === 'civiqone_realtime_sync' && e.newValue) {
+        if ((e.key === 'samagra_realtime_sync' || e.key === 'civiqone_realtime_sync') && e.newValue) {
           try {
             const data: RealtimeEvent = JSON.parse(e.newValue)
             this.notifyLocal(data)
@@ -78,7 +78,7 @@ class RealtimeEventBus {
     // Storage event trigger for cross-tab sync
     if (typeof window !== 'undefined') {
       try {
-        localStorage.setItem('civiqone_realtime_sync', JSON.stringify(event))
+        localStorage.setItem('samagra_realtime_sync', JSON.stringify(event))
       } catch {
         // storage quota or private mode
       }

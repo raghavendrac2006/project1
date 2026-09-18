@@ -2,8 +2,8 @@ import { useState, useEffect, useCallback } from 'react'
 
 export type FontScale = 'normal' | 'large' | 'xlarge'
 
-const STORAGE_FONT_SCALE_KEY = 'civiqone_font_scale_v1'
-const STORAGE_HIGH_CONTRAST_KEY = 'civiqone_high_contrast_v1'
+const STORAGE_FONT_SCALE_KEY = 'samagra_font_scale_v1'
+const STORAGE_HIGH_CONTRAST_KEY = 'samagra_high_contrast_v1'
 
 const SCALE_SIZES: Record<FontScale, string> = {
   normal: '16px',
@@ -14,7 +14,11 @@ const SCALE_SIZES: Record<FontScale, string> = {
 export function useAccessibility() {
   const [fontScale, setFontScaleState] = useState<FontScale>(() => {
     try {
-      return (localStorage.getItem(STORAGE_FONT_SCALE_KEY) as FontScale) || 'normal'
+      return (
+        (localStorage.getItem(STORAGE_FONT_SCALE_KEY) as FontScale) ||
+        (localStorage.getItem('civiqone_font_scale_v1') as FontScale) ||
+        'normal'
+      )
     } catch {
       return 'normal'
     }
@@ -22,7 +26,10 @@ export function useAccessibility() {
 
   const [highContrast, setHighContrastState] = useState<boolean>(() => {
     try {
-      return localStorage.getItem(STORAGE_HIGH_CONTRAST_KEY) === 'true'
+      return (
+        localStorage.getItem(STORAGE_HIGH_CONTRAST_KEY) === 'true' ||
+        localStorage.getItem('civiqone_high_contrast_v1') === 'true'
+      )
     } catch {
       return false
     }

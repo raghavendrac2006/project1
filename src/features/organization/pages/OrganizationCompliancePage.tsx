@@ -77,7 +77,7 @@ export function OrganizationCompliancePage() {
   const handleExportDossier = () => {
     const payload = {
       regulatoryFramework: 'India Digital Personal Data Protection Act (DPDP Act) 2023',
-      organization: 'CIVIQ Enterprise Verifier Network',
+      organization: 'SAMAGRA Enterprise Verifier Network',
       auditDate: new Date().toISOString(),
       scorecard: checks,
       activePurgePolicies: policies,

@@ -19,7 +19,7 @@ export const authService = {
     // Simulated auth check
     await new Promise((resolve) => setTimeout(resolve, 400))
     const user = civicStorage.getUser()
-    const token = `civiq_tok_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
+    const token = `samagra_tok_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
     civicStorage.setAuthToken(token)
     return { user, token }
   },
@@ -44,7 +44,7 @@ export const authService = {
       throw new Error('Invalid OTP. Use test OTP 123456 or any 6-digit number.')
     }
     const user = civicStorage.getUser()
-    const token = `civiq_tok_verified_${Date.now()}`
+    const token = `samagra_tok_verified_${Date.now()}`
     civicStorage.setAuthToken(token)
     return { user, token }
   },

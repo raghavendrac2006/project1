@@ -38,7 +38,7 @@ export const applicationService = {
     const targetService = services.find((s) => s.id === serviceId)
     if (!targetService) throw new Error('Service not found')
 
-    const appNumber = `CIVIQ-${targetService.department.slice(0, 3).toUpperCase()}-2026-${Math.floor(100000 + Math.random() * 900000)}`
+    const appNumber = `SAMAGRA-${targetService.department.slice(0, 3).toUpperCase()}-2026-${Math.floor(100000 + Math.random() * 900000)}`
     const now = new Date().toISOString()
 
     const newApp: CivicApplication = {
@@ -52,7 +52,7 @@ export const applicationService = {
       status: 'submitted',
       currentStep: 1,
       totalSteps: 4,
-      applicantNotes: formData.notes || 'Submitted via CIVIQONE Citizen Portal',
+      applicantNotes: formData.notes || 'Submitted via SAMAGRA Citizen Portal',
       timeline: [
         {
           title: 'Application Form Dispatched',

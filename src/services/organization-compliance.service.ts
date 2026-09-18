@@ -7,8 +7,8 @@ import type { ComplianceCheckItem, DataPurgePolicy, DestructionCertificate } fro
 import { realtimeBus } from './eventBus'
 
 const STORAGE_KEYS = {
-  POLICIES: 'civiq_org_purge_policies',
-  CERTIFICATES: 'civiq_org_destruction_certs',
+  POLICIES: 'samagra_org_purge_policies',
+  CERTIFICATES: 'samagra_org_destruction_certs',
 }
 
 const INITIAL_COMPLIANCE_CHECKS: ComplianceCheckItem[] = [
@@ -95,7 +95,7 @@ const INITIAL_PURGE_POLICIES: DataPurgePolicy[] = [
 const INITIAL_CERTIFICATES: DestructionCertificate[] = [
   {
     id: 'cert_shred_9918',
-    certificateNumber: 'CIVIQ-SHRED-2026-0819',
+    certificateNumber: 'SAMAGRA-SHRED-2026-0819',
     purgePolicyName: 'Temporary KYC Working Cached Documents',
     recordsCount: 312,
     timestamp: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
@@ -105,7 +105,7 @@ const INITIAL_CERTIFICATES: DestructionCertificate[] = [
   },
   {
     id: 'cert_shred_9917',
-    certificateNumber: 'CIVIQ-SHRED-2026-0818',
+    certificateNumber: 'SAMAGRA-SHRED-2026-0818',
     purgePolicyName: 'Rejected Applications Citizen Dossier Wipe',
     recordsCount: 89,
     timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
@@ -117,7 +117,7 @@ const INITIAL_CERTIFICATES: DestructionCertificate[] = [
 
 function getStored<T>(key: string, fallback: T): T {
   try {
-    const item = localStorage.getItem(key)
+    const item = localStorage.getItem(key) || localStorage.getItem(key.replace('samagra_', 'civiq_'))
     return item ? JSON.parse(item) : fallback
   } catch {
     return fallback
@@ -154,7 +154,7 @@ export const organizationComplianceService = {
 
     const recordsCount = Math.floor(Math.random() * 250) + 40
     const randomHex = Array.from({ length: 40 }, () => Math.floor(Math.random() * 16).toString(16)).join('')
-    const certNum = `CIVIQ-SHRED-${new Date().getFullYear()}-${Math.floor(Math.random() * 9000 + 1000)}`
+    const certNum = `SAMAGRA-SHRED-${new Date().getFullYear()}-${Math.floor(Math.random() * 9000 + 1000)}`
 
     const newCert: DestructionCertificate = {
       id: `cert_shred_${Date.now()}`,

@@ -440,7 +440,7 @@ export function OrganizationDeveloperPortalPage() {
 {`// Node.js Webhook Signature Verification
 import crypto from 'crypto'
 
-function verifyCiviqSignature(payload, header, secret) {
+function verifySamagraSignature(payload, header, secret) {
   const [tPart, v1Part] = header.split(',')
   const timestamp = tPart.split('=')[1]
   const signature = v1Part.split('=')[1]
@@ -461,7 +461,7 @@ function verifyCiviqSignature(payload, header, secret) {
                   onClick={() =>
                     copyToClipboard(
                       `import crypto from 'crypto'
-function verifyCiviqSignature(payload, header, secret) { ... }`,
+function verifySamagraSignature(payload, header, secret) { ... }`,
                       'Snippet'
                     )
                   }
@@ -668,7 +668,7 @@ function verifyCiviqSignature(payload, header, secret) { ... }`,
                 type="url"
                 value={webhookUrl}
                 onChange={(e) => setWebhookUrl(e.target.value)}
-                placeholder="https://api.yourdomain.com/civiq/events"
+                placeholder="https://api.yourdomain.com/samagra/events"
                 className="w-full p-2.5 rounded-xl border border-input bg-card text-xs text-foreground outline-none font-mono"
                 required
               />

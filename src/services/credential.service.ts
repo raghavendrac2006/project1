@@ -66,7 +66,7 @@ export const credentialService = {
     civicStorage.addAuditEvent({
       workspace: 'citizen',
       actor: 'Rajesh K. Sharma',
-      actorId: 'usr_civiq_99182',
+      actorId: 'usr_samagra_99182',
       role: 'CITIZEN',
       action: 'GENERATED_VERIFIABLE_PROOF',
       resource: `${cred.title} (#${cred.credentialNumber})`,
@@ -80,7 +80,7 @@ export const credentialService = {
       credentialId,
       title: cred.title,
       zkpHash,
-      qrPayload: `CIVIQ:ZKP:${proofId}:HASH:${zkpHash}:EXP:${expires.toISOString()}`,
+      qrPayload: `SAMAGRA:ZKP:${proofId}:HASH:${zkpHash}:EXP:${expires.toISOString()}`,
       validUntil,
       recipient,
       purpose,

@@ -11,7 +11,7 @@ interface CiviqOneCardQrProps {
 }
 
 export const CiviqOneCardQr: React.FC<CiviqOneCardQrProps> = ({
-  value = 'CIVIQ-DEMO-VERIFY-2048',
+  value = 'SAMAGRA-DEMO-VERIFY-2048',
   size = 120,
   isProtected = false,
   variant = 'full',

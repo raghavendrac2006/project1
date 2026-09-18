@@ -63,7 +63,7 @@ export function DocumentVaultPage() {
   // Per-document sharing block list: Set of doc IDs blocked from external sharing
   const [blockedSharingIds, setBlockedSharingIds] = useState<Set<string>>(() => {
     try {
-      const saved = localStorage.getItem('civiqone_blocked_doc_shares')
+      const saved = localStorage.getItem('samagra_blocked_doc_shares') || localStorage.getItem('civiqone_blocked_doc_shares')
       return saved ? new Set(JSON.parse(saved)) : new Set()
     } catch {
       return new Set()
@@ -216,7 +216,7 @@ export function DocumentVaultPage() {
         next.delete(id)
       }
       try {
-        localStorage.setItem('civiqone_blocked_doc_shares', JSON.stringify(Array.from(next)))
+        localStorage.setItem('samagra_blocked_doc_shares', JSON.stringify(Array.from(next)))
       } catch {}
 
       if (isNowBlocked) {

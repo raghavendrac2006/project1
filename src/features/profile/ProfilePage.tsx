@@ -108,7 +108,7 @@ export function ProfilePage() {
         </div>
       </div>
 
-      {/* 3D Glassmorphism CIVIQONE Card Showcase (Section 28) */}
+      {/* 3D Glassmorphism SAMAGRA Card Showcase (Section 28) */}
       <div className="p-6 rounded-3xl border border-border/80 bg-card/60 backdrop-blur-md shadow-card">
         <div className="max-w-xl mx-auto mb-4 text-center sm:text-left">
           <h3 className="font-display font-bold text-base text-foreground flex items-center justify-center sm:justify-start gap-2">

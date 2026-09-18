@@ -22,7 +22,7 @@ export function Breadcrumbs() {
     privacy: 'Privacy & Consent',
     security: 'Security Center',
     payments: 'Civic Payments',
-    assistant: 'CIVIQONE AI',
+    assistant: 'SAMAGRA AI',
     notifications: 'Notifications',
     profile: 'Citizen Profile',
     settings: 'Settings & Security',

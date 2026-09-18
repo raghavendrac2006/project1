@@ -11,7 +11,7 @@ export const adminService = {
     const user: SuperAdminUser = {
       id: 'adm_01',
       name: 'Chief Systems Administrator',
-      email: email || 'admin@civiqone.gov.in',
+      email: email || 'admin@samagra.gov.in',
       avatar: '',
       role: 'SUPER_ADMIN',
     }
@@ -100,7 +100,7 @@ export const adminService = {
     return [
       civicStorage.getUser(),
       {
-        id: 'usr_civiq_1024',
+        id: 'usr_samagra_1024',
         name: 'Ananya Deshmukh',
         email: 'ananya.d@civicmail.gov.in',
         phone: '9845099882',

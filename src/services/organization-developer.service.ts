@@ -7,16 +7,16 @@ import type { ApiKeyItem, WebhookEndpoint, WebhookDeliveryLog } from '@/types'
 import { realtimeBus } from './eventBus'
 
 const STORAGE_KEYS = {
-  API_KEYS: 'civiq_org_api_keys',
-  WEBHOOKS: 'civiq_org_webhooks',
-  DELIVERY_LOGS: 'civiq_org_delivery_logs',
+  API_KEYS: 'samagra_org_api_keys',
+  WEBHOOKS: 'samagra_org_webhooks',
+  DELIVERY_LOGS: 'samagra_org_delivery_logs',
 }
 
 const INITIAL_API_KEYS: ApiKeyItem[] = [
   {
     id: 'key_prod_01',
     name: 'Production Core Underwriting Service',
-    keyPrefix: 'civ_live_8f7b...9a41',
+    keyPrefix: 'sam_live_8f7b...9a41',
     createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
     lastUsedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
     status: 'active',
@@ -26,7 +26,7 @@ const INITIAL_API_KEYS: ApiKeyItem[] = [
   {
     id: 'key_sbx_02',
     name: 'Staging CI/CD Verification Engine',
-    keyPrefix: 'civ_test_12c4...aa82',
+    keyPrefix: 'sam_test_12c4...aa82',
     createdAt: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
     lastUsedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
     status: 'active',
@@ -38,7 +38,7 @@ const INITIAL_API_KEYS: ApiKeyItem[] = [
 const INITIAL_WEBHOOKS: WebhookEndpoint[] = [
   {
     id: 'wh_ep_01',
-    url: 'https://api.hdfcbank.com/civiq/webhooks/v2',
+    url: 'https://api.hdfcbank.com/samagra/webhooks/v2',
     description: 'Core LOS sync on application approvals and status transitions',
     events: ['application.status_changed', 'zkp.proof_verified', 'consent.revoked'],
     status: 'active',
@@ -48,7 +48,7 @@ const INITIAL_WEBHOOKS: WebhookEndpoint[] = [
   },
   {
     id: 'wh_ep_02',
-    url: 'https://fraud-shield.internal.org/hooks/civiq-alert',
+    url: 'https://fraud-shield.internal.org/hooks/samagra-alert',
     description: 'Fraud & risk anomaly broadcast queue',
     events: ['anomaly.detected', 'compliance.purge_completed'],
     status: 'active',
@@ -62,7 +62,7 @@ const INITIAL_LOGS: WebhookDeliveryLog[] = [
   {
     id: 'log_dlv_01',
     endpointId: 'wh_ep_01',
-    endpointUrl: 'https://api.hdfcbank.com/civiq/webhooks/v2',
+    endpointUrl: 'https://api.hdfcbank.com/samagra/webhooks/v2',
     event: 'application.status_changed',
     status: 'success',
     statusCode: 200,
@@ -75,7 +75,7 @@ const INITIAL_LOGS: WebhookDeliveryLog[] = [
   {
     id: 'log_dlv_02',
     endpointId: 'wh_ep_02',
-    endpointUrl: 'https://fraud-shield.internal.org/hooks/civiq-alert',
+    endpointUrl: 'https://fraud-shield.internal.org/hooks/samagra-alert',
     event: 'anomaly.detected',
     status: 'success',
     statusCode: 202,
@@ -89,7 +89,7 @@ const INITIAL_LOGS: WebhookDeliveryLog[] = [
 
 function getStored<T>(key: string, fallback: T): T {
   try {
-    const item = localStorage.getItem(key)
+    const item = localStorage.getItem(key) || localStorage.getItem(key.replace('samagra_', 'civiq_'))
     return item ? JSON.parse(item) : fallback
   } catch {
     return fallback

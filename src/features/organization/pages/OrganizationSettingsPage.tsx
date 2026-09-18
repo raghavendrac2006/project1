@@ -8,7 +8,7 @@ import { useToast } from '@/hooks'
 
 export function OrganizationSettingsPage() {
   const { success } = useToast()
-  const [webhookUrl, setWebhookUrl] = useState('https://api.apexhealth.org/webhooks/civiqone-events')
+  const [webhookUrl, setWebhookUrl] = useState('https://api.apexhealth.org/webhooks/samagra-events')
   const [autoExpire, setAutoExpire] = useState(true)
   const [strictEkyc, setStrictEkyc] = useState(true)
 
@@ -36,7 +36,7 @@ export function OrganizationSettingsPage() {
               Event Webhook Integration
             </CardTitle>
             <CardDescription className="text-xs text-muted-foreground">
-              Endpoint where CIVIQONE will dispatch real-time events (consent granted, access revoked, application submitted).
+              Endpoint where SAMAGRA will dispatch real-time events (consent granted, access revoked, application submitted).
             </CardDescription>
           </CardHeader>
           <CardContent className="p-5 space-y-3">

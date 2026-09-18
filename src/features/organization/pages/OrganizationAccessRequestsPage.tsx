@@ -28,7 +28,7 @@ export function OrganizationAccessRequestsPage() {
 
   // Form
   const [citizenName, setCitizenName] = useState('Rajesh K. Sharma')
-  const [citizenId, setCitizenId] = useState('usr_civiq_99182')
+  const [citizenId, setCitizenId] = useState('usr_samagra_99182')
   const [purpose, setPurpose] = useState('Comprehensive Health Risk Underwriting & Claim Verification')
   const [durationDays, setDurationDays] = useState(30)
   const [selectedFields, setSelectedFields] = useState<ConsentField[]>([

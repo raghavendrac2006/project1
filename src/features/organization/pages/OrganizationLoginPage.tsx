@@ -74,7 +74,7 @@ export function OrganizationLoginPage() {
           <div>
             <div className="flex items-center gap-2">
               <span className="text-base font-bold text-slate-900 dark:text-white tracking-tight font-display">
-                CIVIQ<span className="text-emerald-600 dark:text-emerald-400">ORG</span> Gateway
+                SAMAGRA<span className="text-emerald-600 dark:text-emerald-400">ORG</span> Gateway
               </span>
               <Badge variant="outline" className="text-[10px] text-emerald-700 dark:text-emerald-400 border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/40 font-semibold">
                 Enterprise B2B Partner Portal
@@ -293,7 +293,7 @@ export function OrganizationLoginPage() {
 
       {/* Sovereign Footer */}
       <footer className="relative z-20 border-t border-slate-200 dark:border-slate-900 bg-white/90 dark:bg-slate-950/90 px-4 sm:px-8 py-3 text-center text-[11px] text-slate-500 dark:text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-2 transition-colors">
-        <span>© 2026 CIVIQORG Enterprise Network · Sovereign Data Federation</span>
+        <span>© 2026 SAMAGRA ORG Enterprise Network · Sovereign Data Federation</span>
         <span>Strict Role-Based Access Control • All Actions Audited</span>
       </footer>
     </div>

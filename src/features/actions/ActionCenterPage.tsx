@@ -119,7 +119,7 @@ export function ActionCenterPage() {
           <div>
             <div className="flex items-center gap-2 mb-1.5">
               <span className="text-xs font-bold text-primary uppercase tracking-widest">
-                CIVIQ Proactive Intelligence
+                SAMAGRA Proactive Intelligence
               </span>
               {criticalCount > 0 && (
                 <span className="flex items-center gap-1 text-[11px] font-bold text-rose-600 dark:text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full">

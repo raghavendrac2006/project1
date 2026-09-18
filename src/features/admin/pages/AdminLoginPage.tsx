@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/Input'
 
 export function AdminLoginPage() {
   const navigate = useNavigate()
-  const [email, setEmail] = useState('admin@civiqone.gov.in')
+  const [email, setEmail] = useState('admin@samagra.gov.in')
   const [password, setPassword] = useState('SuperAdminMasterKey#2026')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -45,7 +45,7 @@ export function AdminLoginPage() {
             Root Governance
           </div>
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
-            CIVIQONE Super Admin
+            SAMAGRA Super Admin
           </h2>
           <p className="mt-1 text-sm text-slate-400">
             Cross-Portal Ecosystem Control & Sovereign Root Node
@@ -111,7 +111,7 @@ export function AdminLoginPage() {
             <button
               type="button"
               onClick={() => {
-                setEmail('admin@civiqone.gov.in')
+                setEmail('admin@samagra.gov.in')
                 handleLogin(new Event('submit') as unknown as React.FormEvent)
               }}
               className="w-full py-2 px-3 rounded-lg bg-slate-950/60 border border-slate-800 hover:border-purple-500/50 hover:bg-purple-950/20 transition-all flex items-center justify-between text-xs text-slate-300 group"
@@ -120,7 +120,7 @@ export function AdminLoginPage() {
                 <span className="font-semibold text-slate-200 group-hover:text-purple-300">
                   Chief Systems Administrator
                 </span>
-                <p className="text-slate-500 font-mono text-[11px]">admin@civiqone.gov.in (SUPER_ADMIN)</p>
+                <p className="text-slate-500 font-mono text-[11px]">admin@samagra.gov.in (SUPER_ADMIN)</p>
               </div>
               <KeyRound className="w-4 h-4 text-purple-400" />
             </button>

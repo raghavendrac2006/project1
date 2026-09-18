@@ -381,7 +381,7 @@ export function PaymentsPage() {
                   <div className="w-24 h-24 mx-auto bg-white p-1 rounded-lg flex items-center justify-center text-slate-900 border">
                     <QrCode className="w-20 h-20" />
                   </div>
-                  <p className="font-mono text-[11px] text-muted-foreground">civiqone.billpay@nic</p>
+                  <p className="font-mono text-[11px] text-muted-foreground">samagra.billpay@nic</p>
                 </div>
               )}
             </div>
