@@ -16,6 +16,7 @@ import {
   Type,
   Contrast,
   LifeBuoy,
+  SlidersHorizontal,
 } from 'lucide-react'
 import { useAuth, useTheme, useLanguage, useAccessibility } from '@/hooks'
 import { SUPPORTED_LANGUAGES } from '@/constants/languages'
@@ -137,49 +138,77 @@ export function Header({
           )}
         </Button>
 
-        {/* Senior-Friendly Accessibility Font Scaler */}
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-9 px-2 gap-1 text-xs text-muted-foreground hover:text-foreground font-mono"
-          onClick={cycleFontScale}
-          title={`Accessibility Font Size: ${fontScale.toUpperCase()} (Click to cycle)`}
-          aria-label={`Cycle font size, current size is ${fontScale}`}
-        >
-          <Type className="w-3.5 h-3.5" />
-          <span className="font-bold text-[11px]">
-            {fontScale === 'normal' ? 'A' : fontScale === 'large' ? 'A+' : 'A++'}
-          </span>
-        </Button>
+        {/* Accessibility & Privacy Preferences Dropdown */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn(
+                'h-9 w-9 text-muted-foreground hover:text-foreground',
+                (highContrast || fontScale !== 'normal') && 'text-primary bg-primary/10'
+              )}
+              title="Accessibility & Privacy Preferences"
+              aria-label="Accessibility & Privacy Preferences"
+            >
+              <SlidersHorizontal className="w-4 h-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56 p-2 space-y-1">
+            <DropdownMenuLabel className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+              Accessibility & Safety
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
 
-        {/* WCAG High Contrast Mode Toggle */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className={cn(
-            'h-9 w-9 text-muted-foreground hover:text-foreground transition-colors',
-            highContrast && 'bg-primary/20 text-primary border border-primary/40 font-bold'
-          )}
-          onClick={toggleHighContrast}
-          title={highContrast ? 'Disable High Contrast' : 'Enable High Contrast (WCAG AAA)'}
-          aria-label={highContrast ? 'Disable High Contrast' : 'Enable High Contrast (WCAG AAA)'}
-        >
-          <Contrast className="w-4 h-4" />
-        </Button>
+            {/* Font Scale Option */}
+            <div className="flex items-center justify-between px-2 py-1.5 text-xs">
+              <span className="flex items-center gap-2 font-medium">
+                <Type className="w-4 h-4 text-muted-foreground" />
+                Text Size
+              </span>
+              <button
+                type="button"
+                onClick={cycleFontScale}
+                className="px-2 py-0.5 rounded-md bg-muted text-xs font-mono font-bold hover:bg-muted/80 text-foreground cursor-pointer"
+                title="Click to cycle size"
+              >
+                {fontScale === 'normal' ? 'Standard (A)' : fontScale === 'large' ? 'Large (A+)' : 'Largest (A++)'}
+              </button>
+            </div>
 
-        {/* Instant Privacy Lock */}
-        {onLockSession && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-9 w-9 text-muted-foreground hover:text-amber-500 transition-colors"
-            onClick={onLockSession}
-            title="Lock Privacy Session Immediately"
-            aria-label="Lock screen for privacy"
-          >
-            <Lock className="w-4 h-4" />
-          </Button>
-        )}
+            {/* High Contrast Option */}
+            <div className="flex items-center justify-between px-2 py-1.5 text-xs">
+              <span className="flex items-center gap-2 font-medium">
+                <Contrast className="w-4 h-4 text-muted-foreground" />
+                High Contrast
+              </span>
+              <button
+                type="button"
+                onClick={toggleHighContrast}
+                className={cn(
+                  'px-2 py-0.5 rounded-md text-xs font-semibold cursor-pointer transition-colors',
+                  highContrast ? 'bg-primary text-primary-foreground font-bold' : 'bg-muted text-muted-foreground hover:text-foreground'
+                )}
+              >
+                {highContrast ? 'ON' : 'OFF'}
+              </button>
+            </div>
+
+            {/* Instant Privacy Lock */}
+            {onLockSession && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={onLockSession}
+                  className="flex items-center gap-2 text-xs text-amber-600 dark:text-amber-400 font-medium cursor-pointer"
+                >
+                  <Lock className="w-4 h-4" />
+                  <span>Lock Privacy Session</span>
+                </DropdownMenuItem>
+              </>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         {/* Customer Care & Grievance Redressal Button */}
         <Button

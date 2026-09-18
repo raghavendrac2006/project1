@@ -1,12 +1,10 @@
 import { useState, useEffect, useMemo } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
 import {
   ShieldAlert,
   ShieldCheck,
   Smartphone,
   Laptop,
   Tablet,
-  Globe,
   Trash2,
   Lock,
   LogOut,
@@ -14,14 +12,10 @@ import {
   History,
   KeyRound,
   CheckCircle2,
-  XCircle,
   Clock,
   RefreshCw,
-  Eye,
   Check,
   Activity,
-  AlertCircle,
-  Sparkles,
   Search,
 } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/Card'
@@ -32,13 +26,11 @@ import { securityService } from '@/services/security.service'
 import { citizenIntelligenceService, LoginHeatmapPoint } from '@/services/citizen-intelligence.service'
 import { useToast, useAuth } from '@/hooks'
 import { civicStorage } from '@/services/storage'
-import { ROUTES } from '@/constants/routes'
 import { cn } from '@/lib/utils'
 import type { TrustedDevice, UserSession, AuditEvent, BehavioralAnomaly } from '@/types'
 
 export function SecurityCenterPage() {
   const { user } = useAuth()
-  const navigate = useNavigate()
   const toast = useToast()
 
   const [devices, setDevices] = useState<TrustedDevice[]>([])
@@ -46,9 +38,7 @@ export function SecurityCenterPage() {
   const [auditEvents, setAuditEvents] = useState<AuditEvent[]>([])
   const [anomalies, setAnomalies] = useState<BehavioralAnomaly[]>([])
   const [heatmap, setHeatmap] = useState<LoginHeatmapPoint[]>([])
-  const [isLoading, setIsLoading] = useState(true)
   const [isBreachChecking, setIsBreachChecking] = useState(false)
-  const [breachCheckResult, setBreachCheckResult] = useState<'clean' | 'scanned' | null>('clean')
 
   // Step-Up Modal state
   const [stepUpOpen, setStepUpOpen] = useState(false)
@@ -56,23 +46,18 @@ export function SecurityCenterPage() {
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null)
 
   const loadData = async () => {
-    setIsLoading(true)
-    try {
-      const [devList, sessList, auditList, anomList, heatList] = await Promise.all([
-        securityService.getTrustedDevices(),
-        securityService.getUserSessions(),
-        securityService.getSecurityAuditEvents(),
-        citizenIntelligenceService.getBehavioralAnomalies(),
-        citizenIntelligenceService.getLoginHeatmap(),
-      ])
-      setDevices(devList)
-      setSessions(sessList)
-      setAuditEvents(auditList)
-      setAnomalies(anomList)
-      setHeatmap(heatList)
-    } finally {
-      setIsLoading(false)
-    }
+    const [devList, sessList, auditList, anomList, heatList] = await Promise.all([
+      securityService.getTrustedDevices(),
+      securityService.getUserSessions(),
+      securityService.getSecurityAuditEvents(),
+      citizenIntelligenceService.getBehavioralAnomalies(),
+      citizenIntelligenceService.getLoginHeatmap(),
+    ])
+    setDevices(devList)
+    setSessions(sessList)
+    setAuditEvents(auditList)
+    setAnomalies(anomList)
+    setHeatmap(heatList)
   }
 
   useEffect(() => {
@@ -89,7 +74,6 @@ export function SecurityCenterPage() {
     setIsBreachChecking(true)
     setTimeout(() => {
       setIsBreachChecking(false)
-      setBreachCheckResult('clean')
       toast.success('Breach Scan Clean', '0 compromised credentials or hash exposures found.')
     }, 1200)
   }
@@ -170,6 +154,17 @@ export function SecurityCenterPage() {
         </div>
 
         <div className="flex items-center gap-2.5 shrink-0">
+          <Button
+            onClick={handleRunBreachCheck}
+            disabled={isBreachChecking}
+            variant="outline"
+            size="sm"
+            className="text-xs font-bold rounded-xl"
+          >
+            <RefreshCw className={cn("w-3.5 h-3.5 mr-1.5", isBreachChecking && "animate-spin")} />
+            {isBreachChecking ? 'Scanning...' : 'Scan Leaks'}
+          </Button>
+
           <Button
             onClick={handleRevokeAllRemote}
             variant="outline"

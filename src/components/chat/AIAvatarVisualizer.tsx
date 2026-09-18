@@ -1,5 +1,5 @@
 import React from 'react'
-import { Bot, Mic, Sparkles, Volume2 } from 'lucide-react'
+import { Bot, Mic, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export type AvatarState = 'idle' | 'listening' | 'thinking' | 'speaking'

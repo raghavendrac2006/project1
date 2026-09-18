@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Bot,
@@ -22,6 +22,29 @@ import { assistantService } from '@/services/assistant.service'
 import { SUPPORTED_LANGUAGES, CIVIC_ASSISTANT_CONTENT } from '@/constants/languages'
 import { cn } from '@/lib/utils'
 import type { AssistantMessage, SupportedLanguage } from '@/types'
+
+const CATEGORY_SUGGESTIONS: Record<string, string[]> = {
+  applications: [
+    'What is the current status of my Driving License renewal?',
+    'Check status of my E-Khata property mutation',
+    'How to expedite statutory application processing?',
+  ],
+  grievances: [
+    'How do I file a statutory grievance against civic delay?',
+    'Escalate an unresolved complaint under the Citizen Charter',
+    'Check status of my previous grievance ticket',
+  ],
+  services: [
+    'Check eligibility for PM Surya Ghar Solar Subsidy',
+    'What documents are required for Caste and Income Certificate?',
+    'How to apply for Ayushman Bharat PMJAY golden card?',
+  ],
+  officer: [
+    'Connect me to Senior Grievance Redressal Officer Vikramaditya Rao',
+    'Request immediate official phone callback from Department Desk',
+    'What are the nodal officer timings for citizen hearings?',
+  ],
+}
 
 export function AssistantPage() {
   const { language, setLanguage, currentLanguageDetails } = useLanguage()
@@ -101,6 +124,51 @@ export function AssistantPage() {
   }
 
   const preset = CIVIC_ASSISTANT_CONTENT[language] || CIVIC_ASSISTANT_CONTENT.en
+
+  const displayedSuggestions = useMemo(() => {
+    if (activeCategory !== 'all' && CATEGORY_SUGGESTIONS[activeCategory]) {
+      return CATEGORY_SUGGESTIONS[activeCategory].map((text) => ({ text }))
+    }
+    return preset.suggestions
+  }, [activeCategory, preset.suggestions])
+
+  const displayedMessages = useMemo(() => {
+    if (activeCategory === 'all') return messages
+    if (activeCategory === 'applications') {
+      return messages.filter(
+        (m) =>
+          m.cardType === 'application' ||
+          m.content.toLowerCase().includes('application') ||
+          m.content.toLowerCase().includes('status')
+      )
+    }
+    if (activeCategory === 'grievances') {
+      return messages.filter(
+        (m) =>
+          m.cardType === 'grievance' ||
+          m.content.toLowerCase().includes('grievance') ||
+          m.content.toLowerCase().includes('complaint')
+      )
+    }
+    if (activeCategory === 'services') {
+      return messages.filter(
+        (m) =>
+          m.cardType === 'service' ||
+          m.content.toLowerCase().includes('scheme') ||
+          m.content.toLowerCase().includes('subsidy') ||
+          m.content.toLowerCase().includes('service')
+      )
+    }
+    if (activeCategory === 'officer') {
+      return messages.filter(
+        (m) =>
+          m.cardType === 'officer' ||
+          m.content.toLowerCase().includes('officer') ||
+          m.content.toLowerCase().includes('desk')
+      )
+    }
+    return messages
+  }, [messages, activeCategory])
 
   return (
     <div className="flex flex-col h-[calc(100vh-8.5rem)] max-w-5xl mx-auto space-y-3">
@@ -202,18 +270,46 @@ export function AssistantPage() {
 
       {/* ── Messages Scroll Area ── */}
       <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 rounded-3xl border border-border bg-card/60 backdrop-blur-sm shadow-subtle">
-        {messages.map((msg) => (
-          <ChatMessageBubble
-            key={msg.id}
-            message={msg}
-            currentLanguage={language}
-            onCardAction={(action, payload) => {
-              if (action === 'connect_officer') {
-                navigate('/app/support?tab=live')
-              }
-            }}
-          />
-        ))}
+        {displayedMessages.length === 0 ? (
+          <div className="h-full flex flex-col items-center justify-center text-center p-6 space-y-3">
+            <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center">
+              <Sparkles className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-foreground">No queries in this category yet</h3>
+              <p className="text-xs text-muted-foreground mt-1 max-w-sm">
+                Choose a suggested topic below or type your inquiry to get instant statutory assistance.
+              </p>
+            </div>
+            <div className="flex flex-wrap justify-center gap-2 pt-2">
+              {displayedSuggestions.map((sug, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => handleSendMessage(sug.text)}
+                  className="px-3 py-1.5 rounded-xl border border-primary/20 bg-primary/5 hover:bg-primary/15 text-xs text-primary font-medium transition-colors cursor-pointer"
+                >
+                  {sug.text}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : (
+          displayedMessages.map((msg) => (
+            <ChatMessageBubble
+              key={msg.id}
+              message={msg}
+              currentLanguage={language}
+              onCardAction={(action, payload) => {
+                if (action === 'connect_officer') {
+                  navigate('/app/support?tab=live')
+                }
+                if (action === 'navigate' && typeof payload === 'string') {
+                  navigate(payload)
+                }
+              }}
+            />
+          ))
+        )}
 
         {isTyping && (
           <div className="flex gap-3 mr-auto max-w-md items-center">
@@ -237,11 +333,11 @@ export function AssistantPage() {
         <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider shrink-0 flex items-center gap-1">
           <Sparkles className="w-3 h-3 text-primary" /> Suggestions:
         </span>
-        {preset.suggestions.map((sug, idx) => (
+        {displayedSuggestions.map((sug, idx) => (
           <button
             key={idx}
             onClick={() => handleSendMessage(sug.text)}
-            className="whitespace-nowrap px-3 py-1.5 rounded-xl border border-border/80 bg-card hover:bg-muted text-xs text-foreground font-medium transition-colors"
+            className="whitespace-nowrap px-3 py-1.5 rounded-xl border border-border/80 bg-card hover:bg-muted text-xs text-foreground font-medium transition-colors cursor-pointer"
           >
             {sug.text}
           </button>

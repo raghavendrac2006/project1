@@ -5,34 +5,36 @@ import {
   X,
   Send,
   Sparkles,
-  Languages,
   Mic,
   Radio,
   Minimize2,
   Maximize2,
-  Trash2,
   Headphones,
   ExternalLink,
   ChevronDown,
   Volume2,
   VolumeX,
-  GripHorizontal,
-  ArrowLeft,
   RotateCcw,
+  Bot,
 } from 'lucide-react'
 import { AIAvatarVisualizer, type AvatarState } from './AIAvatarVisualizer'
-import { RadialSatelliteMenu } from './RadialSatelliteMenu'
-import { ProactiveCivicBubble } from './ProactiveCivicBubble'
-import { QuadrantDockController } from './QuadrantDockController'
 import { ChatMessageBubble } from './ChatMessageBubble'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/DropdownMenu'
 import { useLanguage, useToast, useSpeechRecognition } from '@/hooks'
 import { assistantService } from '@/services/assistant.service'
 import { supportService } from '@/services/support.service'
 import { SUPPORTED_LANGUAGES, CIVIC_ASSISTANT_CONTENT } from '@/constants/languages'
 import { cn } from '@/lib/utils'
-import type { AssistantMessage, SupportedLanguage, CompanionDockPosition } from '@/types'
+import type { AssistantMessage, SupportedLanguage } from '@/types'
 
 const LANG_BCP47: Record<SupportedLanguage, string> = {
   en: 'en-IN',
@@ -65,8 +67,6 @@ export function CitizenFloatingChatbot() {
   const [isTyping, setIsTyping] = useState(false)
   const [isLiveOfficerMode, setIsLiveOfficerMode] = useState(false)
 
-  // Satellite Menu & Drag Physics
-  const [satelliteOpen, setSatelliteOpen] = useState(false)
   const [autoSpeak, setAutoSpeak] = useState(() => {
     return localStorage.getItem('civiqone_auto_speak_v1') === 'true'
   })
@@ -75,106 +75,6 @@ export function CitizenFloatingChatbot() {
     return r ? parseFloat(r) : 0.95
   })
   const [avatarState, setAvatarState] = useState<AvatarState>('idle')
-
-  // Dynamic Page Movement & Quadrant Docking
-  const [dockPosition, setDockPosition] = useState<CompanionDockPosition>(() => {
-    return (localStorage.getItem('civiqone_bot_dock_pos') as CompanionDockPosition) || 'bottom-right'
-  })
-  const [followScroll, setFollowScroll] = useState<boolean>(() => {
-    return localStorage.getItem('civiqone_bot_follow_scroll') !== 'false'
-  })
-  const [dockControllerOpen, setDockControllerOpen] = useState(false)
-  const [scrollOffset, setScrollOffset] = useState(0)
-
-  // Scroll listener for dynamic buoyancy
-  useEffect(() => {
-    if (!followScroll) {
-      setScrollOffset(0)
-      return
-    }
-    const handleScroll = () => {
-      const offset = (window.scrollY % 32) - 16
-      setScrollOffset(offset)
-    }
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [followScroll])
-
-  // Listen for Escape key to easily back out or close chat
-  useEffect(() => {
-    if (!isOpen) return
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        if (isLiveOfficerMode) {
-          setIsLiveOfficerMode(false)
-          toast.info('Returned to AI Copilot', 'Automated statutory assistant active.')
-        } else {
-          setIsOpen(false)
-        }
-      }
-    }
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [isOpen, isLiveOfficerMode])
-
-  const handleSelectDockPosition = (pos: CompanionDockPosition) => {
-    setDockPosition(pos)
-    localStorage.setItem('civiqone_bot_dock_pos', pos)
-    toast.success('Repositioned', `Companion docked to ${pos.replace('-', ' ').toUpperCase()}`)
-  }
-
-  const handleToggleFollowScroll = () => {
-    const next = !followScroll
-    setFollowScroll(next)
-    localStorage.setItem('civiqone_bot_follow_scroll', String(next))
-    toast.info(
-      next ? 'Follow-Scroll Enabled' : 'Follow-Scroll Disabled',
-      next ? 'Companion glides dynamically with page scroll.' : 'Companion position fixed.'
-    )
-  }
-
-  const handleRoamGuide = () => {
-    const targetEl =
-      document.querySelector('[data-tour="active-item"]') ||
-      document.querySelector('main h1') ||
-      document.querySelector('main')
-
-    if (targetEl) {
-      targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' })
-      targetEl.classList.add('ring-4', 'ring-primary/40', 'ring-offset-2', 'transition-all', 'duration-500')
-      setTimeout(() => {
-        targetEl.classList.remove('ring-4', 'ring-primary/40', 'ring-offset-2')
-      }, 4000)
-    }
-
-    const tip =
-      language === 'hi'
-        ? 'मैंने इस पृष्ठ के मुख्य अनुभाग को केंद्रित किया है। आप आवेदन की समीक्षा कर सकते हैं।'
-        : language === 'te'
-        ? 'ఈ పేజీలోని ముఖ్య విభాగాన్ని కేంద్రీకరించాను. వివరాలు పరిశీలించవచ్చు.'
-        : 'I navigated to and highlighted the primary focus area on this page!'
-
-    toast.info('Page Guided', tip)
-    if (autoSpeak) {
-      speakText(tip)
-    }
-  }
-
-  const getDockPositionClasses = (pos: CompanionDockPosition): string => {
-    switch (pos) {
-      case 'bottom-left':
-        return 'bottom-8 left-8 sm:left-24'
-      case 'top-right':
-        return 'top-20 right-8'
-      case 'top-left':
-        return 'top-20 left-8 sm:left-24'
-      case 'center-float':
-        return 'top-1/2 right-6 -translate-y-1/2'
-      case 'bottom-right':
-      default:
-        return 'bottom-8 right-8'
-    }
-  }
 
   const { language, setLanguage, currentLanguageDetails } = useLanguage()
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -202,12 +102,11 @@ export function CitizenFloatingChatbot() {
     } else if (isTyping) {
       setAvatarState('thinking')
     } else {
-      // Return to idle if not speaking
       if (avatarState === 'listening' || avatarState === 'thinking') {
         setAvatarState('idle')
       }
     }
-  }, [isListening, isTyping])
+  }, [isListening, isTyping, avatarState])
 
   // Native Audio Speech Synthesis Helper
   const speakText = (text: string, lang = language) => {
@@ -245,6 +144,23 @@ export function CitizenFloatingChatbot() {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
     }
   }, [messages, isTyping, isOpen])
+
+  // Listen for Escape key to easily back out or close chat
+  useEffect(() => {
+    if (!isOpen) return
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (isLiveOfficerMode) {
+          setIsLiveOfficerMode(false)
+          toast.info('Returned to AI Copilot', 'Automated statutory assistant active.')
+        } else {
+          setIsOpen(false)
+        }
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen, isLiveOfficerMode, toast])
 
   // Don't render floating companion if user is on full-screen assistant
   if (location.pathname === '/app/assistant') {
@@ -349,486 +265,362 @@ export function CitizenFloatingChatbot() {
 
   return (
     <>
-      {/* ── DYNAMIC MOVING COMPANION (DRAGGABLE ACROSS ENTIRE VIEWPORT & DOCKABLE) ── */}
+      {/* ── SLEEK, NON-INTRUSIVE FLOATING ACTION BUTTON (FAB) ── */}
       {!isOpen && (
         <motion.div
-          key={dockPosition}
-          drag
-          dragMomentum={false}
-          dragElastic={0.15}
-          dragConstraints={{
-            top: 70,
-            left: 20,
-            right: window.innerWidth - 80,
-            bottom: window.innerHeight - 80,
-          }}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          animate={{
-            y: followScroll ? [scrollOffset, scrollOffset - 6, scrollOffset] : [0, -6, 0],
-          }}
-          transition={{
-            y: {
-              repeat: Infinity,
-              duration: 3.5,
-              ease: 'easeInOut',
-            },
-          }}
-          className={cn(
-            'fixed z-50 flex items-center justify-center select-none touch-none cursor-grab active:cursor-grabbing transition-all duration-500',
-            getDockPositionClasses(dockPosition)
-          )}
-          style={{ x: 0 }}
+          initial={{ opacity: 0, scale: 0.85, y: 10 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.85, y: 10 }}
+          transition={{ duration: 0.2 }}
+          className="fixed bottom-6 right-6 z-40 flex items-center gap-2 select-none"
         >
-          {/* Proactive Contextual Speech Bubble (Route-Aware) */}
-          <ProactiveCivicBubble
-            language={language}
-            onSelectPrompt={(text) => {
-              setIsOpen(true)
-              setTimeout(() => handleSendMessage(text), 200)
-            }}
-            onSpeakText={(text) => speakText(text)}
-          />
+          <button
+            onClick={() => setIsOpen(true)}
+            className="group relative flex items-center gap-2.5 h-14 pl-3.5 pr-4 rounded-full bg-gradient-to-r from-primary via-blue-600 to-indigo-600 text-white shadow-xl hover:shadow-2xl border border-white/20 transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer"
+            title="Open CiviqOne Civic AI Assistant"
+            aria-label="Open AI Assistant"
+          >
+            <span className="relative flex items-center justify-center w-8 h-8 rounded-full bg-white/15 backdrop-blur-md">
+              <Bot className="w-5 h-5 text-white transition-transform group-hover:rotate-12" />
+              <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-400 rounded-full ring-2 ring-primary" />
+            </span>
 
-          {/* Radial Satellite Bloom Menu (Surrounds the Avatar) */}
-          <RadialSatelliteMenu
-            isOpen={satelliteOpen}
-            isListening={isListening}
-            autoSpeak={autoSpeak}
-            currentLanguage={language}
-            onToggleMic={() => {
-              if (isListening) {
-                stopListening()
-              } else {
-                startListening()
-              }
-            }}
-            onToggleAutoSpeak={toggleAutoSpeak}
-            onSelectLanguage={(lang) => {
-              setLanguage(lang)
-              toast.success('Language Switched', `Active: ${lang.toUpperCase()}`)
-            }}
-            onConnectOfficer={() => {
-              navigate('/app/support?tab=live')
-              setSatelliteOpen(false)
-            }}
-            onOpenChat={() => {
-              setIsOpen(true)
-              setSatelliteOpen(false)
-            }}
-          />
-
-          {/* Expressive Visual Avatar Body with Dynamic Dock Controller */}
-          <div className="relative">
-            <AIAvatarVisualizer
-              state={avatarState}
-              size="md"
-              onClick={() => {
-                setSatelliteOpen(!satelliteOpen)
-              }}
-            />
-
-            {/* Dynamic Quadrant Dock Controller (Allows 1-Click Corner Snapping) */}
-            <div className="absolute -top-3 -right-3 z-20">
-              <QuadrantDockController
-                currentPosition={dockPosition}
-                onSelectPosition={handleSelectDockPosition}
-                followScroll={followScroll}
-                onToggleFollowScroll={handleToggleFollowScroll}
-                onRoamGuide={handleRoamGuide}
-                isOpen={dockControllerOpen}
-                onToggleOpen={() => setDockControllerOpen(!dockControllerOpen)}
-              />
+            <div className="flex flex-col text-left">
+              <span className="text-xs font-bold leading-tight tracking-tight flex items-center gap-1">
+                <span>CiviqAI</span>
+                <Sparkles className="w-3 h-3 text-amber-300" />
+              </span>
+              <span className="text-[10px] text-white/80 font-medium leading-none">
+                {currentLanguageDetails.nativeName}
+              </span>
             </div>
-
-            {/* Quick Action Double-Click / Mini Pill */}
-            <button
-              onClick={() => setIsOpen(true)}
-              className="absolute -bottom-6 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full bg-card/90 backdrop-blur-md border border-border/80 shadow-md text-[9px] font-mono font-bold text-foreground hover:bg-muted whitespace-nowrap cursor-pointer transition-colors"
-              title="Click to open full chat console"
-            >
-              CiviqAI • {currentLanguageDetails.nativeName}
-            </button>
-          </div>
+          </button>
         </motion.div>
       )}
 
-      {/* ── EXPANDED FULL COPILOT CONSOLE (DRAGGABLE ANYWHERE ACROSS PAGE) ── */}
-      {isOpen && (
-        <motion.div
-          drag
-          dragMomentum={false}
-          dragElastic={0.08}
-          dragConstraints={{
-            top: 20,
-            left: 20,
-            right: window.innerWidth - 380,
-            bottom: window.innerHeight - 300,
-          }}
-          className={cn(
-            'fixed z-50 flex flex-col bg-card border border-border/90 rounded-3xl shadow-2xl backdrop-blur-xl transition-all duration-300 animate-in zoom-in-95',
-            isExpanded
-              ? 'inset-4 md:inset-auto md:bottom-6 md:right-6 md:w-[640px] md:h-[720px] max-h-[92vh]'
-              : 'bottom-4 right-4 sm:bottom-6 sm:right-6 w-[calc(100vw-2rem)] sm:w-[460px] h-[640px] max-h-[88vh]'
-          )}
-        >
-          {/* Header */}
-          <div className="flex items-center justify-between p-3.5 border-b border-border/80 bg-muted/40 rounded-t-3xl shrink-0 cursor-grab active:cursor-grabbing">
-            <div className="flex items-center gap-2 min-w-0">
-              {/* Back button to close modal or return from Live Officer */}
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => {
-                  if (isLiveOfficerMode) {
-                    setIsLiveOfficerMode(false)
-                    toast.info('Returned to AI Copilot', 'Automated statutory assistant active.')
-                  } else {
-                    setIsOpen(false)
-                  }
-                }}
-                className="h-8 w-8 rounded-lg text-foreground hover:bg-muted shrink-0 cursor-pointer"
-                title={isLiveOfficerMode ? 'Back to AI Copilot' : 'Back to Portal Page (Esc)'}
-                aria-label="Back to portal page"
-              >
-                <ArrowLeft className="w-4 h-4" />
-              </Button>
-
-              <span title="Drag to reposition chat anywhere" className="hidden sm:inline-flex cursor-grab active:cursor-grabbing">
-                <GripHorizontal className="w-4 h-4 text-muted-foreground/60 shrink-0" />
-              </span>
-              <AIAvatarVisualizer state={avatarState} size="sm" />
-              <div className="min-w-0">
-                <div className="flex items-center gap-1.5">
-                  <h3 className="text-xs sm:text-sm font-bold text-foreground truncate">
-                    CiviqOne Civic AI Agent
-                  </h3>
-                  <Badge variant={isLiveOfficerMode ? 'warning' : 'verified'} size="sm" className="shrink-0">
-                    {isLiveOfficerMode ? 'Live Officer' : '9 Regional'}
-                  </Badge>
+      {/* ── STREAMLINED CHAT CONSOLE ── */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.96 }}
+            transition={{ type: 'spring', damping: 28, stiffness: 350 }}
+            className={cn(
+              'fixed z-50 flex flex-col bg-card border border-border/90 rounded-3xl shadow-2xl backdrop-blur-xl transition-all duration-200',
+              isExpanded
+                ? 'bottom-4 right-4 sm:bottom-6 sm:right-6 w-[calc(100vw-2rem)] sm:w-[640px] h-[680px] max-h-[92vh]'
+                : 'bottom-4 right-4 sm:bottom-6 sm:right-6 w-[calc(100vw-2rem)] sm:w-[420px] h-[580px] max-h-[86vh]'
+            )}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between p-3.5 border-b border-border/80 bg-muted/40 rounded-t-3xl shrink-0">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <AIAvatarVisualizer state={avatarState} size="sm" />
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <h3 className="text-xs sm:text-sm font-bold text-foreground truncate">
+                      CiviqOne Civic AI
+                    </h3>
+                    <Badge variant={isLiveOfficerMode ? 'warning' : 'verified'} size="sm" className="shrink-0 text-[10px] py-0 px-1.5">
+                      {isLiveOfficerMode ? 'Officer Desk' : 'AI Copilot'}
+                    </Badge>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground truncate">
+                    {isLiveOfficerMode ? 'Live Officer Desk Connected' : `Active in ${currentLanguageDetails.name}`}
+                  </p>
                 </div>
-                <p className="text-[10px] text-muted-foreground truncate">
-                  {isLiveOfficerMode ? 'Officer Vikramaditya Rao Desk' : 'Statutory copilot & multi-lingual speech agent'}
-                </p>
               </div>
-            </div>
 
-            {/* Controls */}
-            <div className="flex items-center gap-1">
-              {/* Language Selector Dropdown */}
-              <div className="relative">
-                <select
-                  value={language}
-                  onChange={(e) => setLanguage(e.target.value as SupportedLanguage)}
-                  className="bg-muted/70 hover:bg-muted border border-border text-[11px] font-semibold text-foreground rounded-lg py-1 pl-2 pr-5 cursor-pointer outline-none transition-colors appearance-none"
-                  title="Switch Language"
+              {/* Header Actions */}
+              <div className="flex items-center gap-1">
+                {/* Language Selector Dropdown */}
+                <div className="relative">
+                  <select
+                    value={language}
+                    onChange={(e) => setLanguage(e.target.value as SupportedLanguage)}
+                    className="bg-muted/70 hover:bg-muted border border-border text-[11px] font-semibold text-foreground rounded-lg py-1 pl-2 pr-5 cursor-pointer outline-none transition-colors appearance-none"
+                    title="Switch Language"
+                  >
+                    {SUPPORTED_LANGUAGES.map((l) => (
+                      <option key={l.code} value={l.code}>
+                        {l.flag} {l.nativeName}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="w-3 h-3 text-muted-foreground absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                </div>
+
+                {/* Audio Narration Toggle */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={toggleAutoSpeak}
+                  className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground"
+                  title={autoSpeak ? 'Mute automatic voice narration' : 'Enable voice narration'}
                 >
-                  {SUPPORTED_LANGUAGES.map((l) => (
-                    <option key={l.code} value={l.code}>
-                      {l.flag} {l.nativeName}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="w-3 h-3 text-muted-foreground absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  {autoSpeak ? <Volume2 className="w-4 h-4 text-emerald-500" /> : <VolumeX className="w-4 h-4" />}
+                </Button>
+
+                {/* More Options Dropdown */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground"
+                      title="More Options"
+                    >
+                      <ChevronDown className="w-4 h-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-52">
+                    <DropdownMenuLabel>Assistant Options</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setIsLiveOfficerMode(!isLiveOfficerMode)
+                        toast.info(
+                          isLiveOfficerMode ? 'AI Agent Active' : 'Live Officer Mode',
+                          isLiveOfficerMode ? 'Switched to AI guidance.' : 'Connected to Grievance Redressal Officer desk.'
+                        )
+                      }}
+                      className="flex items-center gap-2 cursor-pointer text-xs"
+                    >
+                      <Headphones className="w-3.5 h-3.5 text-amber-500" />
+                      <span>{isLiveOfficerMode ? 'Switch to AI Copilot' : 'Connect Live Officer'}</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={cycleSpeechRate}
+                      className="flex items-center gap-2 cursor-pointer text-xs"
+                    >
+                      <Volume2 className="w-3.5 h-3.5" />
+                      <span>Speech Pace: {speechRate}x</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={handleClear}
+                      className="flex items-center gap-2 cursor-pointer text-xs text-rose-600 focus:text-rose-600"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" />
+                      <span>Reset Conversation</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={() => {
+                        navigate('/app/support')
+                        setIsOpen(false)
+                      }}
+                      className="flex items-center gap-2 cursor-pointer text-xs"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                      <span>Open Customer Care Hub</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                {/* Expand / Restore Size Toggle */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsExpanded(!isExpanded)}
+                  className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground hidden sm:inline-flex"
+                  title={isExpanded ? 'Restore window size' : 'Expand window size'}
+                >
+                  {isExpanded ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+                </Button>
+
+                {/* Close Button */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsOpen(false)}
+                  className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground"
+                  title="Close chat console (Esc)"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
               </div>
-
-              {/* Auto-Speak Toggle */}
-              <Button
-                variant={autoSpeak ? 'primary' : 'ghost'}
-                size="icon"
-                onClick={toggleAutoSpeak}
-                className="h-8 w-8 rounded-lg"
-                title={autoSpeak ? 'Mute automatic voice' : 'Enable automatic voice narration'}
-              >
-                {autoSpeak ? <Volume2 className="w-3.5 h-3.5 text-emerald-300" /> : <VolumeX className="w-3.5 h-3.5" />}
-              </Button>
-
-              {/* Speech Pace button */}
-              <button
-                type="button"
-                onClick={cycleSpeechRate}
-                className="h-8 px-1.5 rounded-lg text-[10px] font-mono font-bold text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                title="Cycle speech speed (0.8x / 1.0x / 1.25x)"
-              >
-                {speechRate}x
-              </button>
-
-              {/* Live Officer Mode Switcher */}
-              <Button
-                variant={isLiveOfficerMode ? 'primary' : 'ghost'}
-                size="icon"
-                onClick={() => {
-                  setIsLiveOfficerMode(!isLiveOfficerMode)
-                  toast.info(
-                    isLiveOfficerMode ? 'AI Agent Active' : 'Live Officer Mode',
-                    isLiveOfficerMode ? 'Switched to automated AI guidance.' : 'Connected to Grievance Redressal Officer desk.'
-                  )
-                }}
-                className="h-8 w-8 rounded-lg"
-                title={isLiveOfficerMode ? 'Switch back to AI' : 'Escalate to Live Officer'}
-              >
-                <Headphones className={cn('w-4 h-4', isLiveOfficerMode && 'text-amber-300')} />
-              </Button>
-
-              {/* Clear */}
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleClear}
-                className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                title="Clear messages"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-              </Button>
-
-              {/* Expand / Minimize */}
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsExpanded(!isExpanded)}
-                className="h-8 w-8 text-muted-foreground hover:text-foreground hidden sm:flex"
-                title={isExpanded ? 'Restore size' : 'Expand window'}
-              >
-                {isExpanded ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
-              </Button>
-
-              {/* Close */}
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsOpen(false)}
-                className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                title="Close chat (Back to page)"
-              >
-                <X className="w-4 h-4" />
-              </Button>
             </div>
-          </div>
 
-          {/* Civic Services Quick Discovery Tray */}
-          <div className="px-3 py-2 border-b border-border/60 bg-muted/20 flex items-center gap-1.5 overflow-x-auto no-scrollbar shrink-0">
-            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider shrink-0 flex items-center gap-1 pr-1">
-              <Sparkles className="w-2.5 h-2.5 text-primary" /> Topics:
-            </span>
-            {CIVIC_CATEGORIES.map((cat) => (
-              <button
-                key={cat.id}
-                type="button"
-                onClick={() => handleSendMessage(cat.query)}
-                className="whitespace-nowrap px-2.5 py-1 rounded-full text-[11px] font-medium border border-border/80 bg-card hover:bg-primary/10 hover:border-primary/40 hover:text-primary transition-colors cursor-pointer shrink-0"
-              >
-                {cat.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Active Live Officer Status Header Banner */}
-          {isLiveOfficerMode && (
-            <div className="bg-amber-500/15 border-b border-amber-500/30 px-3.5 py-2 flex items-center justify-between text-xs text-amber-700 dark:text-amber-400 shrink-0">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
-                <span className="font-semibold">Live Officer Desk: Officer Vikramaditya Rao</span>
-              </div>
-              <button
-                onClick={() => navigate('/app/support?tab=live')}
-                className="text-[10.5px] font-bold underline flex items-center gap-1 cursor-pointer"
-              >
-                Full Console <ExternalLink className="w-2.5 h-2.5" />
-              </button>
+            {/* Quick Topic Chips */}
+            <div className="px-3 py-2 border-b border-border/60 bg-muted/20 flex items-center gap-1.5 overflow-x-auto no-scrollbar shrink-0">
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider shrink-0 flex items-center gap-1 pr-1">
+                <Sparkles className="w-2.5 h-2.5 text-primary" /> Topics:
+              </span>
+              {CIVIC_CATEGORIES.map((cat) => (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => handleSendMessage(cat.query)}
+                  className="whitespace-nowrap px-2.5 py-1 rounded-full text-[11px] font-medium border border-border/80 bg-card hover:bg-primary/10 hover:border-primary/40 hover:text-primary transition-colors cursor-pointer shrink-0"
+                >
+                  {cat.label}
+                </button>
+              ))}
             </div>
-          )}
 
-          {/* Chat Messages List */}
-          <div className="flex-1 overflow-y-auto p-3.5 space-y-3 overscroll-contain">
-            {messages.map((msg) => (
-              <ChatMessageBubble
-                key={msg.id}
-                message={msg}
-                currentLanguage={language}
-                onCardAction={(action, payload) => {
-                  if (action === 'connect_officer') {
-                    setIsLiveOfficerMode(true)
-                  }
-                  if (action === 'auto_file_grievance' && payload) {
-                    sessionStorage.setItem('civiqone_prefill_grievance', JSON.stringify(payload))
-                    navigate('/app/support?tab=lodge')
-                  }
-                  if (action === 'navigate' && typeof payload === 'string') {
-                    navigate(payload)
-                  }
-                }}
-              />
-            ))}
-
-            {isTyping && (
-              <div className="flex gap-2 mr-auto items-center">
-                <AIAvatarVisualizer state="thinking" size="sm" />
-                <div className="p-2.5 rounded-2xl bg-card border border-border text-xs text-muted-foreground flex items-center gap-1.5 shadow-subtle">
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce" />
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce [animation-delay:0.2s]" />
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce [animation-delay:0.4s]" />
-                  <span className="text-[11px] font-mono ml-1">Analyzing statutory records...</span>
+            {/* Live Officer Active Status Banner */}
+            {isLiveOfficerMode && (
+              <div className="bg-amber-500/15 border-b border-amber-500/30 px-3.5 py-2 flex items-center justify-between text-xs text-amber-700 dark:text-amber-400 shrink-0">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
+                  <span className="font-semibold">Officer Vikramaditya Rao Desk</span>
                 </div>
+                <button
+                  onClick={() => {
+                    navigate('/app/support?tab=live')
+                    setIsOpen(false)
+                  }}
+                  className="text-[10.5px] font-bold underline flex items-center gap-1 cursor-pointer"
+                >
+                  Full Desk <ExternalLink className="w-2.5 h-2.5" />
+                </button>
               </div>
             )}
 
-            <div ref={messagesEndRef} />
-          </div>
+            {/* Messages Scroll Area */}
+            <div className="flex-1 overflow-y-auto p-3.5 space-y-3 overscroll-contain">
+              {messages.map((msg) => (
+                <ChatMessageBubble
+                  key={msg.id}
+                  message={msg}
+                  currentLanguage={language}
+                  onCardAction={(action, payload) => {
+                    if (action === 'connect_officer') {
+                      setIsLiveOfficerMode(true)
+                    }
+                    if (action === 'auto_file_grievance' && payload) {
+                      sessionStorage.setItem('civiqone_prefill_grievance', JSON.stringify(payload))
+                      navigate('/app/support?tab=lodge')
+                      setIsOpen(false)
+                    }
+                    if (action === 'navigate' && typeof payload === 'string') {
+                      navigate(payload)
+                      setIsOpen(false)
+                    }
+                  }}
+                />
+              ))}
 
-          {/* Quick In-Chat Navigation Action Bar */}
-          <div className="px-3 py-1.5 bg-muted/30 border-t border-border/60 flex items-center justify-between text-[11px] text-muted-foreground shrink-0">
-            <button
-              type="button"
-              onClick={() => {
-                if (isLiveOfficerMode) {
-                  setIsLiveOfficerMode(false)
-                  toast.info('Returned to AI Copilot')
-                } else {
-                  setIsOpen(false)
-                }
-              }}
-              className="inline-flex items-center gap-1 font-semibold text-primary hover:text-primary/80 transition-colors cursor-pointer"
-              title="Return to portal page view"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>{isLiveOfficerMode ? '← Back to AI Copilot' : '← Back to Portal'}</span>
-            </button>
-
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={handleClear}
-                className="inline-flex items-center gap-1 hover:text-foreground transition-colors cursor-pointer"
-                title="Reset conversation"
-              >
-                <RotateCcw className="w-3 h-3" />
-                <span>Reset</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setIsLiveOfficerMode(!isLiveOfficerMode)
-                  toast.info(
-                    isLiveOfficerMode ? 'AI Agent Active' : 'Live Officer Mode',
-                    isLiveOfficerMode ? 'Switched to AI guidance.' : 'Connected to Grievance Redressal Officer desk.'
-                  )
-                }}
-                className={cn(
-                  'inline-flex items-center gap-1 font-medium transition-colors cursor-pointer',
-                  isLiveOfficerMode ? 'text-amber-500 font-semibold' : 'hover:text-amber-500'
-                )}
-                title="Connect to human officer"
-              >
-                <Headphones className="w-3 h-3 text-amber-500" />
-                <span>{isLiveOfficerMode ? 'Live Desk' : 'Officer Desk'}</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Quick Suggestions Chips */}
-          <div className="px-3 py-1.5 flex items-center gap-1.5 overflow-x-auto no-scrollbar border-t border-border/60 bg-muted/20 shrink-0">
-            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider shrink-0 flex items-center gap-1">
-              <Sparkles className="w-2.5 h-2.5 text-primary" /> Suggestions:
-            </span>
-            {currentPreset.suggestions.slice(0, 4).map((sug, idx) => (
-              <button
-                key={idx}
-                onClick={() => handleSendMessage(sug.text)}
-                className="whitespace-nowrap px-2.5 py-1 rounded-lg border border-border/80 bg-card hover:bg-muted text-[11px] text-foreground font-medium transition-colors cursor-pointer"
-              >
-                {sug.text}
-              </button>
-            ))}
-          </div>
-
-          {/* Active Speech Recognition Banner */}
-          {isListening && (
-            <div className="px-3 py-1.5 bg-rose-500/10 border-t border-rose-500/25 flex items-center justify-between text-xs text-rose-600 dark:text-rose-400 shrink-0">
-              <div className="flex items-center gap-2">
-                <Radio className="w-3.5 h-3.5 animate-spin" />
-                <span className="font-semibold text-[11px]">
-                  Listening in {currentLanguageDetails.nativeName}... Speak clearly
-                </span>
-              </div>
-              <button
-                onClick={stopListening}
-                className="text-[10px] font-bold px-2 py-0.5 rounded bg-rose-500/20 cursor-pointer"
-              >
-                Done
-              </button>
-            </div>
-          )}
-
-          {/* Input Bar */}
-          <div className="p-3 border-t border-border/80 bg-card rounded-b-3xl shrink-0 space-y-2">
-            <form
-              onSubmit={(e) => {
-                e.preventDefault()
-                handleSendMessage()
-              }}
-              className="flex items-center gap-1.5 bg-muted/40 border border-input rounded-2xl p-1.5 focus-within:ring-2 focus-within:ring-ring transition-all"
-            >
-              {hasSupport && (
-                <button
-                  type="button"
-                  onClick={isListening ? stopListening : startListening}
-                  className={cn(
-                    'w-8 h-8 rounded-xl flex items-center justify-center transition-all shrink-0 cursor-pointer',
-                    isListening
-                      ? 'bg-rose-500 text-white shadow-md animate-pulse'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-                  )}
-                  title={isListening ? 'Stop listening' : `Voice input (${currentLanguageDetails.nativeName})`}
-                >
-                  <Mic className="w-4 h-4" />
-                </button>
+              {isTyping && (
+                <div className="flex gap-2 mr-auto items-center">
+                  <AIAvatarVisualizer state="thinking" size="sm" />
+                  <div className="p-2.5 rounded-2xl bg-card border border-border text-xs text-muted-foreground flex items-center gap-1.5 shadow-subtle">
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce [animation-delay:0.2s]" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce [animation-delay:0.4s]" />
+                    <span className="text-[11px] font-mono ml-1">Analyzing statutory records...</span>
+                  </div>
+                </div>
               )}
 
-              <input
-                type="text"
-                value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
-                placeholder={
-                  isLiveOfficerMode
-                    ? 'Message Officer Vikramaditya Rao...'
-                    : `Ask in ${currentLanguageDetails.nativeName} or English...`
-                }
-                className="flex-1 bg-transparent px-2 text-xs text-foreground placeholder:text-muted-foreground outline-none"
-              />
-
-              <Button
-                type="submit"
-                size="sm"
-                disabled={!inputText.trim() || isTyping}
-                className="h-8 px-3 rounded-xl text-xs font-semibold gap-1 shrink-0"
-              >
-                <span>Send</span>
-                <Send className="w-3 h-3" />
-              </Button>
-            </form>
-
-            {/* Footer status & link */}
-            <div className="flex items-center justify-between text-[10px] text-muted-foreground px-1">
-              <span className="flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
-                {autoSpeak ? 'Auto-Voice Active' : 'Text Mode'} • {speechRate}x
-              </span>
-              <button
-                type="button"
-                onClick={() => {
-                  navigate('/app/support')
-                  setIsOpen(false)
-                }}
-                className="hover:text-primary underline flex items-center gap-0.5 cursor-pointer"
-              >
-                <span>Customer Care Hub</span>
-                <ExternalLink className="w-2.5 h-2.5" />
-              </button>
+              <div ref={messagesEndRef} />
             </div>
-          </div>
-        </motion.div>
-      )}
+
+            {/* Quick Suggestions Bar */}
+            <div className="px-3 py-1.5 flex items-center gap-1.5 overflow-x-auto no-scrollbar border-t border-border/60 bg-muted/20 shrink-0">
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider shrink-0 flex items-center gap-1">
+                <Sparkles className="w-2.5 h-2.5 text-primary" /> Suggestions:
+              </span>
+              {currentPreset.suggestions.slice(0, 4).map((sug, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => handleSendMessage(sug.text)}
+                  className="whitespace-nowrap px-2.5 py-1 rounded-lg border border-border/80 bg-card hover:bg-muted text-[11px] text-foreground font-medium transition-colors cursor-pointer"
+                >
+                  {sug.text}
+                </button>
+              ))}
+            </div>
+
+            {/* Active Speech Recognition Banner */}
+            {isListening && (
+              <div className="px-3 py-1.5 bg-rose-500/10 border-t border-rose-500/25 flex items-center justify-between text-xs text-rose-600 dark:text-rose-400 shrink-0">
+                <div className="flex items-center gap-2">
+                  <Radio className="w-3.5 h-3.5 animate-spin" />
+                  <span className="font-semibold text-[11px]">
+                    Listening in {currentLanguageDetails.nativeName}... Speak clearly
+                  </span>
+                </div>
+                <button
+                  onClick={stopListening}
+                  className="text-[10px] font-bold px-2 py-0.5 rounded bg-rose-500/20 cursor-pointer"
+                >
+                  Done
+                </button>
+              </div>
+            )}
+
+            {/* Input Bar */}
+            <div className="p-3 border-t border-border/80 bg-card rounded-b-3xl shrink-0 space-y-1.5">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  handleSendMessage()
+                }}
+                className="flex items-center gap-1.5 bg-muted/40 border border-input rounded-2xl p-1.5 focus-within:ring-2 focus-within:ring-ring transition-all"
+              >
+                {hasSupport && (
+                  <button
+                    type="button"
+                    onClick={isListening ? stopListening : startListening}
+                    className={cn(
+                      'w-8 h-8 rounded-xl flex items-center justify-center transition-all shrink-0 cursor-pointer',
+                      isListening
+                        ? 'bg-rose-500 text-white shadow-md animate-pulse'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                    )}
+                    title={isListening ? 'Stop listening' : `Voice input (${currentLanguageDetails.nativeName})`}
+                  >
+                    <Mic className="w-4 h-4" />
+                  </button>
+                )}
+
+                <input
+                  type="text"
+                  value={inputText}
+                  onChange={(e) => setInputText(e.target.value)}
+                  placeholder={
+                    isLiveOfficerMode
+                      ? 'Message Officer Vikramaditya Rao...'
+                      : `Ask in ${currentLanguageDetails.nativeName} or English...`
+                  }
+                  className="flex-1 bg-transparent px-2 text-xs text-foreground placeholder:text-muted-foreground outline-none"
+                />
+
+                <Button
+                  type="submit"
+                  size="sm"
+                  disabled={!inputText.trim() || isTyping}
+                  className="h-8 px-3 rounded-xl text-xs font-semibold gap-1 shrink-0"
+                >
+                  <span>Send</span>
+                  <Send className="w-3 h-3" />
+                </Button>
+              </form>
+
+              {/* Footer status & link */}
+              <div className="flex items-center justify-between text-[10px] text-muted-foreground px-1">
+                <span className="flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
+                  {autoSpeak ? 'Voice Narration On' : 'Text Mode'} • {speechRate}x
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigate('/app/support')
+                    setIsOpen(false)
+                  }}
+                  className="hover:text-primary underline flex items-center gap-0.5 cursor-pointer"
+                >
+                  <span>Customer Care Hub</span>
+                  <ExternalLink className="w-2.5 h-2.5" />
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   )
 }
