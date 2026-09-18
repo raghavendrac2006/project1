@@ -282,9 +282,37 @@ export function LandingPage() {
             </Link>
           </div>
 
+          {/* Citizen Hero Image Showcase */}
+          <div className={cn(
+            'mt-12 relative mx-auto max-w-4xl transition-all duration-1000 delay-400',
+            heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+          )}>
+            {/* Multi-spectrum aura behind image reflecting national civic vibrancy */}
+            <div className="absolute -inset-3 sm:-inset-6 bg-gradient-to-r from-amber-500/20 via-primary/25 to-emerald-500/20 rounded-3xl blur-2xl sm:blur-3xl opacity-70 -z-10" />
+
+            <div className="relative rounded-3xl p-2 sm:p-3 bg-card/60 border border-border/70 shadow-2xl backdrop-blur-md overflow-hidden hover-lift transition-all">
+              <div className="relative overflow-hidden rounded-2xl bg-white/95 dark:bg-card/90">
+                <img
+                  src="/citizens-hero.png"
+                  alt="Diverse citizens of India empowered by SAMAGRA Digital Operating System"
+                  className="w-full h-auto max-h-[460px] object-cover object-top transition-transform duration-700 hover:scale-[1.01]"
+                  loading="eager"
+                />
+                {/* Subtle bottom fade */}
+                <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-background/30 via-transparent to-transparent" />
+
+                {/* Floating pill badge */}
+                <div className="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 z-10 flex items-center gap-2.5 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full glass-panel-strong border border-border/80 text-[11px] sm:text-xs font-bold text-foreground shadow-lg backdrop-blur-md">
+                  <span className="h-2 w-2 rounded-full bg-emerald-500 pulse-glow" />
+                  <span>Empowering 1.4+ Billion Sovereign Citizens</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Trust Badges */}
           <div className={cn(
-            'mt-14 pt-8 border-t border-border/50 flex flex-wrap items-center justify-center gap-6 text-xs text-muted-foreground font-semibold transition-all duration-700 delay-500',
+            'mt-12 pt-8 border-t border-border/50 flex flex-wrap items-center justify-center gap-6 text-xs text-muted-foreground font-semibold transition-all duration-700 delay-500',
             heroVisible ? 'opacity-100' : 'opacity-0'
           )}>
             {trustBadges.map(({ icon: Icon, text, color }) => (
