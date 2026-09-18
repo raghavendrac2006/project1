@@ -12,18 +12,41 @@ export const authService = {
   async getSession(): Promise<AuthSession | null> {
     const token = civicStorage.getAuthToken()
     if (!token) return null
-    
-    return apiClient.get<AuthSession>(
-      '/auth/me',
-      async () => {
-        const user = civicStorage.getUser()
-        return { user, token }
+
+    try {
+      const res = await apiClient.get<any>(
+        '/auth/me',
+        async () => {
+          const user = civicStorage.getUser()
+          return { user, token }
+        }
+      )
+
+      if (!res) return null
+      if (res.user && res.token) return res as AuthSession
+
+      const storedUser = civicStorage.getUser()
+      const user: User = {
+        id: res.id || storedUser?.id || 'usr_demo',
+        name: res.full_name || storedUser?.name || 'Rajesh Sharma',
+        email: res.email || storedUser?.email || 'rajesh.sharma@civicmail.gov.in',
+        phone: res.phone || storedUser?.phone || '+91 98450 12345',
+        nationalId: storedUser?.nationalId || 'CIV-2026-001001',
+        isVerified: true,
+        verificationLevel: storedUser?.verificationLevel || 3,
+        role: (res.role?.toLowerCase() as any) || storedUser?.role || 'citizen',
+        createdAt: res.created_at || storedUser?.createdAt || new Date().toISOString(),
       }
-    )
+      civicStorage.saveUser(user)
+      return { user, token }
+    } catch {
+      civicStorage.clearAuthToken()
+      return null
+    }
   },
 
   async login(data: LoginFormData): Promise<AuthSession> {
-    return apiClient.post<AuthSession>(
+    const res = await apiClient.post<any>(
       '/auth/login',
       data,
       async () => {
@@ -34,6 +57,33 @@ export const authService = {
         return { user, token }
       }
     )
+
+    const token = res.token || res.access_token
+    let user = res.user
+
+    if (!user && res.email) {
+      const storedUser = civicStorage.getUser()
+      user = {
+        id: res.user_id || storedUser?.id || 'usr_demo',
+        name: storedUser?.name || (res.email.includes('rajesh') ? 'Rajesh Sharma' : 'Raghavendra'),
+        email: res.email,
+        phone: storedUser?.phone || '+91 98450 12345',
+        nationalId: storedUser?.nationalId || 'CIV-2026-001001',
+        isVerified: true,
+        verificationLevel: storedUser?.verificationLevel || 3,
+        role: (res.role?.toLowerCase() as any) || 'citizen',
+        createdAt: storedUser?.createdAt || new Date().toISOString(),
+      }
+    }
+
+    if (token) {
+      civicStorage.setAuthToken(token)
+    }
+    if (user) {
+      civicStorage.saveUser(user)
+    }
+
+    return { user, token }
   },
 
   async register(data: RegisterFormData): Promise<{ pendingVerification: boolean; phone: string }> {

@@ -62,7 +62,21 @@ class ApiClient {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
-        const errorMessage = errorData.detail || errorData.message || `HTTP Error ${response.status}: ${response.statusText}`
+        let errorMessage = `HTTP Error ${response.status}: ${response.statusText}`
+        if (errorData) {
+          if (typeof errorData.detail === 'string') {
+            errorMessage = errorData.detail
+          } else if (Array.isArray(errorData.detail)) {
+            errorMessage = errorData.detail.map((item: unknown) => {
+              if (typeof item === 'object' && item !== null && 'msg' in item) {
+                return (item as { msg: string }).msg
+              }
+              return String(item)
+            }).join(', ')
+          } else if (typeof errorData.message === 'string') {
+            errorMessage = errorData.message
+          }
+        }
         throw new Error(errorMessage)
       }
 
