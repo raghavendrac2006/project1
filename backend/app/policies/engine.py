@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from backend.app.models.institution import Institution, InstitutionCategory
 from backend.app.models.domain import DataDomain, DomainType
 from backend.app.models.consent import ActiveAccess, AccessStatus, AccessRequest
+from backend.app.models.role import RoleEnum
 
 
 # Allowed Fields Whitelist Per Domain (Minimum Data Principle)
@@ -28,34 +29,53 @@ INSTITUTION_DOMAIN_RULES = {
     "GOVERNMENT": ["TRANSPORT", "GOVERNMENT", "IDENTITY"],
 }
 
+# Role-Level Permission Matrix (Specific roles allowed domains)
+ROLE_DOMAIN_RULES = {
+    "ACADEMIC_VERIFIER": ["EDUCATION", "IDENTITY"],
+    "BANK_KYC_OFFICER": ["FINANCE", "IDENTITY"],
+    "HOSPITAL_VERIFIER": ["HEALTH", "HEALTHCARE", "IDENTITY"],
+    "GOVERNMENT_OFFICER": ["TRANSPORT", "GOVERNMENT", "IDENTITY"],
+    "ADMIN": ["EDUCATION", "FINANCE", "HEALTH", "HEALTHCARE", "TRANSPORT", "GOVERNMENT", "IDENTITY"],
+    "CITIZEN": ["IDENTITY"]
+}
+
 
 def authorize_access(
     db: Session,
     institution_id: str,
     citizen_id: str,
     domain_type: str,
-    requested_fields: Optional[List[str]] = None
+    requested_fields: Optional[List[str]] = None,
+    requester_role: Optional[str] = None
 ) -> Dict[str, Any]:
     """
     Central Policy Engine Enforcement:
-    Evaluates WHO + WHY + WHAT + WHEN + CONSENT
+    Evaluates WHO (requester, role, institution) + WHY (purpose) + WHAT (domain, fields) + WHEN (expiry) + CONSENT (active grant)
     
-    Returns dict:
+    Returns structured dictionary:
     {
+        "decision": "ALLOW" | "DENY",
         "allowed": bool,
+        "policy_rule_id": str,
         "reason": str,
+        "approved_fields": List[str],
+        "denied_fields": List[str],
         "scoped_fields": List[str],
         "purpose": str
     }
     """
     domain_upper = domain_type.upper()
 
-    # 1. Look up Institution
+    # 1. Look up Institution (WHO)
     inst = db.query(Institution).filter(Institution.id == institution_id).first()
     if not inst:
         return {
+            "decision": "DENY",
             "allowed": False,
-            "reason": f"Access Denied: Institution ID {institution_id} not found",
+            "policy_rule_id": "POL_ERR_001_INSTITUTION_NOT_FOUND",
+            "reason": f"Access Denied: Institution ID '{institution_id}' not found in registry",
+            "approved_fields": [],
+            "denied_fields": requested_fields or [],
             "scoped_fields": [],
             "purpose": "N/A"
         }
@@ -63,17 +83,37 @@ def authorize_access(
     inst_category = inst.category.value if hasattr(inst.category, "value") else str(inst.category)
     inst_cat_upper = inst_category.upper()
 
-    # 2. Domain Isolation Matrix Check (WHO + WHY vs Data Domain)
-    allowed_domains = INSTITUTION_DOMAIN_RULES.get(inst_cat_upper, [inst_cat_upper, "IDENTITY"])
-    if domain_upper not in allowed_domains:
+    # 2. Institution Category Domain Isolation Matrix Check (WHO vs WHAT)
+    allowed_inst_domains = INSTITUTION_DOMAIN_RULES.get(inst_cat_upper, [inst_cat_upper, "IDENTITY"])
+    if domain_upper not in allowed_inst_domains:
         return {
+            "decision": "DENY",
             "allowed": False,
+            "policy_rule_id": "POL_ERR_002_DOMAIN_ISOLATION_VIOLATION",
             "reason": f"Domain Isolation Violation: Institution category '{inst_cat_upper}' is prohibited from accessing '{domain_upper}' domain data.",
+            "approved_fields": [],
+            "denied_fields": requested_fields or [],
             "scoped_fields": [],
             "purpose": "N/A"
         }
 
-    # 3. Look up Data Domain record
+    # 3. Role-Level Permission Matrix Check (WHO Role vs WHAT Domain)
+    if requester_role:
+        role_str = requester_role.value if hasattr(requester_role, "value") else str(requester_role).upper()
+        allowed_role_domains = ROLE_DOMAIN_RULES.get(role_str, [])
+        if allowed_role_domains and domain_upper not in allowed_role_domains:
+            return {
+                "decision": "DENY",
+                "allowed": False,
+                "policy_rule_id": "POL_ERR_003_ROLE_UNAUTHORIZED",
+                "reason": f"Role Authorization Failure: Requester role '{role_str}' is not authorized to access '{domain_upper}' domain data.",
+                "approved_fields": [],
+                "denied_fields": requested_fields or [],
+                "scoped_fields": [],
+                "purpose": "N/A"
+            }
+
+    # 4. Look up Data Domain record (WHAT)
     domain_id = None
     try:
         norm_type = domain_type.upper()
@@ -88,7 +128,7 @@ def authorize_access(
     except (KeyError, ValueError):
         domain_id = None
 
-    # 4. Check CONSENT & Active Grant in DB
+    # 5. Check CONSENT & Active Grant in DB (CONSENT + WHEN)
     query = db.query(ActiveAccess).filter(
         ActiveAccess.citizen_id == citizen_id,
         ActiveAccess.institution_id == institution_id
@@ -100,8 +140,12 @@ def authorize_access(
 
     if not grant:
         return {
+            "decision": "DENY",
             "allowed": False,
-            "reason": f"No active consent grant found for institution '{inst.name}' on '{domain_upper}' domain for citizen ID {citizen_id}.",
+            "policy_rule_id": "POL_ERR_004_NO_CONSENT_GRANT",
+            "reason": f"Consent Denial: No active consent grant found for institution '{inst.name}' on '{domain_upper}' domain for citizen '{citizen_id}'.",
+            "approved_fields": [],
+            "denied_fields": requested_fields or [],
             "scoped_fields": [],
             "purpose": "N/A"
         }
@@ -109,13 +153,17 @@ def authorize_access(
     # Check Revocation
     if grant.status == AccessStatus.REVOKED or grant.revoked_at is not None:
         return {
+            "decision": "DENY",
             "allowed": False,
+            "policy_rule_id": "POL_ERR_005_GRANT_REVOKED",
             "reason": f"Access Denied: Citizen has REVOKED consent grant #{grant.id}.",
+            "approved_fields": [],
+            "denied_fields": requested_fields or [],
             "scoped_fields": [],
             "purpose": "N/A"
         }
 
-    # Check Expiry
+    # Check Expiry (WHEN)
     now = datetime.datetime.now(datetime.timezone.utc)
     grant_expires = grant.expires_at
     if grant_expires.tzinfo is None:
@@ -123,30 +171,60 @@ def authorize_access(
 
     if now >= grant_expires or grant.status == AccessStatus.EXPIRED:
         return {
+            "decision": "DENY",
             "allowed": False,
+            "policy_rule_id": "POL_ERR_006_GRANT_EXPIRED",
             "reason": f"Access Denied: Consent grant #{grant.id} EXPIRED at {grant.expires_at.isoformat()}.",
+            "approved_fields": [],
+            "denied_fields": requested_fields or [],
             "scoped_fields": [],
             "purpose": "N/A"
         }
 
-    # 5. WHAT / Minimum Data Principle Scoping
+    # 6. WHAT / Minimum Data Principle Scoping & Approved / Denied Fields Computation
     granted_fields = grant.approved_fields or []
     domain_allowed_fields = DOMAIN_FIELD_MAP.get(domain_upper, [])
 
     if requested_fields:
-        final_scoped = [f for f in requested_fields if f in granted_fields and f in domain_allowed_fields]
+        approved_fields = [f for f in requested_fields if f in granted_fields and f in domain_allowed_fields]
+        denied_fields = [f for f in requested_fields if f not in approved_fields]
     else:
-        final_scoped = [f for f in granted_fields if f in domain_allowed_fields]
+        approved_fields = [f for f in granted_fields if f in domain_allowed_fields]
+        denied_fields = []
 
-    if not final_scoped and granted_fields:
-        final_scoped = [f for f in granted_fields if f in domain_allowed_fields]
+    if not approved_fields and granted_fields:
+        approved_fields = [f for f in granted_fields if f in domain_allowed_fields]
 
     original_req = db.query(AccessRequest).filter(AccessRequest.id == grant.access_request_id).first()
     purpose = original_req.purpose if original_req else (grant.purpose or "Authorized institutional request")
 
     return {
+        "decision": "ALLOW",
         "allowed": True,
-        "reason": f"Access Granted: Scoped {len(final_scoped)} field(s) under active consent.",
-        "scoped_fields": final_scoped,
+        "policy_rule_id": "POL_OK_001_AUTHORIZED",
+        "reason": f"Access Granted: Scoped {len(approved_fields)} approved field(s) under active consent.",
+        "approved_fields": approved_fields,
+        "denied_fields": denied_fields,
+        "scoped_fields": approved_fields,
         "purpose": purpose
+    }
+
+
+def authorize_citizen_access(requester_user_id: str, target_citizen_id: str) -> Dict[str, Any]:
+    """
+    Evaluates citizen self-access boundary isolation.
+    Citizen A must only access Citizen A's data.
+    """
+    if requester_user_id == target_citizen_id:
+        return {
+            "decision": "ALLOW",
+            "allowed": True,
+            "policy_rule_id": "POL_OK_002_CITIZEN_SELF_ACCESS",
+            "reason": "Citizen self-access authorized"
+        }
+    return {
+        "decision": "DENY",
+        "allowed": False,
+        "policy_rule_id": "POL_ERR_007_CITIZEN_BOUNDARY_VIOLATION",
+        "reason": f"Access Denied: Citizen '{requester_user_id}' cannot access records belonging to citizen '{target_citizen_id}'"
     }

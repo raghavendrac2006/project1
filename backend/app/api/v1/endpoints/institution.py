@@ -135,7 +135,8 @@ def query_authorized_citizen_data(
         institution_id=institution_id,
         citizen_id=target_user_id,
         domain_type=domain_type,
-        requested_fields=field_list
+        requested_fields=field_list,
+        requester_role=inst_user.role_id
     )
 
     norm_type = domain_type.upper()
@@ -163,7 +164,7 @@ def query_authorized_citizen_data(
 
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail=f"Access Denied by Policy Engine: {evaluation['reason']}"
+            detail=f"Access Denied by Policy Engine [{evaluation.get('policy_rule_id', 'POL_DENIED')}]: {evaluation['reason']}"
         )
 
     citizen_profile = crud_user.get_citizen_profile(db, target_user_id)
@@ -205,7 +206,7 @@ def query_authorized_citizen_data(
         if doc.metadata_json and isinstance(doc.metadata_json, dict):
             raw_data.update(doc.metadata_json)
 
-    scoped_fields = evaluation["scoped_fields"]
+    scoped_fields = evaluation.get("scoped_fields") or evaluation.get("approved_fields") or []
     scoped_data = {}
     for f in scoped_fields:
         if f in raw_data:
@@ -228,10 +229,14 @@ def query_authorized_citizen_data(
     db.commit()
 
     return {
+        "decision": evaluation.get("decision", "ALLOW"),
         "status": "authorized",
+        "policy_rule_id": evaluation.get("policy_rule_id", "POL_OK_001_AUTHORIZED"),
         "citizen_id": target_user_id,
         "domain": domain_type.upper(),
         "purpose": evaluation.get("purpose"),
+        "approved_fields": evaluation.get("approved_fields", list(scoped_data.keys())),
+        "denied_fields": evaluation.get("denied_fields", []),
         "scoped_fields": list(scoped_data.keys()),
         "data": scoped_data
     }
