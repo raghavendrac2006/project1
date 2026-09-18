@@ -47,13 +47,13 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       {children}
       <div
         aria-live="polite"
-        className="fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-md w-full pointer-events-none p-4"
+        className="fixed top-4 right-4 sm:top-5 sm:right-6 z-50 flex flex-col gap-2 max-w-md w-full pointer-events-none p-2 sm:p-0"
       >
         {toasts.map((t) => (
           <div
             key={t.id}
             role="status"
-            className="pointer-events-auto flex items-start justify-between gap-3 p-4 rounded-xl shadow-elevation bg-card border border-border/80 text-card-foreground transition-all duration-200 animate-in fade-in slide-in-from-bottom-2"
+            className="pointer-events-auto flex items-start justify-between gap-3 p-4 rounded-xl shadow-elevation bg-card border border-border/80 text-card-foreground transition-all duration-200 animate-in fade-in slide-in-from-top-2"
           >
             <div className="flex items-start gap-3">
               {getIcon(t.type)}

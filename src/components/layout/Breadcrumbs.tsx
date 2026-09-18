@@ -23,6 +23,7 @@ export function Breadcrumbs() {
     security: 'Security Center',
     payments: 'Civic Payments',
     assistant: 'CiviqOne AI',
+    support: 'Customer Care & Grievances',
     notifications: 'Notifications',
     profile: 'Citizen Profile',
     settings: 'Settings & Security',
