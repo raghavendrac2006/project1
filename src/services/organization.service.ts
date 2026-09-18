@@ -1,3 +1,4 @@
+import { apiClient } from './apiClient'
 import { civicStorage, type OrgSessionData } from './storage'
 import type {
   CivicService,
@@ -159,6 +160,37 @@ export const organizationService = {
   },
 
   async createAccessRequest(data: Omit<ConsentRequest, 'id' | 'requestedAt' | 'status' | 'approvedFields' | 'approvedDocuments'>): Promise<ConsentRequest> {
+    try {
+      const res = await apiClient.post<any>('/institution/access-requests', {
+        citizen_civic_id: data.citizenId || 'CIV-2026-004281',
+        domain_type: 'FINANCE',
+        purpose: data.purpose || 'Verification',
+        duration_days: data.durationDays || 30,
+        requested_fields: data.requestedFields || ['full_name']
+      })
+      if (res && res.request_id) {
+        const created: ConsentRequest = {
+          id: res.request_id,
+          organizationId: data.organizationId || 'inst_bank',
+          organizationName: data.organizationName || 'HDFC Bank Ltd.',
+          purpose: data.purpose,
+          requestedFields: data.requestedFields,
+          approvedFields: [],
+          requestedDocuments: [],
+          approvedDocuments: [],
+          durationDays: data.durationDays,
+          status: 'pending',
+          requestedAt: new Date().toISOString(),
+          expiresAt: res.expires_at,
+          citizenId: data.citizenId || 'usr_demo',
+          citizenName: data.citizenName || 'Raghavendra'
+        }
+        civicStorage.createConsentRequest(created)
+        return created
+      }
+    } catch {
+      // Fallback if institution endpoint fails or unauthorized
+    }
     return civicStorage.createConsentRequest(data)
   },
 

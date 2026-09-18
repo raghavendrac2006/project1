@@ -8,6 +8,24 @@ export interface AuthSession {
   token: string
 }
 
+function mapBackendUser(res: any, storedUser?: User | null): User {
+  const isCitizen = !res.role || res.role.toUpperCase() === 'CITIZEN'
+  return {
+    id: res.id || res.user_id || storedUser?.id || 'usr_demo',
+    name: res.full_name || res.name || storedUser?.name || (isCitizen ? 'Raghavendra' : 'Loan Officer'),
+    email: res.email || storedUser?.email || '',
+    phone: res.phone || storedUser?.phone || '+91 98450 12345',
+    avatar: storedUser?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+    nationalId: res.civic_one_id || storedUser?.nationalId || 'CIV-2026-004281',
+    verificationLevel: storedUser?.verificationLevel || 'Level 3 - Biometric Sovereign',
+    state: storedUser?.state || 'Karnataka',
+    city: storedUser?.city || 'Bengaluru',
+    pincode: storedUser?.pincode || '560001',
+    memberSince: res.created_at || storedUser?.memberSince || '2026-01-15',
+    securityScore: storedUser?.securityScore || 98
+  }
+}
+
 export const authService = {
   async getSession(): Promise<AuthSession | null> {
     const token = civicStorage.getAuthToken()
@@ -23,20 +41,8 @@ export const authService = {
       )
 
       if (!res) return null
-      if (res.user && res.token) return res as AuthSession
-
       const storedUser = civicStorage.getUser()
-      const user: User = {
-        id: res.id || storedUser?.id || 'usr_demo',
-        name: res.full_name || storedUser?.name || 'Rajesh Sharma',
-        email: res.email || storedUser?.email || 'rajesh.sharma@civicmail.gov.in',
-        phone: res.phone || storedUser?.phone || '+91 98450 12345',
-        nationalId: storedUser?.nationalId || 'CIV-2026-001001',
-        isVerified: true,
-        verificationLevel: storedUser?.verificationLevel || 3,
-        role: (res.role?.toLowerCase() as any) || storedUser?.role || 'citizen',
-        createdAt: res.created_at || storedUser?.createdAt || new Date().toISOString(),
-      }
+      const user = mapBackendUser(res, storedUser)
       civicStorage.saveUser(user)
       return { user, token }
     } catch {
@@ -48,42 +54,31 @@ export const authService = {
   async login(data: LoginFormData): Promise<AuthSession> {
     const res = await apiClient.post<any>(
       '/auth/login',
-      data,
+      { username: data.email, password: data.password },
       async () => {
-        await new Promise((resolve) => setTimeout(resolve, 300))
         const user = civicStorage.getUser()
-        const token = `civiqone_tok_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
+        const token = `civiqone_tok_${Date.now()}`
         civicStorage.setAuthToken(token)
         return { user, token }
       }
     )
 
-    const token = res.token || res.access_token
-    let user = res.user
-
-    if (!user && res.email) {
-      const storedUser = civicStorage.getUser()
-      user = {
-        id: res.user_id || storedUser?.id || 'usr_demo',
-        name: storedUser?.name || (res.email.includes('rajesh') ? 'Rajesh Sharma' : 'Raghavendra'),
-        email: res.email,
-        phone: storedUser?.phone || '+91 98450 12345',
-        nationalId: storedUser?.nationalId || 'CIV-2026-001001',
-        isVerified: true,
-        verificationLevel: storedUser?.verificationLevel || 3,
-        role: (res.role?.toLowerCase() as any) || 'citizen',
-        createdAt: storedUser?.createdAt || new Date().toISOString(),
-      }
-    }
-
+    const token = res.access_token || res.token
     if (token) {
       civicStorage.setAuthToken(token)
     }
-    if (user) {
-      civicStorage.saveUser(user)
+
+    // Now fetch real user details using the token
+    let user: User
+    try {
+      const meRes = await apiClient.get<any>('/auth/me')
+      user = mapBackendUser(meRes, civicStorage.getUser())
+    } catch {
+      user = mapBackendUser(res, civicStorage.getUser())
     }
 
-    return { user, token }
+    civicStorage.saveUser(user)
+    return { user, token: token || civicStorage.getAuthToken() || '' }
   },
 
   async register(data: RegisterFormData): Promise<{ pendingVerification: boolean; phone: string }> {
@@ -91,7 +86,6 @@ export const authService = {
       '/auth/register',
       data,
       async () => {
-        await new Promise((resolve) => setTimeout(resolve, 400))
         const existingUser = civicStorage.getUser()
         const updatedUser: User = {
           ...existingUser,
