@@ -32,7 +32,40 @@ def seed_db(db: Session):
             db.flush()
         domain_map[dtype] = dom
 
-    # 2. Seed Demo Citizen (Raghavendra)
+    # 2. Seed Demo Citizens (Rajesh Sharma & Raghavendra)
+    r_user = db.query(User).filter(User.email == "rajesh.sharma@civicmail.gov.in").first()
+    if not r_user:
+        r_user = User(
+            email="rajesh.sharma@civicmail.gov.in",
+            phone="+91 98450 12345",
+            hashed_password=hashed_pwd,
+            full_name="Rajesh Sharma",
+            role=UserRole.CITIZEN,
+            is_active=True
+        )
+        db.add(r_user)
+        db.flush()
+
+    r_profile = db.query(CitizenProfile).filter(CitizenProfile.user_id == r_user.id).first()
+    if not r_profile:
+        r_profile = CitizenProfile(
+            user_id=r_user.id,
+            civic_one_id="CIV-2026-001001",
+            full_name="Rajesh Sharma",
+            date_of_birth="1992-10-15",
+            gender="Male",
+            phone="+91 98450 12345",
+            email="rajesh.sharma@civicmail.gov.in",
+            address="78 Civic Colony, M.G. Road, Bengaluru, Karnataka - 560001",
+            blood_group="B+",
+            aadhaar_last4="1001",
+            pan_number="RAJSH1001P",
+            father_name="Mahesh Sharma",
+            emergency_contact="+91 98450 12346",
+            photo_url="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150"
+        )
+        db.add(r_profile)
+
     c_user = db.query(User).filter(User.email == "raghavendra@civicone.gov.in").first()
     if not c_user:
         c_user = User(

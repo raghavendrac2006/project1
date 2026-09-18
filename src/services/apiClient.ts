@@ -62,7 +62,8 @@ class ApiClient {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.message || `HTTP Error ${response.status}: ${response.statusText}`)
+        const errorMessage = errorData.detail || errorData.message || `HTTP Error ${response.status}: ${response.statusText}`
+        throw new Error(errorMessage)
       }
 
       const json = await response.json()
