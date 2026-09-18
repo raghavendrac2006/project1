@@ -30,3 +30,23 @@ def mark_notification_read(
         raise HTTPException(status_code=404, detail="Notification not found")
     db.commit()
     return {"status": "success", "message": "Notification marked as read"}
+
+
+@router.post("/mark-all-read")
+def mark_all_notifications_read(
+    db: Session = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_active_user)
+) -> Any:
+    count = crud_audit.mark_all_notifications_read(db, current_user.id)
+    db.commit()
+    return {"status": "success", "marked_count": count, "message": f"{count} notifications marked as read"}
+
+
+@router.get("/unread-count")
+def get_unread_count(
+    db: Session = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_active_user)
+) -> Any:
+    count = crud_audit.get_unread_notification_count(db, current_user.id)
+    return {"unread_count": count}
+

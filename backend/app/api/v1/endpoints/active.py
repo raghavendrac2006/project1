@@ -38,6 +38,17 @@ def list_active_access(
             g.status = AccessStatus.EXPIRED
             current_status = AccessStatus.EXPIRED.value
             has_updates = True
+            crud_audit.create_audit_log(
+                db=db,
+                citizen_id=g.citizen_id,
+                institution_id=g.institution_id,
+                access_request_id=g.access_request_id,
+                domain_id=g.domain_id,
+                action="ACCESS_EXPIRED",
+                purpose="Active access grant expired",
+                accessed_fields=g.approved_fields,
+                result="EXPIRED"
+            )
 
         result.append({
             "id": g.id,

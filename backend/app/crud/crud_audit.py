@@ -78,3 +78,23 @@ def mark_notification_read(db: Session, notification_id: str, user_id: str) -> b
     notif.is_read = True
     db.flush()
     return True
+
+
+def mark_all_notifications_read(db: Session, user_id: str) -> int:
+    unread_notifs = db.query(Notification).filter(
+        Notification.user_id == user_id,
+        Notification.is_read == False
+    ).all()
+    count = len(unread_notifs)
+    for n in unread_notifs:
+        n.is_read = True
+    db.flush()
+    return count
+
+
+def get_unread_notification_count(db: Session, user_id: str) -> int:
+    return db.query(Notification).filter(
+        Notification.user_id == user_id,
+        Notification.is_read == False
+    ).count()
+

@@ -192,6 +192,18 @@ def authorize_access(
     if now >= grant_expires or grant.status == AccessStatus.EXPIRED:
         if grant.status == AccessStatus.ACTIVE:
             grant.status = AccessStatus.EXPIRED
+            from backend.app.crud import crud_audit
+            crud_audit.create_audit_log(
+                db=db,
+                citizen_id=grant.citizen_id,
+                institution_id=grant.institution_id,
+                access_request_id=grant.access_request_id,
+                domain_id=grant.domain_id,
+                action="ACCESS_EXPIRED",
+                purpose="Active access grant expired",
+                accessed_fields=grant.approved_fields,
+                result="EXPIRED"
+            )
             db.commit()
 
         return {
