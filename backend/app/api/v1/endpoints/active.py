@@ -1,11 +1,11 @@
 import datetime
 from typing import Any, List
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from backend.app.api import deps
 from backend.app.models.user import User
-from backend.app.models.consent import ActiveAccess, AccessStatus
+from backend.app.models.consent import ActiveAccess, AccessStatus, AccessRequest, RequestStatus
 from backend.app.models.institution import Institution
 from backend.app.models.domain import DataDomain
 from backend.app.crud import crud_active_access, crud_audit
@@ -23,6 +23,8 @@ def list_active_access(
 
     now = datetime.datetime.now(datetime.timezone.utc)
     result = []
+    has_updates = False
+
     for g in grants:
         inst = db.query(Institution).filter(Institution.id == g.institution_id).first()
         dom = db.query(DataDomain).filter(DataDomain.id == g.domain_id).first()
@@ -33,7 +35,9 @@ def list_active_access(
             expires_at = expires_at.replace(tzinfo=datetime.timezone.utc)
 
         if g.status == AccessStatus.ACTIVE and expires_at and expires_at < now:
+            g.status = AccessStatus.EXPIRED
             current_status = AccessStatus.EXPIRED.value
+            has_updates = True
 
         result.append({
             "id": g.id,
@@ -52,6 +56,10 @@ def list_active_access(
             "revoked_at": g.revoked_at,
             "status": current_status
         })
+
+    if has_updates:
+        db.commit()
+
     return result
 
 
@@ -61,35 +69,51 @@ def revoke_active_access(
     db: Session = Depends(deps.get_db),
     current_user: User = Depends(deps.get_current_active_user)
 ) -> Any:
-    grant = crud_active_access.get_active_grant_by_id(db, access_id)
+    # 1. Atomic Row Lock Grant
+    grant = db.query(ActiveAccess).with_for_update().filter(
+        ActiveAccess.id == access_id
+    ).first()
+
     if not grant or grant.citizen_id != current_user.id:
-        raise HTTPException(status_code=404, detail="Active access grant not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Active access grant not found")
 
     if grant.status != AccessStatus.ACTIVE:
         raise HTTPException(
-            status_code=400,
-            detail=f"Grant is not active (current status: {grant.status.value})"
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Grant is not active (current status: '{grant.status.value}')"
         )
 
+    now = datetime.datetime.now(datetime.timezone.utc)
     grant.status = AccessStatus.REVOKED
-    grant.revoked_at = datetime.datetime.now(datetime.timezone.utc)
+    grant.revoked_at = now
+
+    # Also sync associated AccessRequest if present
+    req = None
+    if grant.access_request_id:
+        req = db.query(AccessRequest).filter(AccessRequest.id == grant.access_request_id).first()
+        if req:
+            req.status = RequestStatus.REVOKED
+            req.updated_at = now
 
     inst = db.query(Institution).filter(Institution.id == grant.institution_id).first()
     dom = db.query(DataDomain).filter(DataDomain.id == grant.domain_id).first()
 
+    # Audit Log Entry
     crud_audit.create_audit_log(
         db=db,
         citizen_id=current_user.id,
         institution_id=grant.institution_id,
+        user_id=current_user.id,
         access_request_id=grant.access_request_id,
         domain_id=grant.domain_id,
         action="REVOKE_CONSENT",
-        purpose="Citizen revoked access consent",
+        purpose=f"Citizen revoked active access grant #{grant.id}",
         accessed_fields=grant.approved_fields,
         result="REVOKED"
     )
 
     inst_name = inst.name if inst else "Institution"
+    # Citizen Notification
     crud_audit.create_notification(
         db=db,
         user_id=current_user.id,
@@ -99,9 +123,21 @@ def revoke_active_access(
         related_entity_id=grant.id
     )
 
+    # Institution Requester Notification
+    if req and req.requester_user_id:
+        crud_audit.create_notification(
+            db=db,
+            user_id=req.requester_user_id,
+            title="Consent Revoked by Citizen",
+            message=f"Citizen has revoked consent for access request #{req.id} ({dom.name if dom else 'Data'}).",
+            notification_type="CONSENT_REVOKED",
+            related_entity_id=grant.id
+        )
+
     db.commit()
     return {
         "status": "success",
         "message": f"Active access grant #{grant.id} revoked successfully.",
         "revoked_at": grant.revoked_at.isoformat()
     }
+

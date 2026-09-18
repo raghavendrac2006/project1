@@ -190,6 +190,10 @@ def authorize_access(
         grant_expires = grant_expires.replace(tzinfo=datetime.timezone.utc)
 
     if now >= grant_expires or grant.status == AccessStatus.EXPIRED:
+        if grant.status == AccessStatus.ACTIVE:
+            grant.status = AccessStatus.EXPIRED
+            db.commit()
+
         return {
             "decision": "DENY",
             "allowed": False,
