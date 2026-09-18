@@ -32,10 +32,11 @@ def seed_db(db: Session):
             db.flush()
         domain_map[dtype] = dom
 
-    # 2. Seed Demo Citizens (Rajesh Sharma & Raghavendra)
+    # 2. Seed Demo Citizens (Rajesh Sharma, Raghavendra, Priya Sharma)
     r_user = db.query(User).filter(User.email == "rajesh.sharma@civicmail.gov.in").first()
     if not r_user:
         r_user = User(
+            external_auth_id="ext_rajesh_001",
             email="rajesh.sharma@civicmail.gov.in",
             phone="+91 98450 12345",
             hashed_password=hashed_pwd,
@@ -69,6 +70,7 @@ def seed_db(db: Session):
     c_user = db.query(User).filter(User.email == "raghavendra@civicone.gov.in").first()
     if not c_user:
         c_user = User(
+            external_auth_id="ext_raghavendra_001",
             email="raghavendra@civicone.gov.in",
             phone="+91 98765 43210",
             hashed_password=hashed_pwd,
@@ -103,6 +105,7 @@ def seed_db(db: Session):
     p_user = db.query(User).filter(User.email == "priya@civicone.gov.in").first()
     if not p_user:
         p_user = User(
+            external_auth_id="ext_priya_001",
             email="priya@civicone.gov.in",
             phone="+91 91234 56789",
             hashed_password=hashed_pwd,
@@ -160,6 +163,7 @@ def seed_db(db: Session):
     kec_user = db.query(User).filter(User.email == "coordinator@kec.edu.in").first()
     if not kec_user:
         kec_user = User(
+            external_auth_id="ext_kec_001",
             email="coordinator@kec.edu.in",
             hashed_password=hashed_pwd,
             full_name="Academic Coordinator",
@@ -181,6 +185,7 @@ def seed_db(db: Session):
     bank_user = db.query(User).filter(User.email == "loan_officer@abcbank.com").first()
     if not bank_user:
         bank_user = User(
+            external_auth_id="ext_bank_001",
             email="loan_officer@abcbank.com",
             hashed_password=hashed_pwd,
             full_name="Bank Loan Officer",
@@ -197,6 +202,21 @@ def seed_db(db: Session):
             department="Retail Credit Division",
             designation="Credit Analyst"
         ))
+
+    # 5b. Seed Fictional Development Admin
+    admin_user = db.query(User).filter(User.email == "admin@civicone.gov.in").first()
+    if not admin_user:
+        admin_user = User(
+            external_auth_id="ext_admin_001",
+            email="admin@civicone.gov.in",
+            phone="+91 90000 00000",
+            hashed_password=hashed_pwd,
+            full_name="CivicOne System Administrator",
+            role=UserRole.ADMIN,
+            is_active=True
+        )
+        db.add(admin_user)
+        db.flush()
 
     # 6. Seed Demo Records for Raghavendra
     record_defs = [

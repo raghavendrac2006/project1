@@ -89,6 +89,30 @@ def read_user_me(
     return current_user
 
 
+@router.get("/institution-me")
+def read_institution_me(
+    user_inst_tuple: tuple = Depends(deps.get_current_institution_user)
+) -> Any:
+    """
+    Get current authenticated institution user identity context.
+    """
+    current_user, inst_user, institution = user_inst_tuple
+    return {
+        "user_id": current_user.id,
+        "email": current_user.email,
+        "full_name": current_user.full_name,
+        "institution_id": institution.id,
+        "institution_name": institution.name,
+        "institution_category": institution.category.value,
+        "institution_registration_id": institution.registration_id,
+        "is_verified": institution.is_verified,
+        "role_id": inst_user.role_id.value,
+        "department": inst_user.department,
+        "designation": inst_user.designation,
+        "status": inst_user.status
+    }
+
+
 @router.post("/logout")
 def logout() -> Any:
     """

@@ -9,7 +9,7 @@ from backend.app.models.domain import DataDomain, DomainType, Document, Record
 from backend.app.models.consent import AccessRequest, RequestStatus
 from backend.app.crud import crud_user, crud_request, crud_audit
 from backend.app.policies.engine import authorize_access
-from backend.app.schemas import InstitutionAccessRequestCreate
+from backend.app.schemas import InstitutionAccessRequestCreate, AccessRequestSchema
 
 router = APIRouter()
 
@@ -18,8 +18,9 @@ router = APIRouter()
 def create_institution_access_request(
     payload: InstitutionAccessRequestCreate,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_active_user)
+    user_inst_tuple: tuple = Depends(deps.get_current_institution_user)
 ) -> Any:
+    current_user, inst_user, institution = user_inst_tuple
     citizen_profile = None
     if payload.citizen_civic_id:
         citizen_profile = crud_user.get_citizen_by_civic_one_id(db, payload.citizen_civic_id)
@@ -29,15 +30,7 @@ def create_institution_access_request(
     if not citizen_profile:
         raise HTTPException(status_code=404, detail="Citizen profile not found")
 
-    inst_user = db.query(InstitutionUser).filter(InstitutionUser.user_id == current_user.id).first()
-    if not inst_user:
-        first_inst = db.query(Institution).first()
-        institution_id = first_inst.id if first_inst else None
-    else:
-        institution_id = inst_user.institution_id
-
-    if not institution_id:
-        raise HTTPException(status_code=400, detail="Institution context not found")
+    institution_id = inst_user.institution_id
 
     norm_type = payload.domain_type.upper()
     if norm_type == "HEALTHCARE":
@@ -61,12 +54,11 @@ def create_institution_access_request(
         duration_days=str(payload.duration_days)
     )
 
-    inst = db.query(Institution).filter(Institution.id == institution_id).first()
     crud_audit.create_notification(
         db=db,
         user_id=citizen_profile.user_id,
         title="New Access Request",
-        message=f"{inst.name if inst else 'An institution'} requested access to your {domain.name} records.",
+        message=f"{institution.name} requested access to your {domain.name} records.",
         notification_type="ACCESS_REQUEST",
         related_entity_id=req.id
     )
@@ -79,13 +71,40 @@ def create_institution_access_request(
     }
 
 
-@router.get("/access-requests")
+@router.get("/access-requests", response_model=List[AccessRequestSchema])
 def list_institution_access_requests(
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_active_user)
+    user_inst_tuple: tuple = Depends(deps.get_current_institution_user)
 ) -> Any:
-    requests = crud_request.list_institution_requests(db, current_user.id)
-    return requests
+    current_user, inst_user, institution = user_inst_tuple
+    requests = db.query(AccessRequest).filter(
+        AccessRequest.institution_id == institution.id
+    ).order_by(AccessRequest.created_at.desc()).all()
+
+    result = []
+    for req in requests:
+        inst = db.query(Institution).filter(Institution.id == req.institution_id).first()
+        dom = db.query(DataDomain).filter(DataDomain.id == req.domain_id).first()
+        result.append({
+            "id": req.id,
+            "citizen_id": req.citizen_id,
+            "institution_id": req.institution_id,
+            "institution_name": inst.name if inst else "Unknown Institution",
+            "institution_category": inst.category.value if inst else "UNKNOWN",
+            "requester_user_id": req.requester_user_id,
+            "domain_id": req.domain_id,
+            "domain_name": dom.name if dom else "Unknown Domain",
+            "domain_type": dom.domain_type.value if dom else "UNKNOWN",
+            "purpose": req.purpose,
+            "requested_duration": req.requested_duration,
+            "duration_days": req.duration_days,
+            "status": req.status.value,
+            "requested_fields": req.requested_fields or [],
+            "expires_at": req.expires_at,
+            "created_at": req.created_at,
+            "updated_at": req.updated_at
+        })
+    return result
 
 
 @router.get("/authorized-data/{citizen_id}")
@@ -94,8 +113,10 @@ def query_authorized_citizen_data(
     domain_type: str = Query(..., description="Domain type e.g. IDENTITY, EDUCATION, HEALTH, FINANCE, TRANSPORT"),
     requested_fields: Optional[str] = Query(None, description="Comma-separated requested fields"),
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_active_user)
+    user_inst_tuple: tuple = Depends(deps.get_current_institution_user)
 ) -> Any:
+    current_user, inst_user, institution = user_inst_tuple
+
     # Resolve target user ID if passed civic_one_id
     if citizen_id.startswith("CIV-"):
         c_prof = crud_user.get_citizen_by_civic_one_id(db, citizen_id)
@@ -105,12 +126,7 @@ def query_authorized_citizen_data(
     else:
         target_user_id = citizen_id
 
-    inst_user = db.query(InstitutionUser).filter(InstitutionUser.user_id == current_user.id).first()
-    if not inst_user:
-        first_inst = db.query(Institution).first()
-        institution_id = first_inst.id if first_inst else None
-    else:
-        institution_id = inst_user.institution_id
+    institution_id = institution.id
 
     field_list = [f.strip() for f in requested_fields.split(",")] if requested_fields else None
 
