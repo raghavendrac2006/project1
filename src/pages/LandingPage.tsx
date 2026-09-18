@@ -268,10 +268,13 @@ export function LandingPage() {
             </span>
           </h1>
 
-          <p className={cn(
-            'mt-5 sm:mt-7 text-sm sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed text-balance transition-all duration-700 delay-200',
-            heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-          )}>
+          <p
+            className={cn(
+              'mt-5 sm:mt-7 text-sm sm:text-lg md:text-xl font-bold tracking-tight text-foreground/90 max-w-2xl mx-auto leading-relaxed text-balance transition-all duration-700 delay-200',
+              heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+            )}
+            style={{ fontFamily: "'Arial Black', 'Arial-BoldMT', Gadget, sans-serif" }}
+          >
             Manage your credentials, encrypted document vault, family delegations, and statutory civic services from a single zero-knowledge operating system.
           </p>
 
