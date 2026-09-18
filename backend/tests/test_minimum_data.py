@@ -1,12 +1,14 @@
 import pytest
+from backend.app.crud import crud_user
 
 
-def test_minimum_data_principle_scoping(client):
+def test_minimum_data_principle_scoping(db_session, client):
     headers = {"X-Dev-User-Email": "coordinator@kec.edu.in"}
+    raghu_user = crud_user.get_user_by_email(db_session, "raghavendra@civicone.gov.in")
 
     # Institution queries education data
     response = client.get(
-        "/api/v1/institution/authorized-data/1?domain_type=education",
+        f"/api/v1/institution/authorized-data/{raghu_user.id}?domain_type=EDUCATION",
         headers=headers
     )
     assert response.status_code == 200

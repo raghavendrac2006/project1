@@ -9,10 +9,12 @@ from backend.app.models.consent import ActiveAccess, AccessStatus, AccessRequest
 
 # Allowed Fields Whitelist Per Domain (Minimum Data Principle)
 DOMAIN_FIELD_MAP = {
-    "IDENTITY": ["full_name", "dob", "gender", "aadhaar_last4", "pan_number", "phone", "address", "blood_group"],
+    "IDENTITY": ["full_name", "date_of_birth", "dob", "gender", "aadhaar_last4", "pan_number", "phone", "email", "address", "blood_group"],
     "EDUCATION": ["full_name", "degree", "cgpa", "year", "college_name", "graduation_year", "documents", "certificates"],
+    "HEALTH": ["full_name", "blood_group", "allergies", "vaccination_status", "medical_history", "documents"],
     "HEALTHCARE": ["full_name", "blood_group", "allergies", "vaccination_status", "medical_history", "documents"],
     "FINANCE": ["full_name", "pan_number", "credit_score", "annual_income", "bank_account_masked", "documents"],
+    "TRANSPORT": ["full_name", "driving_license", "vehicle_registration", "license_valid_until", "documents"],
     "GOVERNMENT": ["full_name", "driving_license", "vehicle_registration", "license_valid_until", "documents"],
 }
 
@@ -20,15 +22,17 @@ DOMAIN_FIELD_MAP = {
 INSTITUTION_DOMAIN_RULES = {
     "EDUCATION": ["EDUCATION", "IDENTITY"],
     "FINANCE": ["FINANCE", "IDENTITY"],
-    "HEALTHCARE": ["HEALTHCARE", "IDENTITY"],
-    "GOVERNMENT": ["GOVERNMENT", "IDENTITY"],
+    "HEALTH": ["HEALTH", "HEALTHCARE", "IDENTITY"],
+    "HEALTHCARE": ["HEALTH", "HEALTHCARE", "IDENTITY"],
+    "TRANSPORT": ["TRANSPORT", "GOVERNMENT", "IDENTITY"],
+    "GOVERNMENT": ["TRANSPORT", "GOVERNMENT", "IDENTITY"],
 }
 
 
 def authorize_access(
     db: Session,
-    institution_id: int,
-    citizen_id: int,
+    institution_id: str,
+    citizen_id: str,
     domain_type: str,
     requested_fields: Optional[List[str]] = None
 ) -> Dict[str, Any]:
@@ -45,10 +49,6 @@ def authorize_access(
     }
     """
     domain_upper = domain_type.upper()
-    if domain_upper == "HEALTH":
-        domain_upper = "HEALTHCARE"
-    if domain_upper == "TRANSPORT":
-        domain_upper = "GOVERNMENT"
 
     # 1. Look up Institution
     inst = db.query(Institution).filter(Institution.id == institution_id).first()
@@ -62,10 +62,6 @@ def authorize_access(
 
     inst_category = inst.category.value if hasattr(inst.category, "value") else str(inst.category)
     inst_cat_upper = inst_category.upper()
-    if inst_cat_upper == "HEALTH":
-        inst_cat_upper = "HEALTHCARE"
-    if inst_cat_upper == "TRANSPORT":
-        inst_cat_upper = "GOVERNMENT"
 
     # 2. Domain Isolation Matrix Check (WHO + WHY vs Data Domain)
     allowed_domains = INSTITUTION_DOMAIN_RULES.get(inst_cat_upper, [inst_cat_upper, "IDENTITY"])
@@ -78,11 +74,18 @@ def authorize_access(
         }
 
     # 3. Look up Data Domain record
+    domain_id = None
     try:
-        domain_enum = DomainType(domain_type.lower())
+        norm_type = domain_type.upper()
+        if norm_type == "HEALTHCARE":
+            norm_type = "HEALTH"
+        elif norm_type == "GOVERNMENT":
+            norm_type = "TRANSPORT"
+
+        domain_enum = DomainType[norm_type]
         domain_obj = db.query(DataDomain).filter(DataDomain.domain_type == domain_enum).first()
         domain_id = domain_obj.id if domain_obj else None
-    except ValueError:
+    except (KeyError, ValueError):
         domain_id = None
 
     # 4. Check CONSENT & Active Grant in DB
@@ -127,7 +130,7 @@ def authorize_access(
         }
 
     # 5. WHAT / Minimum Data Principle Scoping
-    granted_fields = grant.granted_fields or []
+    granted_fields = grant.approved_fields or []
     domain_allowed_fields = DOMAIN_FIELD_MAP.get(domain_upper, [])
 
     if requested_fields:
@@ -135,13 +138,11 @@ def authorize_access(
     else:
         final_scoped = [f for f in granted_fields if f in domain_allowed_fields]
 
-    # If no specific requested fields match but grant has fields, fallback to grant fields
     if not final_scoped and granted_fields:
         final_scoped = [f for f in granted_fields if f in domain_allowed_fields]
 
-    # Look up purpose from original request
-    original_req = db.query(AccessRequest).filter(AccessRequest.id == grant.request_id).first()
-    purpose = original_req.purpose if original_req else "Authorized institutional request"
+    original_req = db.query(AccessRequest).filter(AccessRequest.id == grant.access_request_id).first()
+    purpose = original_req.purpose if original_req else (grant.purpose or "Authorized institutional request")
 
     return {
         "allowed": True,

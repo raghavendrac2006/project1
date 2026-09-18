@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from backend.app.api import deps
 from backend.app.models.user import User
-from backend.app.models.audit import Notification
+from backend.app.crud import crud_audit
 from backend.app.schemas import NotificationSchema
 
 router = APIRouter()
@@ -15,32 +15,18 @@ def list_notifications(
     db: Session = Depends(deps.get_db),
     current_user: User = Depends(deps.get_current_active_user)
 ) -> Any:
-    """
-    List user notifications.
-    """
-    notifs = db.query(Notification).filter(
-        Notification.user_id == current_user.id
-    ).order_by(Notification.created_at.desc()).all()
+    notifs = crud_audit.list_user_notifications(db, current_user.id)
     return notifs
 
 
 @router.patch("/{notification_id}/read")
 def mark_notification_read(
-    notification_id: int,
+    notification_id: str,
     db: Session = Depends(deps.get_db),
     current_user: User = Depends(deps.get_current_active_user)
 ) -> Any:
-    """
-    Mark notification as read.
-    """
-    notif = db.query(Notification).filter(
-        Notification.id == notification_id,
-        Notification.user_id == current_user.id
-    ).first()
-
-    if not notif:
+    success = crud_audit.mark_notification_read(db, notification_id, current_user.id)
+    if not success:
         raise HTTPException(status_code=404, detail="Notification not found")
-
-    notif.is_read = True
     db.commit()
     return {"status": "success", "message": "Notification marked as read"}

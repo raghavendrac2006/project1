@@ -4,9 +4,9 @@ from sqlalchemy.orm import Session
 
 from backend.app.api import deps
 from backend.app.models.user import User
-from backend.app.models.audit import AuditLog
 from backend.app.models.institution import Institution
 from backend.app.models.domain import DataDomain
+from backend.app.crud import crud_audit
 from backend.app.schemas import AuditLogSchema
 
 router = APIRouter()
@@ -17,12 +17,7 @@ def list_access_history(
     db: Session = Depends(deps.get_db),
     current_user: User = Depends(deps.get_current_active_user)
 ) -> Any:
-    """
-    List immutable audit log history for current citizen.
-    """
-    logs = db.query(AuditLog).filter(
-        AuditLog.citizen_id == current_user.id
-    ).order_by(AuditLog.timestamp.desc()).all()
+    logs = crud_audit.list_citizen_history(db, current_user.id)
 
     result = []
     for log in logs:
@@ -35,12 +30,14 @@ def list_access_history(
             "institution_id": log.institution_id,
             "institution_name": inst.name if inst else "System / Citizen Direct",
             "user_id": log.user_id,
+            "access_request_id": log.access_request_id,
             "domain_id": log.domain_id,
             "domain_name": dom.name if dom else "N/A",
             "action": log.action,
             "purpose": log.purpose,
             "accessed_fields": log.accessed_fields or [],
-            "timestamp": log.timestamp,
-            "outcome": log.outcome
+            "result": log.result,
+            "metadata_json": log.metadata_json,
+            "timestamp": log.timestamp
         })
     return result

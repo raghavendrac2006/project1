@@ -3,7 +3,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from backend.app.api import deps
-from backend.app.models.user import User, CitizenProfile
+from backend.app.models.user import User
+from backend.app.crud import crud_user
 from backend.app.schemas import CitizenProfileSchema, CitizenProfileUpdate
 
 router = APIRouter()
@@ -14,10 +15,7 @@ def get_citizen_profile(
     db: Session = Depends(deps.get_db),
     current_user: User = Depends(deps.get_current_active_user)
 ) -> Any:
-    """
-    Get citizen profile for current user.
-    """
-    profile = db.query(CitizenProfile).filter(CitizenProfile.user_id == current_user.id).first()
+    profile = crud_user.get_citizen_profile(db, current_user.id)
     if not profile:
         raise HTTPException(status_code=404, detail="Citizen profile not found")
     return profile
@@ -28,25 +26,25 @@ def get_citizen_identity(
     db: Session = Depends(deps.get_db),
     current_user: User = Depends(deps.get_current_active_user)
 ) -> Any:
-    """
-    Get digital civic identity card payload.
-    """
-    profile = db.query(CitizenProfile).filter(CitizenProfile.user_id == current_user.id).first()
+    profile = crud_user.get_citizen_profile(db, current_user.id)
     if not profile:
         raise HTTPException(status_code=404, detail="Citizen profile not found")
 
     return {
-        "civic_id": profile.civic_id,
+        "civic_one_id": profile.civic_one_id,
+        "civic_id": profile.civic_one_id,
         "full_name": profile.full_name,
-        "dob": profile.dob,
+        "date_of_birth": profile.date_of_birth,
+        "dob": profile.date_of_birth,
         "gender": profile.gender,
         "phone": profile.phone,
+        "email": profile.email,
         "address": profile.address,
         "blood_group": profile.blood_group,
         "aadhaar_last4": profile.aadhaar_last4,
         "pan_number": profile.pan_number,
         "photo_url": profile.photo_url,
-        "verification_status": "VERIFIED_GOVT_ID",
+        "verification_status": profile.verification_status,
         "issued_by": "Republic of India / CivicOne Central Data Exchange"
     }
 
@@ -57,10 +55,7 @@ def update_citizen_profile(
     db: Session = Depends(deps.get_db),
     current_user: User = Depends(deps.get_current_active_user)
 ) -> Any:
-    """
-    Update editable citizen profile fields.
-    """
-    profile = db.query(CitizenProfile).filter(CitizenProfile.user_id == current_user.id).first()
+    profile = crud_user.get_citizen_profile(db, current_user.id)
     if not profile:
         raise HTTPException(status_code=404, detail="Citizen profile not found")
 

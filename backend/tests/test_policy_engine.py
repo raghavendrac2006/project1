@@ -1,16 +1,17 @@
 import pytest
 from backend.app.policies.engine import authorize_access
-from backend.app.models.institution import Institution, InstitutionCategory
-from backend.app.models.user import User
+from backend.app.crud import crud_user, crud_institution
 
 
 def test_policy_engine_active_grant_success(db_session):
-    # Raghavendra (id=1) has an active grant for Kuppam Engineering College (id=1, EDUCATION)
+    kec_inst = crud_institution.get_institution_by_registration_id(db_session, "KEC-EDU-001")
+    raghu_user = crud_user.get_user_by_email(db_session, "raghavendra@civicone.gov.in")
+
     res = authorize_access(
         db=db_session,
-        institution_id=1,
-        citizen_id=1,
-        domain_type="education",
+        institution_id=kec_inst.id,
+        citizen_id=raghu_user.id,
+        domain_type="EDUCATION",
         requested_fields=["degree", "cgpa"]
     )
     assert res["allowed"] is True
@@ -19,12 +20,14 @@ def test_policy_engine_active_grant_success(db_session):
 
 
 def test_policy_engine_no_consent_denial(db_session):
-    # Raghavendra has NO active grant for CityCare Hospital (id=3, HEALTHCARE)
+    cch_inst = crud_institution.get_institution_by_registration_id(db_session, "CCH-HLT-404")
+    raghu_user = crud_user.get_user_by_email(db_session, "raghavendra@civicone.gov.in")
+
     res = authorize_access(
         db=db_session,
-        institution_id=3,
-        citizen_id=1,
-        domain_type="healthcare",
+        institution_id=cch_inst.id,
+        citizen_id=raghu_user.id,
+        domain_type="HEALTH",
         requested_fields=["blood_group"]
     )
     assert res["allowed"] is False
