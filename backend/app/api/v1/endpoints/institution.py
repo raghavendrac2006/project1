@@ -1,3 +1,4 @@
+import datetime
 from typing import Any, List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
@@ -21,6 +22,27 @@ def create_institution_access_request(
     user_inst_tuple: tuple = Depends(deps.get_current_institution_user)
 ) -> Any:
     current_user, inst_user, institution = user_inst_tuple
+
+    # 1. Validate Purpose
+    purpose_clean = (payload.purpose or "").strip()
+    if not purpose_clean or len(purpose_clean) < 3:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Purpose is required and must be at least 3 characters long."
+        )
+
+    # 2. Validate Duration Days
+    try:
+        duration_int = int(payload.duration_days)
+        if duration_int < 1 or duration_int > 365:
+            raise ValueError()
+    except (ValueError, TypeError):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Requested duration must be a valid integer between 1 and 365 days."
+        )
+
+    # 3. Validate Target Citizen
     citizen_profile = None
     if payload.citizen_civic_id:
         citizen_profile = crud_user.get_citizen_by_civic_one_id(db, payload.citizen_civic_id)
@@ -28,20 +50,46 @@ def create_institution_access_request(
         citizen_profile = crud_user.get_citizen_profile(db, payload.citizen_id)
 
     if not citizen_profile:
-        raise HTTPException(status_code=404, detail="Citizen profile not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Target citizen profile not found")
 
     institution_id = inst_user.institution_id
 
+    # 4. Validate Domain & Requested Fields
     norm_type = payload.domain_type.upper()
     if norm_type == "HEALTHCARE":
         norm_type = "HEALTH"
     elif norm_type == "GOVERNMENT":
         norm_type = "TRANSPORT"
 
-    domain_enum = DomainType[norm_type]
+    try:
+        domain_enum = DomainType[norm_type]
+    except KeyError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid data domain '{payload.domain_type}'."
+        )
+
     domain = db.query(DataDomain).filter(DataDomain.domain_type == domain_enum).first()
     if not domain:
-        raise HTTPException(status_code=400, detail=f"Invalid domain '{payload.domain_type}'")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Domain '{payload.domain_type}' not found in registry.")
+
+    if not payload.requested_fields or not isinstance(payload.requested_fields, list):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Requested fields must be a non-empty list of specific data fields."
+        )
+
+    from backend.app.policies.engine import DOMAIN_FIELD_MAP
+    allowed_domain_fields = DOMAIN_FIELD_MAP.get(norm_type, [])
+    invalid_fields = [f for f in payload.requested_fields if f not in allowed_domain_fields]
+    if invalid_fields:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Fields {invalid_fields} are invalid for data domain '{norm_type}'."
+        )
+
+    now = datetime.datetime.now(datetime.timezone.utc)
+    calculated_expiry = now + datetime.timedelta(days=duration_int)
 
     req = crud_request.create_access_request(
         db=db,
@@ -49,16 +97,31 @@ def create_institution_access_request(
         institution_id=institution_id,
         requester_user_id=current_user.id,
         domain_id=domain.id,
-        purpose=payload.purpose,
+        purpose=purpose_clean,
         requested_fields=payload.requested_fields,
-        duration_days=str(payload.duration_days)
+        requested_duration=f"{duration_int}_DAYS",
+        duration_days=str(duration_int),
+        expires_at=calculated_expiry
+    )
+
+    crud_audit.create_audit_log(
+        db=db,
+        citizen_id=citizen_profile.user_id,
+        institution_id=institution_id,
+        user_id=current_user.id,
+        access_request_id=req.id,
+        domain_id=domain.id,
+        action="REQUEST_CREATED",
+        purpose=purpose_clean,
+        accessed_fields=payload.requested_fields,
+        result="PENDING"
     )
 
     crud_audit.create_notification(
         db=db,
         user_id=citizen_profile.user_id,
         title="New Access Request",
-        message=f"{institution.name} requested access to your {domain.name} records.",
+        message=f"{institution.name} requested access to your {domain.name} records for {duration_int} days.",
         notification_type="ACCESS_REQUEST",
         related_entity_id=req.id
     )
@@ -67,7 +130,8 @@ def create_institution_access_request(
     return {
         "status": "success",
         "message": "Access request submitted successfully",
-        "request_id": req.id
+        "request_id": req.id,
+        "expires_at": calculated_expiry.isoformat()
     }
 
 

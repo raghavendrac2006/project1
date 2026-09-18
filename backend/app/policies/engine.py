@@ -46,7 +46,8 @@ def authorize_access(
     citizen_id: str,
     domain_type: str,
     requested_fields: Optional[List[str]] = None,
-    requester_role: Optional[str] = None
+    requester_role: Optional[str] = None,
+    skip_consent_check: bool = False
 ) -> Dict[str, Any]:
     """
     Central Policy Engine Enforcement:
@@ -129,6 +130,25 @@ def authorize_access(
         domain_id = None
 
     # 5. Check CONSENT & Active Grant in DB (CONSENT + WHEN)
+    if skip_consent_check:
+        domain_allowed_fields = DOMAIN_FIELD_MAP.get(domain_upper, [])
+        if requested_fields:
+            approved_fields = [f for f in requested_fields if f in domain_allowed_fields]
+            denied_fields = [f for f in requested_fields if f not in approved_fields]
+        else:
+            approved_fields = domain_allowed_fields
+            denied_fields = []
+        return {
+            "decision": "ALLOW",
+            "allowed": True,
+            "policy_rule_id": "POL_ALLOW_APPROVAL_PRECHECK",
+            "reason": "Policy pre-approval evaluation successful: Institution, Role, and Domain isolation authorized.",
+            "approved_fields": approved_fields,
+            "denied_fields": denied_fields,
+            "scoped_fields": approved_fields,
+            "purpose": "Approval Pre-check"
+        }
+
     query = db.query(ActiveAccess).filter(
         ActiveAccess.citizen_id == citizen_id,
         ActiveAccess.institution_id == institution_id

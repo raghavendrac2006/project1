@@ -1,6 +1,6 @@
 import datetime
 from typing import Any, List
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from backend.app.api import deps
@@ -90,34 +90,70 @@ def approve_access_request(
     request_id: str,
     payload: RequestApprovePayload = None,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_active_user)
+    citizen_user_tuple: tuple = Depends(deps.get_current_citizen)
 ) -> Any:
-    req = db.query(AccessRequest).filter(
-        AccessRequest.id == request_id,
-        AccessRequest.citizen_id == current_user.id
+    current_user, citizen_profile = citizen_user_tuple
+
+    # 1. Row Lock Access Request
+    req = db.query(AccessRequest).with_for_update().filter(
+        AccessRequest.id == request_id
     ).first()
 
-    if not req:
-        raise HTTPException(status_code=404, detail="Access request not found")
+    if not req or req.citizen_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Access request not found")
 
+    # 2. Check Request Status (Must be PENDING; otherwise 409 Conflict)
     if req.status != RequestStatus.PENDING:
-        raise HTTPException(status_code=400, detail=f"Cannot approve request with status '{req.status.value}'")
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Access request #{request_id} is no longer pending (current status: '{req.status.value}')"
+        )
 
+    # 3. Look up Domain & Institution Requester Info
+    dom = db.query(DataDomain).filter(DataDomain.id == req.domain_id).first()
+    inst = db.query(Institution).filter(Institution.id == req.institution_id).first()
+
+    # Look up requester's institution user role
+    from backend.app.models.institution import InstitutionUser
+    inst_user = db.query(InstitutionUser).filter(InstitutionUser.user_id == req.requester_user_id).first()
+    requester_role = inst_user.role_id if inst_user else None
+
+    # 4. Re-evaluate Policy Engine (Authoritative Check)
+    from backend.app.policies.engine import authorize_access
+    evaluation = authorize_access(
+        db=db,
+        institution_id=req.institution_id,
+        citizen_id=current_user.id,
+        domain_type=dom.domain_type.value if dom else "IDENTITY",
+        requested_fields=req.requested_fields,
+        requester_role=requester_role,
+        skip_consent_check=True
+    )
+
+    if not evaluation["allowed"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Policy Engine Authorization Failure [{evaluation.get('policy_rule_id', 'POL_DENIED')}]: {evaluation['reason']}"
+        )
+
+    # Derive approved fields from Policy Engine output
+    approved_fields = evaluation.get("approved_fields") or req.requested_fields or []
     days = payload.duration_days if (payload and payload.duration_days) else int(req.duration_days or "30")
-    granted_fields = payload.granted_fields if (payload and payload.granted_fields) else req.requested_fields
-
-    req.status = RequestStatus.APPROVED
-    req.updated_at = datetime.datetime.now(datetime.timezone.utc)
 
     now = datetime.datetime.now(datetime.timezone.utc)
     expires_at = now + datetime.timedelta(days=days)
+
+    # 5. Atomic Update Transaction
+    req.status = RequestStatus.APPROVED
+    req.expires_at = expires_at
+    req.updated_at = now
 
     crud_request.create_consent_record(
         db=db,
         access_request_id=req.id,
         citizen_id=current_user.id,
         decision="APPROVED",
-        approved_fields=granted_fields,
+        approved_fields=approved_fields,
         expires_at=expires_at
     )
 
@@ -127,13 +163,10 @@ def approve_access_request(
         citizen_id=current_user.id,
         institution_id=req.institution_id,
         domain_id=req.domain_id,
-        approved_fields=granted_fields,
+        approved_fields=approved_fields,
         expires_at=expires_at,
         purpose=req.purpose
     )
-
-    inst = db.query(Institution).filter(Institution.id == req.institution_id).first()
-    dom = db.query(DataDomain).filter(DataDomain.id == req.domain_id).first()
 
     crud_audit.create_audit_log(
         db=db,
@@ -142,13 +175,14 @@ def approve_access_request(
         user_id=req.requester_user_id,
         access_request_id=req.id,
         domain_id=req.domain_id,
-        action="GRANT_CONSENT",
+        action="REQUEST_APPROVED",
         purpose=req.purpose,
-        accessed_fields=granted_fields,
+        accessed_fields=approved_fields,
         result="SUCCESS"
     )
 
     inst_name = inst.name if inst else "Institution"
+    # Citizen Notification
     crud_audit.create_notification(
         db=db,
         user_id=current_user.id,
@@ -158,12 +192,23 @@ def approve_access_request(
         related_entity_id=active_grant.id
     )
 
+    # Institution Requester Notification
+    if req.requester_user_id:
+        crud_audit.create_notification(
+            db=db,
+            user_id=req.requester_user_id,
+            title="Access Request Approved",
+            message=f"Citizen {citizen_profile.full_name} approved your access request for {dom.name if dom else 'Data'}.",
+            notification_type="REQUEST_APPROVED",
+            related_entity_id=req.id
+        )
+
     db.commit()
     return {
         "status": "success",
         "message": f"Access request #{req.id} approved successfully",
         "expires_at": expires_at.isoformat(),
-        "granted_fields": granted_fields
+        "granted_fields": approved_fields
     }
 
 
@@ -171,21 +216,28 @@ def approve_access_request(
 def deny_access_request(
     request_id: str,
     db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_active_user)
+    citizen_user_tuple: tuple = Depends(deps.get_current_citizen)
 ) -> Any:
-    req = db.query(AccessRequest).filter(
-        AccessRequest.id == request_id,
-        AccessRequest.citizen_id == current_user.id
+    current_user, citizen_profile = citizen_user_tuple
+
+    # 1. Row Lock Access Request
+    req = db.query(AccessRequest).with_for_update().filter(
+        AccessRequest.id == request_id
     ).first()
 
-    if not req:
-        raise HTTPException(status_code=404, detail="Access request not found")
+    if not req or req.citizen_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Access request not found")
 
+    # 2. Check Request Status (Must be PENDING; otherwise 409 Conflict)
     if req.status != RequestStatus.PENDING:
-        raise HTTPException(status_code=400, detail=f"Cannot deny request with status '{req.status.value}'")
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Access request #{request_id} is no longer pending (current status: '{req.status.value}')"
+        )
 
+    now = datetime.datetime.now(datetime.timezone.utc)
     req.status = RequestStatus.DENIED
-    req.updated_at = datetime.datetime.now(datetime.timezone.utc)
+    req.updated_at = now
 
     crud_request.create_consent_record(
         db=db,
@@ -202,11 +254,36 @@ def deny_access_request(
         user_id=req.requester_user_id,
         access_request_id=req.id,
         domain_id=req.domain_id,
-        action="DENY_CONSENT",
+        action="REQUEST_DENIED",
         purpose=req.purpose,
         accessed_fields=[],
         result="DENIED"
     )
 
+    dom = db.query(DataDomain).filter(DataDomain.id == req.domain_id).first()
+    inst = db.query(Institution).filter(Institution.id == req.institution_id).first()
+    inst_name = inst.name if inst else "Institution"
+
+    # Citizen Notification
+    crud_audit.create_notification(
+        db=db,
+        user_id=current_user.id,
+        title="Consent Denied",
+        message=f"You denied access request from {inst_name} for {dom.name if dom else 'Data'}.",
+        notification_type="CONSENT_DENIED",
+        related_entity_id=req.id
+    )
+
+    # Institution Requester Notification
+    if req.requester_user_id:
+        crud_audit.create_notification(
+            db=db,
+            user_id=req.requester_user_id,
+            title="Access Request Denied",
+            message=f"Citizen {citizen_profile.full_name} denied your access request for {dom.name if dom else 'Data'}.",
+            notification_type="REQUEST_DENIED",
+            related_entity_id=req.id
+        )
+
     db.commit()
-    return {"status": "success", "message": f"Access request #{req.id} denied."}
+    return {"status": "success", "message": f"Access request #{req.id} denied successfully."}
