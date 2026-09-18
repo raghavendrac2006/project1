@@ -14,10 +14,8 @@ import {
   MapPin,
   Building2,
   Scroll,
-  Filter,
   Eye,
   Check,
-  Globe2
 } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
@@ -53,8 +51,6 @@ export function GovernmentServicesPage() {
   const [isGazetteModalOpen, setIsGazetteModalOpen] = useState(false)
   const [newTitle, setNewTitle] = useState('')
   const [newCode, setNewCode] = useState('')
-  const [newMinistry, setNewMinistry] = useState('Ministry of Electronics and Information Technology (MeitY)')
-  const [newDept, setNewDept] = useState('')
   const [newJurisdiction, setNewJurisdiction] = useState<'Central' | 'State' | 'Municipal'>('Central')
   const [newState, setNewState] = useState('All India')
   const [newCategory, setNewCategory] = useState<'identity' | 'tax' | 'transport' | 'health' | 'welfare' | 'housing' | 'legal' | 'business' | 'other'>('identity')
@@ -174,8 +170,6 @@ export function GovernmentServicesPage() {
           <div className="flex items-center gap-3">
             <Button
               onClick={() => {
-                setNewDept(session.department.name)
-                setNewMinistry(session.department.ministry)
                 setNewCode(`${session.department.code}-${Math.floor(100 + Math.random() * 900)}`)
                 setNewJurisdiction(session.department.jurisdiction)
                 setNewAct(session.department.statutoryAct || '')

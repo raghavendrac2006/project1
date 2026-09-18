@@ -198,7 +198,7 @@ export function LandingPage() {
 
           <div className="grid md:grid-cols-3 gap-8 items-stretch">
             {/* Portal 1: Citizen */}
-            <div className="rounded-3xl border-2 border-blue-500/30 bg-card p-7 shadow-lg shadow-blue-500/5 hover:border-blue-500/60 transition-all flex flex-col justify-between group relative overflow-hidden h-full">
+            <div className="rounded-3xl border-2 border-blue-500/30 bg-card p-7 shadow-lg shadow-blue-500/5 hover:border-blue-500/60 hover-lift transition-all flex flex-col justify-between group relative overflow-hidden h-full">
               <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-bl-full pointer-events-none group-hover:bg-blue-500/10 transition-colors" />
 
               <div className="flex-1 flex flex-col">
@@ -229,7 +229,7 @@ export function LandingPage() {
             </div>
 
             {/* Portal 2: Organization */}
-            <div className="rounded-3xl border-2 border-emerald-500/30 bg-card p-7 shadow-lg shadow-emerald-500/5 hover:border-emerald-500/60 transition-all flex flex-col justify-between group relative overflow-hidden h-full">
+            <div className="rounded-3xl border-2 border-emerald-500/30 bg-card p-7 shadow-lg shadow-emerald-500/5 hover:border-emerald-500/60 hover-lift transition-all flex flex-col justify-between group relative overflow-hidden h-full">
               <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-bl-full pointer-events-none group-hover:bg-emerald-500/10 transition-colors" />
 
               <div className="flex-1 flex flex-col">
@@ -260,7 +260,7 @@ export function LandingPage() {
             </div>
 
             {/* Portal 3: Government */}
-            <div className="rounded-3xl border-2 border-indigo-500/30 bg-card p-7 shadow-lg shadow-indigo-500/5 hover:border-indigo-500/60 transition-all flex flex-col justify-between group relative overflow-hidden h-full">
+            <div className="rounded-3xl border-2 border-indigo-500/30 bg-card p-7 shadow-lg shadow-indigo-500/5 hover:border-indigo-500/60 hover-lift transition-all flex flex-col justify-between group relative overflow-hidden h-full">
               <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-bl-full pointer-events-none group-hover:bg-indigo-500/10 transition-colors" />
 
               <div className="flex-1 flex flex-col">
@@ -306,7 +306,7 @@ export function LandingPage() {
 
         <div className="grid md:grid-cols-3 gap-6 items-stretch">
           {/* Card 1 */}
-          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group h-full flex flex-col">
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm hover:shadow-md hover-lift transition-all relative overflow-hidden group h-full flex flex-col">
             <div className="h-12 w-12 rounded-xl bg-blue-500/10 text-primary flex items-center justify-center mb-5 group-hover:scale-110 transition-transform shrink-0">
               <Award className="w-6 h-6" />
             </div>
@@ -317,7 +317,7 @@ export function LandingPage() {
           </div>
 
           {/* Card 2 */}
-          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group h-full flex flex-col">
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm hover:shadow-md hover-lift transition-all relative overflow-hidden group h-full flex flex-col">
             <div className="h-12 w-12 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform shrink-0">
               <FileText className="w-6 h-6" />
             </div>
@@ -328,7 +328,7 @@ export function LandingPage() {
           </div>
 
           {/* Card 3 */}
-          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group h-full flex flex-col">
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm hover:shadow-md hover-lift transition-all relative overflow-hidden group h-full flex flex-col">
             <div className="h-12 w-12 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform shrink-0">
               <Users className="w-6 h-6" />
             </div>
@@ -339,7 +339,7 @@ export function LandingPage() {
           </div>
 
           {/* Card 4 */}
-          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group h-full flex flex-col">
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm hover:shadow-md hover-lift transition-all relative overflow-hidden group h-full flex flex-col">
             <div className="h-12 w-12 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform shrink-0">
               <Zap className="w-6 h-6" />
             </div>
@@ -350,7 +350,7 @@ export function LandingPage() {
           </div>
 
           {/* Card 5 */}
-          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group h-full flex flex-col">
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm hover:shadow-md hover-lift transition-all relative overflow-hidden group h-full flex flex-col">
             <div className="h-12 w-12 rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform shrink-0">
               <Layers className="w-6 h-6" />
             </div>
@@ -361,7 +361,7 @@ export function LandingPage() {
           </div>
 
           {/* Card 6 */}
-          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group h-full flex flex-col">
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm hover:shadow-md hover-lift transition-all relative overflow-hidden group h-full flex flex-col">
             <div className="h-12 w-12 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform shrink-0">
               <Lock className="w-6 h-6" />
             </div>
@@ -440,7 +440,8 @@ export function LandingPage() {
               >
                 <button
                   onClick={() => setOpenFaq(isOpen ? null : idx)}
-                  className="w-full p-5 text-left flex items-center justify-between gap-4 font-bold text-sm sm:text-base text-foreground hover:bg-muted/40 transition-colors"
+                  aria-expanded={isOpen}
+                  className="w-full p-5 text-left flex items-center justify-between gap-4 font-bold text-sm sm:text-base text-foreground hover:bg-muted/40 transition-colors focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   <span>{faq.q}</span>
                   <ChevronDown

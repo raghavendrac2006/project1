@@ -14,7 +14,6 @@ import {
   Users,
   Award,
   Zap,
-  Star,
   CheckCircle2,
   TrendingUp,
   ShieldOff,
@@ -71,6 +70,18 @@ export function DashboardPage() {
   // Attention items
   const actionRequiredApp = applications.find((a) => a.status === 'action_required')
   const expiringDoc = documents.find((d) => d.verificationStatus === 'expiring_soon')
+
+  const expiringOrOverdueDocs = useMemo(() => {
+    const now = Date.now()
+    return documents
+      .filter((d) => d.verificationStatus === 'expiring_soon' || (d.expiryDate && new Date(d.expiryDate).getTime() < now))
+      .map((doc) => {
+        const daysLeft = doc.expiryDate
+          ? Math.ceil((new Date(doc.expiryDate).getTime() - now) / (1000 * 60 * 60 * 24))
+          : 0
+        return { doc, daysLeft }
+      })
+  }, [documents])
 
   return (
     <div className="space-y-6 pb-12 animate-in fade-in duration-200">
@@ -423,26 +434,17 @@ export function DashboardPage() {
               <Clock className="w-4 h-4 text-purple-500" />
             </div>
             <div className="space-y-2">
-              {documents
-                .filter((d) => d.verificationStatus === 'expiring_soon' || (d.expiryDate && new Date(d.expiryDate).getTime() < Date.now()))
-                .slice(0, 3)
-                .map((doc) => {
-                  const daysLeft = doc.expiryDate
-                    ? Math.ceil((new Date(doc.expiryDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
-                    : 0
-                  return (
-                    <div key={doc.id} className="flex items-center justify-between text-xs">
-                      <span className="text-muted-foreground truncate flex-1 pr-2">{doc.name || doc.title}</span>
-                      <Badge variant="outline" className={`text-[9px] font-bold shrink-0 ${
-                        daysLeft <= 0 ? 'bg-rose-500/10 text-rose-600 border-rose-500/30' : 'bg-amber-500/10 text-amber-600 border-amber-500/30'
-                      }`}>
-                        {daysLeft <= 0 ? 'EXPIRED' : `${daysLeft}d left`}
-                      </Badge>
-                    </div>
-                  )
-                })
-              }
-              {documents.filter((d) => d.verificationStatus === 'expiring_soon' || (d.expiryDate && new Date(d.expiryDate).getTime() < Date.now())).length === 0 && (
+              {expiringOrOverdueDocs.slice(0, 3).map(({ doc, daysLeft }) => (
+                <div key={doc.id} className="flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground truncate flex-1 pr-2">{doc.name || doc.title}</span>
+                  <Badge variant="outline" className={`text-[9px] font-bold shrink-0 ${
+                    daysLeft <= 0 ? 'bg-rose-500/10 text-rose-600 border-rose-500/30' : 'bg-amber-500/10 text-amber-600 border-amber-500/30'
+                  }`}>
+                    {daysLeft <= 0 ? 'EXPIRED' : `${daysLeft}d left`}
+                  </Badge>
+                </div>
+              ))}
+              {expiringOrOverdueDocs.length === 0 && (
                 <p className="text-xs text-emerald-600 font-semibold flex items-center gap-1">
                   <CheckCircle2 className="w-3.5 h-3.5" /> All documents current
                 </p>

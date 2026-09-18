@@ -1,9 +1,6 @@
 import { useState } from 'react'
 import {
   ShieldCheck,
-  QrCode,
-  Eye,
-  EyeOff,
   Share2,
   Download,
   Copy,
@@ -33,7 +30,6 @@ export function IdentityPage() {
   const [credentials, setCredentials] = useState(() => civicStorage.getCredentials())
   const [activeTab, setActiveTab] = useState<'smart_card' | 'credentials'>('smart_card')
 
-  const [showFullId, setShowFullId] = useState(false)
   const [shareModalOpen, setShareModalOpen] = useState(false)
   const [generatedToken, setGeneratedToken] = useState<{ token: string; qrPayload: string; validUntil: string } | null>(null)
   const [purpose, setPurpose] = useState('Govt Checkpoint Verification')
@@ -54,13 +50,6 @@ export function IdentityPage() {
   const [isGeneratingProof, setIsGeneratingProof] = useState(false)
 
   const toast = useToast()
-
-  const handleToggleMask = () => {
-    setShowFullId((prev) => !prev)
-    if (!showFullId) {
-      toast.info('Sensitive Data Unmasked', 'National ID revealed for 30 seconds.')
-    }
-  }
 
   const handleGenerateShareToken = async () => {
     setIsGenerating(true)
