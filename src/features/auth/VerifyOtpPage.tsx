@@ -72,7 +72,7 @@ export function VerifyOtpPage() {
     setIsLoading(true)
     try {
       await verifyOtp(fullOtp)
-      toast.success('Security Code Verified', 'Welcome to SAMAGRA Digital Civic OS.')
+      toast.success('Security Code Verified', 'Welcome to CiviqOne Digital Civic OS.')
       navigate(ROUTES.APP.DASHBOARD, { replace: true })
     } catch (err) {
       toast.error('Verification Failed', err instanceof Error ? err.message : 'Invalid code.')

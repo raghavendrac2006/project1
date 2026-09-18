@@ -21,7 +21,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('Uncaught error in SAMAGRA component tree:', error, errorInfo)
+    console.error('Uncaught error in CiviqOne component tree:', error, errorInfo)
   }
 
   public render() {
@@ -36,7 +36,7 @@ export class ErrorBoundary extends Component<Props, State> {
               Something went wrong
             </h2>
             <p className="text-xs sm:text-sm text-muted-foreground mt-2 mb-6 leading-relaxed">
-              SAMAGRA encountered an unexpected exception while rendering this view. Your session data and digital credentials remain securely protected.
+              CiviqOne encountered an unexpected exception while rendering this view. Your session data and digital credentials remain securely protected.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <Button

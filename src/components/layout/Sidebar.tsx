@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { NavLink } from 'react-router-dom'
+import { NavLink, Link } from 'react-router-dom'
 import {
   LayoutDashboard,
   Shield,
@@ -20,6 +20,7 @@ import {
   Sparkles,
   Database,
   Compass,
+  LifeBuoy,
 } from 'lucide-react'
 import { ROUTES } from '@/constants/routes'
 import { cn } from '@/lib/utils'
@@ -74,7 +75,8 @@ export function Sidebar({ collapsed, onToggleCollapse }: SidebarProps) {
       { label: 'Privacy & Consent', path: ROUTES.APP.PRIVACY, icon: Lock },
       { label: 'Security Center', path: ROUTES.APP.SECURITY, icon: KeyRound },
       { label: 'Civic Payments', path: ROUTES.APP.PAYMENTS, icon: CreditCard },
-      { label: 'SAMAGRA AI', path: ROUTES.APP.ASSISTANT, icon: Bot, isHighlighted: true },
+      { label: 'CiviqOne AI', path: ROUTES.APP.ASSISTANT, icon: Bot, isHighlighted: true },
+      { label: 'Customer Care', path: ROUTES.APP.SUPPORT, icon: LifeBuoy },
       { label: 'Notifications', path: ROUTES.APP.NOTIFICATIONS, icon: Bell },
       { label: 'Settings', path: ROUTES.APP.SETTINGS, icon: Settings },
     ],
@@ -89,29 +91,37 @@ export function Sidebar({ collapsed, onToggleCollapse }: SidebarProps) {
       )}
     >
       {/* Brand Header */}
-      <div className="flex h-16 items-center justify-between px-4 border-b border-border/80">
-        <div className="flex items-center gap-3 overflow-hidden">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-blue-700 via-blue-600 to-sky-500 text-white shadow-md">
-            <Shield className="h-5 w-5 fill-white/20" />
+      <div className={cn(
+        'flex h-16 items-center border-b border-border/80 transition-all select-none',
+        collapsed ? 'justify-center px-2 relative' : 'justify-between px-4'
+      )}>
+        <Link to={ROUTES.ROOT} className={cn('flex items-center group', collapsed ? 'justify-center' : 'gap-3 overflow-hidden')}>
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/95 dark:bg-card/95 p-1 border border-border/70 shadow-sm group-hover:scale-105 transition-transform">
+            <img src="/civiqone-icon.png" alt="CiviQone" className="h-full w-full object-contain" />
           </div>
           {!collapsed && (
-            <div className="flex flex-col">
-              <span className="font-display text-base font-extrabold tracking-tight text-foreground flex items-center gap-1.5">
-                SAMAGRA
+            <div className="flex flex-col min-w-0">
+              <span className="font-display text-base font-black tracking-tight text-foreground block leading-none">
+                Civi<span className="text-[#E11D48]">Q</span>one
               </span>
-              <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
-                Civic Operating System
+              <span className="text-[9px] font-semibold text-muted-foreground tracking-wide mt-1 truncate">
+                Citizens for a Better Tomorrow
               </span>
             </div>
           )}
-        </div>
+        </Link>
 
         <button
           onClick={onToggleCollapse}
-          className="h-7 w-7 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
+          className={cn(
+            'rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors',
+            collapsed
+              ? 'absolute -right-3 top-1/2 -translate-y-1/2 h-6 w-6 bg-card shadow-md z-40'
+              : 'h-7 w-7'
+          )}
           aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
-          {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+          {collapsed ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronLeft className="w-4 h-4" />}
         </button>
       </div>
 

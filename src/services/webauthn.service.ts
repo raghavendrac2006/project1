@@ -86,12 +86,12 @@ class WebAuthnService {
           publicKey: {
             challenge: challenge as unknown as BufferSource,
             rp: {
-              name: 'SAMAGRA Civic OS',
+              name: 'CiviqOne Civic OS',
               id: window.location.hostname || 'localhost',
             },
             user: {
-              id: new TextEncoder().encode('samagra_citizen_root') as unknown as BufferSource,
-              name: 'citizen@samagra.internal',
+              id: new TextEncoder().encode('civiqone_citizen_root') as unknown as BufferSource,
+              name: 'citizen@civiqone.internal',
               displayName: 'Verified Citizen',
             },
             pubKeyCredParams: [

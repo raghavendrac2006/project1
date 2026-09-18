@@ -1,14 +1,14 @@
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { adminService } from '@/services/admin.service'
 import { ROUTES } from '@/constants/routes'
-import { ShieldAlert, KeyRound, Lock, ArrowRight, CheckCircle2, Terminal } from 'lucide-react'
+import { KeyRound, Lock, ArrowRight, CheckCircle2, Terminal } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 
 export function AdminLoginPage() {
   const navigate = useNavigate()
-  const [email, setEmail] = useState('admin@samagra.gov.in')
+  const [email, setEmail] = useState('admin@civiqone.gov.in')
   const [password, setPassword] = useState('SuperAdminMasterKey#2026')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -34,9 +34,11 @@ export function AdminLoginPage() {
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10">
         <div className="flex justify-center">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-700 via-indigo-700 to-rose-700 flex items-center justify-center text-white shadow-xl shadow-purple-950/60 border border-purple-500/30">
-            <ShieldAlert className="w-9 h-9" />
-          </div>
+          <Link to={ROUTES.ROOT} className="group">
+            <div className="w-16 h-16 rounded-2xl bg-white/95 flex items-center justify-center shadow-xl shadow-purple-950/60 border border-purple-500/30 p-2 group-hover:scale-105 transition-transform">
+              <img src="/civiqone-icon.png" alt="CiviQone" className="h-full w-full object-contain" />
+            </div>
+          </Link>
         </div>
 
         <div className="mt-4 text-center">
@@ -44,8 +46,8 @@ export function AdminLoginPage() {
             <Terminal className="w-3.5 h-3.5" />
             Root Governance
           </div>
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
-            SAMAGRA Super Admin
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white font-display">
+            Civi<span className="text-[#E11D48]">Q</span>one <span className="text-purple-400">Super Admin</span>
           </h2>
           <p className="mt-1 text-sm text-slate-400">
             Cross-Portal Ecosystem Control & Sovereign Root Node
@@ -111,7 +113,7 @@ export function AdminLoginPage() {
             <button
               type="button"
               onClick={() => {
-                setEmail('admin@samagra.gov.in')
+                setEmail('admin@civiqone.gov.in')
                 handleLogin(new Event('submit') as unknown as React.FormEvent)
               }}
               className="w-full py-2 px-3 rounded-lg bg-slate-950/60 border border-slate-800 hover:border-purple-500/50 hover:bg-purple-950/20 transition-all flex items-center justify-between text-xs text-slate-300 group"
@@ -120,7 +122,7 @@ export function AdminLoginPage() {
                 <span className="font-semibold text-slate-200 group-hover:text-purple-300">
                   Chief Systems Administrator
                 </span>
-                <p className="text-slate-500 font-mono text-[11px]">admin@samagra.gov.in (SUPER_ADMIN)</p>
+                <p className="text-slate-500 font-mono text-[11px]">admin@civiqone.gov.in (SUPER_ADMIN)</p>
               </div>
               <KeyRound className="w-4 h-4 text-purple-400" />
             </button>

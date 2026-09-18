@@ -29,16 +29,16 @@ export const CiviqOneCardBack: React.FC<CiviqOneCardBackProps> = ({
       {/* 1. Subtle Digital Guilloche Watermark */}
       <div className="civiq-glass-pattern" />
 
-      {/* 2. Top Header: SAMAGRA Identity Verification */}
+      {/* 2. Top Header: CiviqOne Identity Verification */}
       <div className="relative z-10 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-blue-600/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center shadow-sm border border-blue-500/20">
-            <Shield className="w-4 h-4 fill-current/20" />
+          <div className="w-8 h-8 rounded-xl bg-white/95 dark:bg-slate-900/95 flex items-center justify-center shadow-sm border border-slate-200/80 dark:border-white/10 p-1 shrink-0">
+            <img src="/civiqone-icon.png" alt="CiviQone" className="h-full w-full object-contain" />
           </div>
           <div>
             <div className="flex items-center gap-1.5">
-              <span className="font-sans text-xs font-black tracking-wider text-slate-900 dark:text-white uppercase">
-                SAMAGRA
+              <span className="font-sans text-xs font-black tracking-wider text-slate-900 dark:text-white">
+                Civi<span className="text-[#E11D48]">Q</span>one
               </span>
               <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">|</span>
               <span className="text-[9px] font-mono font-semibold text-slate-500 dark:text-slate-400">

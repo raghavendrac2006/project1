@@ -25,7 +25,7 @@ import type {
 } from '@/types'
 
 export const INITIAL_USER: User = {
-  id: 'usr_samagra_99182',
+  id: 'usr_civiqone_99182',
   name: 'Aarav Mehta',
   email: 'aarav.mehta@civicmail.gov.in',
   phone: '9845012345',
@@ -46,7 +46,7 @@ export const INITIAL_IDENTITY: CitizenIdentity = {
   gender: 'Male',
   nationalId: 'CIV-2048-4821',
   maskedNationalId: 'CIV-2048-••••-4821',
-  qrCodeData: 'SAMAGRA:CID-9921-IN:SIG-SHA256-8A39F0B1:VERIFIED:SEC-LVL3',
+  qrCodeData: 'CIVIQONE:CID-9921-IN:SIG-SHA256-8A39F0B1:VERIFIED:SEC-LVL3',
   digitalSignature: '0x8f2c91b45da812fec9001b984fa472e39c4a86b1',
   issueDate: '01 Jan 2024',
   expiryDate: '31 Dec 2034',
@@ -1736,7 +1736,7 @@ export const INITIAL_NOTIFICATIONS: CivicNotification[] = [
   {
     id: 'notif_03',
     title: 'Security Notice: New Login from Indiranagar',
-    message: 'Your SAMAGRA portal session was authorized from Chrome 129 on Windows (IP 122.172.84.10) with Biometric 2FA.',
+    message: 'Your CiviqOne portal session was authorized from Chrome 129 on Windows (IP 122.172.84.10) with Biometric 2FA.',
     category: 'security',
     priority: 'medium',
     isRead: true,
@@ -2035,7 +2035,7 @@ export const INITIAL_CONSENT_REQUESTS: ConsentRequest[] = [
     durationDays: 30,
     status: 'pending',
     requestedAt: '2026-09-16T14:30:00Z',
-    citizenId: 'usr_samagra_99182',
+    citizenId: 'usr_civiqone_99182',
     citizenName: 'Rajesh K. Sharma',
   },
   {
@@ -2055,7 +2055,7 @@ export const INITIAL_CONSENT_REQUESTS: ConsentRequest[] = [
     requestedAt: '2026-08-20T10:00:00Z',
     respondedAt: '2026-08-20T10:15:00Z',
     expiresAt: '2026-10-20T10:00:00Z',
-    citizenId: 'usr_samagra_99182',
+    citizenId: 'usr_civiqone_99182',
     citizenName: 'Rajesh K. Sharma',
   },
   {
@@ -2075,7 +2075,7 @@ export const INITIAL_CONSENT_REQUESTS: ConsentRequest[] = [
     requestedAt: '2026-08-25T09:00:00Z',
     respondedAt: '2026-08-25T09:20:00Z',
     expiresAt: '2026-09-24T09:00:00Z', // Expiring soon (< 7 days!)
-    citizenId: 'usr_samagra_99182',
+    citizenId: 'usr_civiqone_99182',
     citizenName: 'Rajesh K. Sharma',
   },
   {
@@ -2092,7 +2092,7 @@ export const INITIAL_CONSENT_REQUESTS: ConsentRequest[] = [
     requestedAt: '2026-06-01T12:00:00Z',
     respondedAt: '2026-06-01T12:30:00Z',
     expiresAt: '2026-06-16T12:00:00Z',
-    citizenId: 'usr_samagra_99182',
+    citizenId: 'usr_civiqone_99182',
     citizenName: 'Rajesh K. Sharma',
   },
 ]
@@ -2106,7 +2106,7 @@ export const INITIAL_ACCESS_GRANTS: AccessGrant[] = [
     organizationId: 'org_metro_transit',
     organizationName: 'Metro Urban Transit Corporation',
     serviceName: 'Subsidized Citizen Metro Smart Card Pass',
-    citizenId: 'usr_samagra_99182',
+    citizenId: 'usr_civiqone_99182',
     citizenName: 'Rajesh K. Sharma',
     purpose: 'Commuter concession eligibility verification',
     authorizedFields: ['fullName', 'dateOfBirth', 'phone'],
@@ -2120,7 +2120,7 @@ export const INITIAL_ACCESS_GRANTS: AccessGrant[] = [
     organizationId: 'org_techedu',
     organizationName: 'TechEdu Global Foundation',
     serviceName: 'National Professional Skills Accreditation',
-    citizenId: 'usr_samagra_99182',
+    citizenId: 'usr_civiqone_99182',
     citizenName: 'Rajesh K. Sharma',
     purpose: 'Credential validation for subsidized fellowship',
     authorizedFields: ['fullName', 'email', 'educationStatus'],
@@ -2134,7 +2134,7 @@ export const INITIAL_ACCESS_GRANTS: AccessGrant[] = [
     organizationId: 'org_fastfin',
     organizationName: 'FastFin Digital Micro-Credit',
     serviceName: 'Instant consumer loan pre-qualification',
-    citizenId: 'usr_samagra_99182',
+    citizenId: 'usr_civiqone_99182',
     citizenName: 'Rajesh K. Sharma',
     purpose: 'Instant consumer loan pre-qualification',
     authorizedFields: ['fullName', 'panNumber'],
@@ -2503,7 +2503,7 @@ export const INITIAL_GOV_OFFICIALS: GovernmentOfficial[] = [
 export const INITIAL_ADMIN_USER: SuperAdminUser = {
   id: 'adm_01',
   name: 'Chief Systems Administrator',
-  email: 'admin@samagra.gov.in',
+  email: 'admin@civiqone.gov.in',
   avatar: '',
   role: 'SUPER_ADMIN',
 }
@@ -2529,7 +2529,7 @@ export const INITIAL_AUDIT_EVENTS: AuditEvent[] = [
     id: 'aud_02',
     workspace: 'citizen',
     actor: 'Rajesh K. Sharma',
-    actorId: 'usr_samagra_99182',
+    actorId: 'usr_civiqone_99182',
     role: 'CITIZEN',
     action: 'CONSENT_PARTIALLY_GRANTED',
     resource: 'ConsentRequest #req_02 (Metro Transit)',
@@ -2583,7 +2583,7 @@ export const INITIAL_CREDENTIALS: CivicCredential[] = [
     status: 'active',
     verificationMethod: 'cryptographic_zkp',
     proofHash: '0x8f2c91b45da812fec9001b984fa472e39c4a86b1a3d90214c76b',
-    schemaVersion: 'did:samagra:zkp:identity:v2',
+    schemaVersion: 'did:civiqone:zkp:identity:v2',
     attributes: {
       fullName: 'Rajesh Kumar Sharma',
       dateOfBirth: '1988-08-14',
@@ -2610,7 +2610,7 @@ export const INITIAL_CREDENTIALS: CivicCredential[] = [
     status: 'expiring_soon',
     verificationMethod: 'qr_signed',
     proofHash: '0x3b91a7e28cf00192a71d8820c741e45901baef482104cc79',
-    schemaVersion: 'did:samagra:qr:dl:v1',
+    schemaVersion: 'did:civiqone:qr:dl:v1',
     attributes: {
       licenseeName: 'Rajesh K. Sharma',
       vehicleClasses: 'LMV, MCWG, TRANS',
@@ -2634,7 +2634,7 @@ export const INITIAL_CREDENTIALS: CivicCredential[] = [
     status: 'active',
     verificationMethod: 'government_registry',
     proofHash: '0x9924ab10c8e21958b40129cd827104f128bc94a00812edfa',
-    schemaVersion: 'did:samagra:degree:nad:v1',
+    schemaVersion: 'did:civiqone:degree:nad:v1',
     attributes: {
       graduateName: 'Rajesh Kumar Sharma',
       program: 'B.E. Computer Science & Engineering',
@@ -2657,7 +2657,7 @@ export const INITIAL_CREDENTIALS: CivicCredential[] = [
     status: 'active',
     verificationMethod: 'cryptographic_zkp',
     proofHash: '0x55aa01824fce10992a40bce882914fc01948ba283710da12',
-    schemaVersion: 'did:samagra:zkp:property:v1',
+    schemaVersion: 'did:civiqone:zkp:property:v1',
     attributes: {
       propertyAddress: 'Flat 402, Kaveri Heights, Bengaluru - 560038',
       khataClassification: 'A-Khata',
@@ -2679,7 +2679,7 @@ export const INITIAL_CREDENTIALS: CivicCredential[] = [
     status: 'active',
     verificationMethod: 'cryptographic_zkp',
     proofHash: '0x17c92b8e400192a488e1bc9842a19ff4820da08127364b91',
-    schemaVersion: 'did:samagra:abha:health:v2',
+    schemaVersion: 'did:civiqone:abha:health:v2',
     attributes: {
       abhaAddress: 'rajesh.sharma@abdm',
       healthIdNumber: '91-8821-0021-4412',
@@ -2702,7 +2702,7 @@ export const INITIAL_CREDENTIALS: CivicCredential[] = [
     status: 'active',
     verificationMethod: 'government_registry',
     proofHash: '0x4477ee9911029384bc10928475a183940192348571029481',
-    schemaVersion: 'did:samagra:tax:itr:v1',
+    schemaVersion: 'did:civiqone:tax:itr:v1',
     attributes: {
       panMasked: 'ABCPS••••K',
       assessmentYear: '2025-2026',
@@ -2864,7 +2864,7 @@ export const INITIAL_CITIZEN_ACTIONS: CitizenActionItem[] = [
     title: 'New Terminal Authenticated: Chrome on Windows',
     description: 'A new session was logged in from IP 14.139.128.9 in Bengaluru. Verify if this was you.',
     urgency: 'low',
-    sourceEntity: 'SAMAGRA Sovereign Auth Engine',
+    sourceEntity: 'CiviqOne Sovereign Auth Engine',
     actionLabel: 'Inspect Devices',
     targetRoute: '/app/security',
     createdAt: '2026-09-17T04:30:00Z',
@@ -2904,7 +2904,7 @@ export const INITIAL_TRUSTED_DEVICES: TrustedDevice[] = [
     id: 'dev_03',
     deviceName: 'Civic Tablet (iPad Air)',
     deviceType: 'tablet',
-    browser: 'SAMAGRA App v2.4',
+    browser: 'CiviqOne App v2.4',
     os: 'iPadOS 17.5',
     ipAddress: '14.139.128.9',
     location: 'Indiranagar, Bengaluru',

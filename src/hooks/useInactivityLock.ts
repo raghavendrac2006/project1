@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 
 const DEFAULT_TIMEOUT_MS = 15 * 60 * 1000 // 15 minutes
-const STORAGE_LOCK_KEY = 'samagra_session_locked_v1'
+const STORAGE_LOCK_KEY = 'civiqone_session_locked_v1'
 
 interface UseInactivityLockOptions {
   timeoutMs?: number

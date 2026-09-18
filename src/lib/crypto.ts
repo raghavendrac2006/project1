@@ -103,6 +103,6 @@ export async function signStatutoryReceipt(payload: {
   return {
     signature,
     algorithm: 'ECDSA-SHA256 (NIST P-256 Curve)',
-    verifyingKeyId: 'urn:samagra:state:treasury:v3:pubkey_0x89c4',
+    verifyingKeyId: 'urn:civiqone:state:treasury:v3:pubkey_0x89c4',
   }
 }

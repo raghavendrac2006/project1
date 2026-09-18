@@ -7,15 +7,11 @@ import {
   AlertTriangle,
   Upload,
   FastForward,
-  CheckCircle2,
-  Clock,
   Sparkles,
   MessageSquare,
   Send,
   User,
-  ShieldCheck,
   RefreshCcw,
-  ExternalLink,
 } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'

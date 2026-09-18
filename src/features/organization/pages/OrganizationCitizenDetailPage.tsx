@@ -45,7 +45,7 @@ export function OrganizationCitizenDetailPage() {
   const loadProfile = async () => {
     setLoading(true)
     try {
-      const data = await organizationService.getCitizenAuthorizedProfile(citizenId || 'usr_samagra_99182')
+      const data = await organizationService.getCitizenAuthorizedProfile(citizenId || 'usr_civiqone_99182')
       setProfile(data)
     } finally {
       setLoading(false)

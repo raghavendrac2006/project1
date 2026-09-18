@@ -88,7 +88,7 @@ export function AdminDashboardPage() {
               </span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-              SAMAGRA Ecosystem Control Console
+              CiviqOne Ecosystem Control Console
             </h1>
             <p className="text-sm text-slate-300 max-w-2xl">
               Cross-portal orchestration of Citizen Identity, Private Organization Vetting, and Public Sector Governance.

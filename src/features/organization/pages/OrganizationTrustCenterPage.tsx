@@ -177,7 +177,7 @@ export function OrganizationTrustCenterPage() {
         <div className="flex-1 space-y-3">
           <div className="flex flex-wrap gap-2">
             <Badge variant="outline" className="text-[10px] bg-emerald-500/10 text-emerald-700 border-emerald-500/30 font-bold dark:text-emerald-400">
-              ✓ SAMAGRA VERIFIED PARTNER
+              ✓ CIVIQONE VERIFIED PARTNER
             </Badge>
             <Badge variant="outline" className="text-[10px] bg-blue-500/10 text-blue-700 border-blue-500/30 dark:text-blue-400">
               {profile.regulatoryBody.split('(')[0].trim()}
@@ -308,7 +308,7 @@ export function OrganizationTrustCenterPage() {
       <div className="p-4 rounded-xl border border-border bg-muted/30 text-xs text-muted-foreground flex items-start gap-2">
         <Building2 className="w-4 h-4 shrink-0 mt-0.5 text-muted-foreground" />
         <p>
-          This Trust Center is auto-generated from SAMAGRA's verified partner registry. The scores and
+          This Trust Center is auto-generated from CiviqOne's verified partner registry. The scores and
           declarations shown here are for transparency purposes and do not constitute legal certification.
           Citizens can review this page before granting data access to this organization.
         </p>

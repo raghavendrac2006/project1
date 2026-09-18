@@ -380,22 +380,24 @@ export function GovernmentLoginPage() {
       {/* Top National Header Bar */}
       <header className="relative z-20 border-b border-slate-200 dark:border-slate-800/80 bg-white/90 dark:bg-slate-950/85 backdrop-blur-md px-4 sm:px-8 py-3.5 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-colors">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-700 via-indigo-700 to-slate-900 flex items-center justify-center text-white shadow-md border border-blue-400/30 shrink-0">
-            <Landmark className="w-6 h-6" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-sm sm:text-base font-bold text-slate-900 dark:text-white tracking-tight font-display">
-                SAMAGRA Government Secretariat
-              </span>
-              <Badge variant="outline" className="text-[10px] text-blue-700 dark:text-blue-300 border-blue-300 dark:border-blue-700 bg-blue-50 dark:bg-blue-950/50 font-semibold">
-                Department Isolation Gateway
-              </Badge>
+          <Link to={ROUTES.ROOT} className="flex items-center gap-3 group">
+            <div className="w-11 h-11 rounded-2xl bg-white dark:bg-slate-900 flex items-center justify-center shadow-sm border border-slate-200 dark:border-slate-800 p-1.5 shrink-0 group-hover:scale-105 transition-transform">
+              <img src="/civiqone-icon.png" alt="CiviQone" className="h-full w-full object-contain" />
             </div>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400">
-              Unique Statutory Desks · 11 Dedicated Ministries · 28 States & 8 Union Territories
-            </p>
-          </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm sm:text-base font-bold text-slate-900 dark:text-white tracking-tight font-display">
+                  Civi<span className="text-[#E11D48]">Q</span>one<span className="text-blue-600 dark:text-blue-400 font-black ml-1.5 text-xs px-1.5 py-0.5 rounded bg-blue-500/10 border border-blue-500/20">GOV</span> Secretariat
+                </span>
+                <Badge variant="outline" className="hidden sm:inline-flex text-[10px] text-blue-700 dark:text-blue-300 border-blue-300 dark:border-blue-700 bg-blue-50 dark:bg-blue-950/50 font-semibold">
+                  Department Isolation Gateway
+                </Badge>
+              </div>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                Unique Statutory Desks · 11 Dedicated Ministries · 28 States & 8 Union Territories
+              </p>
+            </div>
+          </Link>
         </div>
 
         {/* National Stats Strip & Theme Switcher */}

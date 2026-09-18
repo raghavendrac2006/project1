@@ -21,7 +21,7 @@ export const familyService = {
     civicStorage.addAuditEvent({
       workspace: 'citizen',
       actor: 'Rajesh K. Sharma',
-      actorId: 'usr_samagra_99182',
+      actorId: 'usr_civiqone_99182',
       role: 'CITIZEN',
       action: 'ADDED_FAMILY_MEMBER',
       resource: `${member.fullName || member.name || 'Member'} (${member.relationship || member.relation || 'Relative'})`,
@@ -60,7 +60,7 @@ export const familyService = {
     civicStorage.addAuditEvent({
       workspace: 'citizen',
       actor: 'Rajesh K. Sharma',
-      actorId: 'usr_samagra_99182',
+      actorId: 'usr_civiqone_99182',
       role: 'CITIZEN',
       action: 'UPDATED_DELEGATED_AUTHORITY',
       resource: `${member.fullName} (${member.relationship})`,

@@ -1,4 +1,4 @@
-import { ShieldCheck } from 'lucide-react'
+// CiviQone official brand loader
 
 export function PageLoader() {
   return (
@@ -8,14 +8,14 @@ export function PageLoader() {
         <div className="absolute w-16 h-16 rounded-2xl bg-primary/20 animate-ping opacity-50" />
         
         {/* Center icon badge */}
-        <div className="relative w-14 h-14 rounded-2xl bg-gradient-to-tr from-primary to-sky-500 flex items-center justify-center text-white shadow-lg shadow-primary/25">
-          <ShieldCheck className="w-7 h-7 animate-pulse" />
+        <div className="relative w-16 h-16 rounded-2xl bg-white/95 dark:bg-card/95 p-2 flex items-center justify-center border border-border/70 shadow-lg shadow-primary/20">
+          <img src="/civiqone-icon.png" alt="CiviQone" className="h-full w-full object-contain animate-pulse" />
         </div>
       </div>
 
       <div className="text-center space-y-1.5 max-w-xs">
-        <p className="font-display text-sm font-semibold text-foreground tracking-tight">
-          Loading Civic Workspace
+        <p className="font-display text-sm font-bold text-foreground tracking-tight">
+          Loading Civi<span className="text-[#E11D48]">Q</span>one Workspace
         </p>
         <p className="text-xs text-muted-foreground">
           Decrypting credentials and initializing sovereign session...

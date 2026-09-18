@@ -14,10 +14,13 @@ import {
   Check,
   Lock,
   Type,
+  Contrast,
+  LifeBuoy,
 } from 'lucide-react'
 import { useAuth, useTheme, useLanguage, useAccessibility } from '@/hooks'
 import { SUPPORTED_LANGUAGES } from '@/constants/languages'
 import { ROUTES } from '@/constants/routes'
+import { cn } from '@/lib/utils'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -44,7 +47,7 @@ export function Header({
   const { user, logout } = useAuth()
   const { theme, toggleTheme } = useTheme()
   const { language, setLanguage, currentLanguageDetails } = useLanguage()
-  const { fontScale, cycleFontScale } = useAccessibility()
+  const { fontScale, cycleFontScale, highContrast, toggleHighContrast } = useAccessibility()
   const navigate = useNavigate()
 
   const [notifications] = useState(() => civicStorage.getNotifications())
@@ -149,6 +152,21 @@ export function Header({
           </span>
         </Button>
 
+        {/* WCAG High Contrast Mode Toggle */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className={cn(
+            'h-9 w-9 text-muted-foreground hover:text-foreground transition-colors',
+            highContrast && 'bg-primary/20 text-primary border border-primary/40 font-bold'
+          )}
+          onClick={toggleHighContrast}
+          title={highContrast ? 'Disable High Contrast' : 'Enable High Contrast (WCAG AAA)'}
+          aria-label={highContrast ? 'Disable High Contrast' : 'Enable High Contrast (WCAG AAA)'}
+        >
+          <Contrast className="w-4 h-4" />
+        </Button>
+
         {/* Instant Privacy Lock */}
         {onLockSession && (
           <Button
@@ -162,6 +180,18 @@ export function Header({
             <Lock className="w-4 h-4" />
           </Button>
         )}
+
+        {/* Customer Care & Grievance Redressal Button */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-9 w-9 text-muted-foreground hover:text-foreground"
+          onClick={() => navigate(ROUTES.APP.SUPPORT)}
+          title="Citizen Customer Care & Grievance Redressal"
+          aria-label="Customer Care & Support"
+        >
+          <LifeBuoy className="w-4 h-4" />
+        </Button>
 
         {/* Notifications Dropdown */}
         <DropdownMenu>

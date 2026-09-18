@@ -93,7 +93,7 @@ export function OrganizationApplicationDetailPage() {
       const app = await organizationService.getApplicationById(applicationId)
       if (app) {
         setApplication(app)
-        const prof = await organizationService.getCitizenAuthorizedProfile('usr_samagra_99182')
+        const prof = await organizationService.getCitizenAuthorizedProfile('usr_civiqone_99182')
         setProfile(prof)
       }
     } finally {
@@ -139,7 +139,7 @@ export function OrganizationApplicationDetailPage() {
       requestedFields: selectedExtraFields,
       requestedDocuments: ['Income Tax Return Acknowledgement'],
       durationDays: 30,
-      citizenId: 'usr_samagra_99182',
+      citizenId: 'usr_civiqone_99182',
       citizenName: 'Rajesh K. Sharma',
     })
 

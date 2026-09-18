@@ -68,22 +68,24 @@ export function OrganizationLoginPage() {
       {/* Top Header Bar */}
       <header className="relative z-20 border-b border-slate-200 dark:border-slate-800/80 bg-white/85 dark:bg-slate-950/85 backdrop-blur-md px-4 sm:px-8 py-3.5 flex items-center justify-between transition-colors">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-600 flex items-center justify-center text-white shadow-md border border-emerald-500/20 shrink-0">
-            <Building2 className="w-5 h-5" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-base font-bold text-slate-900 dark:text-white tracking-tight font-display">
-                SAMAGRA<span className="text-emerald-600 dark:text-emerald-400">ORG</span> Gateway
-              </span>
-              <Badge variant="outline" className="text-[10px] text-emerald-700 dark:text-emerald-400 border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/40 font-semibold">
-                Enterprise B2B Partner Portal
-              </Badge>
+          <Link to={ROUTES.ROOT} className="flex items-center gap-3 group">
+            <div className="w-11 h-11 rounded-2xl bg-white dark:bg-slate-900 flex items-center justify-center shadow-sm border border-slate-200 dark:border-slate-800 p-1.5 shrink-0 group-hover:scale-105 transition-transform">
+              <img src="/civiqone-icon.png" alt="CiviQone" className="h-full w-full object-contain" />
             </div>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400">
-              Verified Civic Service Providers, Insurers & Financial Institutions
-            </p>
-          </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-base font-bold text-slate-900 dark:text-white tracking-tight font-display">
+                  Civi<span className="text-[#E11D48]">Q</span>one<span className="text-emerald-600 dark:text-emerald-400 font-extrabold ml-1.5 text-xs px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20">ORG</span>
+                </span>
+                <Badge variant="outline" className="hidden sm:inline-flex text-[10px] text-emerald-700 dark:text-emerald-400 border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/40 font-semibold">
+                  Partner Gateway
+                </Badge>
+              </div>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                Verified Civic Service Providers, Insurers & Financial Institutions
+              </p>
+            </div>
+          </Link>
         </div>
 
         <div className="flex items-center gap-2.5">
@@ -293,7 +295,7 @@ export function OrganizationLoginPage() {
 
       {/* Sovereign Footer */}
       <footer className="relative z-20 border-t border-slate-200 dark:border-slate-900 bg-white/90 dark:bg-slate-950/90 px-4 sm:px-8 py-3 text-center text-[11px] text-slate-500 dark:text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-2 transition-colors">
-        <span>© 2026 SAMAGRA ORG Enterprise Network · Sovereign Data Federation</span>
+        <span>© 2026 CiviqOne ORG Enterprise Network · Sovereign Data Federation</span>
         <span>Strict Role-Based Access Control • All Actions Audited</span>
       </footer>
     </div>

@@ -1,7 +1,7 @@
 import { civicStorage } from './storage'
 import type { PolicyTemplate, PolicyPurposeCategory, PolicyAttributeConfig, ConsentField } from '@/types'
 
-const POLICY_STORAGE_KEY = 'samagra_org_policies_v1'
+const POLICY_STORAGE_KEY = 'civiqone_org_policies_v1'
 
 function getPolicies(): PolicyTemplate[] {
   const stored = localStorage.getItem(POLICY_STORAGE_KEY) || localStorage.getItem('civiqone_org_policies_v1')

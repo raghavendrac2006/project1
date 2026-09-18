@@ -1,5 +1,5 @@
 import React from 'react'
-import { NavLink } from 'react-router-dom'
+import { NavLink, Link } from 'react-router-dom'
 import { ROUTES } from '@/constants/routes'
 import {
   ShieldAlert,
@@ -69,35 +69,35 @@ export function AdminSidebar({ collapsed, onToggleCollapse }: AdminSidebarProps)
       }`}
     >
       {/* Brand Header */}
-      <div className="h-16 flex items-center px-4 border-b border-slate-800 justify-between">
-        {!collapsed && (
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-600 via-purple-600 to-rose-600 flex items-center justify-center text-white shadow-md shadow-purple-950/40 border border-purple-500/30">
-              <ShieldAlert className="w-5 h-5" />
-            </div>
+      <div className={`h-16 flex items-center border-b border-slate-800 transition-all select-none ${
+        collapsed ? 'justify-center px-2 relative' : 'justify-between px-4'
+      }`}>
+        <Link to={ROUTES.ROOT} className={`flex items-center group ${collapsed ? 'justify-center' : 'gap-2.5'}`}>
+          <div className="w-10 h-10 rounded-xl bg-white/95 p-1 border border-purple-500/30 flex items-center justify-center shadow-md shrink-0 group-hover:scale-105 transition-transform">
+            <img src="/civiqone-icon.png" alt="CiviQone" className="h-full w-full object-contain" />
+          </div>
+          {!collapsed && (
             <div>
-              <span className="font-bold text-sm tracking-tight text-white block">
-                SAMAGRA
+              <span className="font-bold text-sm tracking-tight text-white block leading-none font-display">
+                Civi<span className="text-[#E11D48]">Q</span>one
               </span>
-              <span className="text-[10px] font-mono text-purple-400 font-semibold tracking-wider uppercase block">
+              <span className="text-[9.5px] font-mono text-purple-400 font-semibold tracking-wider uppercase block mt-1">
                 Super Admin Console
               </span>
             </div>
-          </div>
-        )}
-
-        {collapsed && (
-          <div className="mx-auto w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-600 via-purple-600 to-rose-600 flex items-center justify-center text-white shadow-md border border-purple-500/30">
-            <ShieldAlert className="w-5 h-5" />
-          </div>
-        )}
+          )}
+        </Link>
 
         <button
           onClick={onToggleCollapse}
-          className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-900 transition-colors"
+          className={`rounded-lg text-slate-400 hover:text-white hover:bg-slate-900 transition-colors flex items-center justify-center border border-slate-800 ${
+            collapsed
+              ? 'absolute -right-3 top-1/2 -translate-y-1/2 h-6 w-6 bg-slate-900 shadow-md z-40'
+              : 'h-7 w-7 p-1.5'
+          }`}
           title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
-          {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+          {collapsed ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronLeft className="w-3.5 h-3.5" />}
         </button>
       </div>
 

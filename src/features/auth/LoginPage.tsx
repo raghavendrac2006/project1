@@ -129,16 +129,16 @@ export function LoginPage() {
         <div className="absolute bottom-0 right-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10">
-          <Link to={ROUTES.ROOT} className="inline-flex items-center gap-3 group">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-tr from-blue-700 via-blue-600 to-sky-500 text-white shadow-md group-hover:scale-105 transition-transform">
-              <Shield className="h-6 w-6 fill-white/20" />
+          <Link to={ROUTES.ROOT} className="inline-flex items-center gap-3.5 group">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/95 dark:bg-card/95 p-1.5 border border-border/70 shadow-md group-hover:scale-105 transition-transform shrink-0">
+              <img src="/civiqone-icon.png" alt="CiviqOne" className="h-full w-full object-contain" />
             </div>
             <div>
-              <span className="font-display text-xl font-extrabold tracking-tight text-foreground">
-                SAMAGRA
+              <span className="font-display text-2xl font-black tracking-tight text-foreground leading-none block">
+                Civi<span className="text-[#E11D48]">Q</span>one
               </span>
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
-                Digital Civic Operating System
+              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mt-1">
+                Citizens for a Better Tomorrow
               </p>
             </div>
           </Link>
@@ -214,15 +214,15 @@ export function LoginPage() {
           {/* Mobile brand header */}
           <div className="lg:hidden flex items-center gap-3 mb-4">
             <Link to={ROUTES.ROOT} className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-blue-700 to-sky-500 text-white shadow-md">
-                <Shield className="h-5 w-5 fill-white/20" />
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/95 dark:bg-card/95 p-1 border border-border/70 shadow-sm">
+                <img src="/civiqone-icon.png" alt="CiviqOne" className="h-full w-full object-contain" />
               </div>
               <div>
-                <span className="font-display text-lg font-extrabold text-foreground">
-                  SAMAGRA
+                <span className="font-display text-lg font-black text-foreground leading-none block">
+                  Civi<span className="text-[#E11D48]">Q</span>one
                 </span>
-                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
-                  Digital Civic OS
+                <p className="text-[9.5px] font-semibold text-muted-foreground tracking-wide mt-1">
+                  Citizens for a Better Tomorrow
                 </p>
               </div>
             </Link>

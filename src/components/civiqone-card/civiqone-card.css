@@ -1,5 +1,5 @@
 /* ==========================================================================
-   SAMAGRA CARD — PREMIUM FLAT GLASSMORPHISM DIGITAL CIVIC IDENTITY CARD
+   CIVIQONE CARD — PREMIUM FLAT GLASSMORPHISM DIGITAL CIVIC IDENTITY CARD
    ========================================================================== */
 
 /* 1. Atmospheric Ambient Backdrop Container */
@@ -179,3 +179,26 @@
     border-radius: 16px;
   }
 }
+
+/* 9. High Contrast Mode Support */
+.high-contrast .civiq-glass-card-face {
+  background: #FFFFFF !important;
+  color: #000000 !important;
+  border: 2px solid #000000 !important;
+  box-shadow: none !important;
+}
+
+.dark.high-contrast .civiq-glass-card-face,
+.dark .high-contrast .civiq-glass-card-face {
+  background: #000000 !important;
+  color: #FFFFFF !important;
+  border: 2px solid #FFFFFF !important;
+  box-shadow: none !important;
+}
+
+.high-contrast .civiq-atmospheric-wrapper {
+  background: transparent !important;
+  border: 2px solid currentColor !important;
+  box-shadow: none !important;
+}
+
