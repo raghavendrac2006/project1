@@ -52,9 +52,10 @@ export const authService = {
   },
 
   async login(data: LoginFormData): Promise<AuthSession> {
+    const emailOrIdentifier = (data as any).email || data.identifier || ''
     const res = await apiClient.post<any>(
       '/auth/login',
-      { username: data.email, password: data.password },
+      { username: emailOrIdentifier, password: data.password },
       async () => {
         const user = civicStorage.getUser()
         const token = `civiqone_tok_${Date.now()}`
