@@ -66,7 +66,7 @@ export function RegisterPage() {
                 Register Citizen Digital Identity
               </h1>
               <p className="text-xs text-muted-foreground">
-                Create your verified sovereign profile on SAMAGRA
+                Create your verified sovereign profile on CiviqOne
               </p>
             </div>
           </div>

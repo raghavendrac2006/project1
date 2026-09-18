@@ -135,7 +135,7 @@ export function LoginPage() {
             </div>
             <div>
               <span className="font-display text-xl font-extrabold tracking-tight text-foreground">
-                SAMAGRA
+                CiviqOne
               </span>
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
                 Digital Civic Operating System
@@ -219,7 +219,7 @@ export function LoginPage() {
               </div>
               <div>
                 <span className="font-display text-lg font-extrabold text-foreground">
-                  SAMAGRA
+                  CiviqOne
                 </span>
                 <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
                   Digital Civic OS

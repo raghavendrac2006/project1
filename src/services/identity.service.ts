@@ -10,7 +10,7 @@ export const identityService = {
   async generateShareableToken(purpose: string): Promise<{ token: string; qrPayload: string; validUntil: string }> {
     await new Promise((resolve) => setTimeout(resolve, 350))
     const validUntil = new Date(Date.now() + 15 * 60 * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    const token = `SAMAGRA-TOK-${Math.random().toString(36).substring(2, 8).toUpperCase()}-${Date.now().toString().slice(-4)}`
+    const token = `CIVIQONE-TOK-${Math.random().toString(36).substring(2, 8).toUpperCase()}-${Date.now().toString().slice(-4)}`
     
     // Add verification record
     const identity = civicStorage.getIdentity()
@@ -29,7 +29,7 @@ export const identityService = {
 
     return {
       token,
-      qrPayload: `SAMAGRA:SHARE:${token}:PURPOSE:${encodeURIComponent(purpose)}:EXP:${validUntil}`,
+      qrPayload: `CIVIQONE:SHARE:${token}:PURPOSE:${encodeURIComponent(purpose)}:EXP:${validUntil}`,
       validUntil,
     }
   },

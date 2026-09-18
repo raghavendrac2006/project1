@@ -651,7 +651,7 @@ export function DashboardPage() {
                 <div className="p-1.5 rounded-lg bg-primary/15 text-primary">
                   <Bot className="w-4 h-4" />
                 </div>
-                <span className="text-xs font-bold text-foreground">SAMAGRA Copilot</span>
+                <span className="text-xs font-bold text-foreground">CiviqOne Copilot</span>
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed">
                 Need guidance applying for your family or checking document renewal rules? Ask in 5 regional languages.
@@ -741,7 +741,7 @@ export function DashboardPage() {
             <div className="flex items-center justify-between">
               <DialogTitle className="text-base font-bold flex items-center gap-2">
                 <ShieldCheck className="w-5 h-5 text-primary" />
-                SAMAGRA Sovereign Digital ID
+                CiviqOne Sovereign Digital ID
               </DialogTitle>
               <Button
                 variant="outline"

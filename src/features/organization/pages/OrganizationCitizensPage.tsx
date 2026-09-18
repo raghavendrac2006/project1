@@ -44,7 +44,7 @@ export function OrganizationCitizensPage() {
 
   // Request Form State
   const [citizenName, setCitizenName] = useState('Rajesh K. Sharma')
-  const [citizenId, setCitizenId] = useState('usr_samagra_99182')
+  const [citizenId, setCitizenId] = useState('usr_civiqone_99182')
   const [purpose, setPurpose] = useState('Comprehensive Health Risk Underwriting & Claim Verification')
   const [durationDays, setDurationDays] = useState(30)
   const [selectedFields, setSelectedFields] = useState<ConsentField[]>([
@@ -290,7 +290,7 @@ export function OrganizationCitizensPage() {
                 type="button"
                 onClick={() => {
                   setCitizenName('Rajesh K. Sharma')
-                  setCitizenId('usr_samagra_99182')
+                  setCitizenId('usr_civiqone_99182')
                   setPurpose('Comprehensive Health Risk Underwriting & Claim Verification')
                   setSelectedFields(['fullName', 'dateOfBirth', 'phone', 'address', 'panNumber'])
                   setDurationDays(30)
@@ -303,7 +303,7 @@ export function OrganizationCitizensPage() {
                 type="button"
                 onClick={() => {
                   setCitizenName('Rajesh K. Sharma')
-                  setCitizenId('usr_samagra_99182')
+                  setCitizenId('usr_civiqone_99182')
                   setPurpose('Instant Video KYC & Bank Account Opening Verification')
                   setSelectedFields(['fullName', 'dateOfBirth', 'phone', 'address', 'panNumber', 'income'])
                   setDurationDays(90)

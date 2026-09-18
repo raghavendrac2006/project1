@@ -2,8 +2,8 @@ import { useState, useEffect, useCallback } from 'react'
 
 export type FontScale = 'normal' | 'large' | 'xlarge'
 
-const STORAGE_FONT_SCALE_KEY = 'samagra_font_scale_v1'
-const STORAGE_HIGH_CONTRAST_KEY = 'samagra_high_contrast_v1'
+const STORAGE_FONT_SCALE_KEY = 'civiqone_font_scale_v1'
+const STORAGE_HIGH_CONTRAST_KEY = 'civiqone_high_contrast_v1'
 
 const SCALE_SIZES: Record<FontScale, string> = {
   normal: '16px',

@@ -105,7 +105,7 @@ export function OrganizationSidebar({ collapsed, onToggleCollapse }: Organizatio
           {!collapsed && (
             <div className="flex flex-col min-w-0">
               <span className="font-display text-sm font-extrabold tracking-tight text-foreground truncate flex items-center gap-1.5">
-                SAMAGRA<span className="text-emerald-500 font-black">ORG</span>
+                CiviqOne<span className="text-emerald-500 font-black">ORG</span>
               </span>
               <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider truncate">
                 Organization Portal

@@ -7,9 +7,9 @@ import type { ApiKeyItem, WebhookEndpoint, WebhookDeliveryLog } from '@/types'
 import { realtimeBus } from './eventBus'
 
 const STORAGE_KEYS = {
-  API_KEYS: 'samagra_org_api_keys',
-  WEBHOOKS: 'samagra_org_webhooks',
-  DELIVERY_LOGS: 'samagra_org_delivery_logs',
+  API_KEYS: 'civiqone_org_api_keys',
+  WEBHOOKS: 'civiqone_org_webhooks',
+  DELIVERY_LOGS: 'civiqone_org_delivery_logs',
 }
 
 const INITIAL_API_KEYS: ApiKeyItem[] = [
@@ -38,7 +38,7 @@ const INITIAL_API_KEYS: ApiKeyItem[] = [
 const INITIAL_WEBHOOKS: WebhookEndpoint[] = [
   {
     id: 'wh_ep_01',
-    url: 'https://api.hdfcbank.com/samagra/webhooks/v2',
+    url: 'https://api.hdfcbank.com/civiqone/webhooks/v2',
     description: 'Core LOS sync on application approvals and status transitions',
     events: ['application.status_changed', 'zkp.proof_verified', 'consent.revoked'],
     status: 'active',
@@ -48,7 +48,7 @@ const INITIAL_WEBHOOKS: WebhookEndpoint[] = [
   },
   {
     id: 'wh_ep_02',
-    url: 'https://fraud-shield.internal.org/hooks/samagra-alert',
+    url: 'https://fraud-shield.internal.org/hooks/civiqone-alert',
     description: 'Fraud & risk anomaly broadcast queue',
     events: ['anomaly.detected', 'compliance.purge_completed'],
     status: 'active',
@@ -62,7 +62,7 @@ const INITIAL_LOGS: WebhookDeliveryLog[] = [
   {
     id: 'log_dlv_01',
     endpointId: 'wh_ep_01',
-    endpointUrl: 'https://api.hdfcbank.com/samagra/webhooks/v2',
+    endpointUrl: 'https://api.hdfcbank.com/civiqone/webhooks/v2',
     event: 'application.status_changed',
     status: 'success',
     statusCode: 200,
@@ -75,7 +75,7 @@ const INITIAL_LOGS: WebhookDeliveryLog[] = [
   {
     id: 'log_dlv_02',
     endpointId: 'wh_ep_02',
-    endpointUrl: 'https://fraud-shield.internal.org/hooks/samagra-alert',
+    endpointUrl: 'https://fraud-shield.internal.org/hooks/civiqone-alert',
     event: 'anomaly.detected',
     status: 'success',
     statusCode: 202,
@@ -89,7 +89,10 @@ const INITIAL_LOGS: WebhookDeliveryLog[] = [
 
 function getStored<T>(key: string, fallback: T): T {
   try {
-    const item = localStorage.getItem(key) || localStorage.getItem(key.replace('samagra_', 'civiq_'))
+    const item =
+      localStorage.getItem(key) ||
+      localStorage.getItem(key.replace('civiqone_', 'civiq_')) ||
+      localStorage.getItem(key.replace('civiqone_', 'samagra_'))
     return item ? JSON.parse(item) : fallback
   } catch {
     return fallback

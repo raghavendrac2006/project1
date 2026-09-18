@@ -375,7 +375,7 @@ export function SecurityCenterPage() {
               </Badge>
             </div>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Email <span className="font-mono text-foreground font-semibold">{user?.email || 'citizen@samagra.gov.in'}</span> and national identity hashes scanned against 42 billion breached records.
+              Email <span className="font-mono text-foreground font-semibold">{user?.email || 'citizen@civiqone.gov.in'}</span> and national identity hashes scanned against 42 billion breached records.
             </p>
           </div>
         </div>

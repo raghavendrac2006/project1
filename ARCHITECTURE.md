@@ -1,6 +1,6 @@
-# SAMAGRA Enterprise Architecture & Multi-Developer Guidelines
+# CiviqOne Enterprise Architecture & Multi-Developer Guidelines
 
-Welcome to the **Samagra Sovereign Identity & Data Consent Portal** codebase.
+Welcome to the **CiviqOne Sovereign Identity & Data Consent Portal** codebase.
 This project is structured using **Domain-Driven Feature Isolation (DDFI)** to enable concurrent contributions from multiple engineering teams (MNC standard) without code collision or Git merge conflicts.
 
 ---

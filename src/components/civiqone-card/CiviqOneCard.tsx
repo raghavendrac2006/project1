@@ -134,7 +134,7 @@ export const CiviqOneCard: React.FC<CiviqOneCardProps> = ({
         <div className="w-full aspect-[1.586/1] min-h-[270px] rounded-[24px] p-6 bg-rose-500/5 border border-rose-500/30 flex flex-col items-center justify-center text-center space-y-3">
           <AlertTriangle className="w-10 h-10 text-rose-500" />
           <div>
-            <h3 className="text-sm font-bold text-foreground">Unable to load SAMAGRA Digital Card.</h3>
+            <h3 className="text-sm font-bold text-foreground">Unable to load CiviqOne Digital Card.</h3>
             <p className="text-xs text-muted-foreground mt-1">Please try re-authenticating.</p>
           </div>
           {onRetry && (
@@ -155,7 +155,7 @@ export const CiviqOneCard: React.FC<CiviqOneCardProps> = ({
         <div
           role="button"
           tabIndex={0}
-          aria-label={`SAMAGRA Digital Civic Identity Card for ${data.displayName}. Currently showing ${isFlipped ? 'Identity Verification Back' : 'Digital Identity Front'}. Press Enter or Space to flip.`}
+          aria-label={`CiviqOne Digital Civic Identity Card for ${data.displayName}. Currently showing ${isFlipped ? 'Identity Verification Back' : 'Digital Identity Front'}. Press Enter or Space to flip.`}
           aria-pressed={isFlipped}
           onClick={handleFlip}
           onKeyDown={handleKeyDown}

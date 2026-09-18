@@ -23,7 +23,7 @@ export interface LocalizedCivicAssistantPreset {
 
 export const CIVIC_ASSISTANT_CONTENT: Record<SupportedLanguage, LocalizedCivicAssistantPreset> = {
   en: {
-    welcomeMessage: 'Namaste Rajesh. I am SAMAGRA Intelligent Civic Assistant. How can I guide you with government services, document verification, or your pending applications today?',
+    welcomeMessage: 'Namaste Rajesh. I am CiviqOne Intelligent Civic Assistant. How can I guide you with government services, document verification, or your pending applications today?',
     suggestions: [
       { text: 'How do I renew my driving license?', action: 'dl_renewal' },
       { text: 'Check status of my property mutation', action: 'check_mutation' },
@@ -59,7 +59,7 @@ export const CIVIC_ASSISTANT_CONTENT: Record<SupportedLanguage, LocalizedCivicAs
     },
   },
   te: {
-    welcomeMessage: 'నమస్కారం రాజేష్ గారు. నేను మీ SAMAGRA పౌర సేవా సహాయకుడిని. ప్రభుత్వ సేవలు, పత్రాల ధృవీకరణ లేదా దరఖాస్తుల పురోగతి గురించి మీకు ఎలా సహాయపడగలను?',
+    welcomeMessage: 'నమస్కారం రాజేష్ గారు. నేను మీ CiviqOne పౌర సేవా సహాయకుడిని. ప్రభుత్వ సేవలు, పత్రాల ధృవీకరణ లేదా దరఖాస్తుల పురోగతి గురించి మీకు ఎలా సహాయపడగలను?',
     suggestions: [
       { text: 'డ్రైవింగ్ లైసెన్స్ పునరుద్ధరణ ఎలా చేయాలి?', action: 'dl_renewal' },
       { text: 'ఆస్తి మ్యుటేషన్ స్థితిని పరిశీలించండి', action: 'check_mutation' },
@@ -94,7 +94,7 @@ export const CIVIC_ASSISTANT_CONTENT: Record<SupportedLanguage, LocalizedCivicAs
     },
   },
   ta: {
-    welcomeMessage: 'வணக்கம் ராஜேஷ். நான் SAMAGRA குடிமக்கள் டிஜிட்டல் உதவியாளர். அரசு சேவைகள், ஆவண சரிபார்ப்பு அல்லது உங்கள் விண்ணப்ப விவரங்களை அறிய உங்களுக்கு எவ்வாறு உதவலாம்?',
+    welcomeMessage: 'வணக்கம் ராஜேஷ். நான் CiviqOne குடிமக்கள் டிஜிட்டல் உதவியாளர். அரசு சேவைகள், ஆவண சரிபார்ப்பு அல்லது உங்கள் விண்ணப்ப விவரங்களை அறிய உங்களுக்கு எவ்வாறு உதவலாம்?',
     suggestions: [
       { text: 'ஓட்டுநர் உரிமத்தை எவ்வாறு புதுப்பிப்பது?', action: 'dl_renewal' },
       { text: 'எனது சொத்து பட்டா / மாற்ற நிலையை காண்க', action: 'check_mutation' },
@@ -129,7 +129,7 @@ export const CIVIC_ASSISTANT_CONTENT: Record<SupportedLanguage, LocalizedCivicAs
     },
   },
   kn: {
-    welcomeMessage: 'ನಮಸ್ಕಾರ ರಾಜೇಶ್ ಅವರೇ. ನಾನು SAMAGRA ನಾಗರಿಕ ಡಿಜಿಟಲ್ ಸಹಾಯಕ. ಸರಕಾರಿ ಸೇವೆಗಳು, ದಾಖಲೆಗಳ ಪರಿಶೀಲನೆ ಅಥವಾ ಅರ್ಜಿಗಳ ಸ್ಥಿತಿ ಪರಿಶೀಲನೆಗೆ ನಾನು ಹೇಗೆ ನೆರವಾಗಲಿ?',
+    welcomeMessage: 'ನಮಸ್ಕಾರ ರಾಜೇಶ್ ಅವರೇ. ನಾನು CiviqOne ನಾಗರಿಕ ಡಿಜಿಟಲ್ ಸಹಾಯಕ. ಸರಕಾರಿ ಸೇವೆಗಳು, ದಾಖಲೆಗಳ ಪರಿಶೀಲನೆ ಅಥವಾ ಅರ್ಜಿಗಳ ಸ್ಥಿತಿ ಪರಿಶೀಲನೆಗೆ ನಾನು ಹೇಗೆ ನೆರವಾಗಲಿ?',
     suggestions: [
       { text: 'ಡ್ರೈವಿಂಗ್ ಲೈಸೆನ್ಸ್ ನವೀಕರಣ ಹೇಗೆ?', action: 'dl_renewal' },
       { text: 'ಇ-ಖಾತಾ ಮ್ಯುಟೇಶನ್ ಅರ್ಜಿ ಸ್ಥಿತಿ ಪರಿಶೀಲಿಸಿ', action: 'check_mutation' },
@@ -164,7 +164,7 @@ export const CIVIC_ASSISTANT_CONTENT: Record<SupportedLanguage, LocalizedCivicAs
     },
   },
   ml: {
-    welcomeMessage: 'നമസ്കാരം രാജേഷ്. ഞാൻ SAMAGRA സിവിക് ഡിജിറ്റൽ അസിസ്റ്റന്റാണ്. സർക്കാർ സേവനങ്ങൾ, രേഖ പരിശോധന, അപേക്ഷാ നില പരിശോധന എന്നിവയിൽ ഞാൻ എങ്ങനെ സഹായിക്കണം?',
+    welcomeMessage: 'നമസ്കാരം രാജേഷ്. ഞാൻ CiviqOne സിവിക് ഡിജിറ്റൽ അസിസ്റ്റന്റാണ്. സർക്കാർ സേവനങ്ങൾ, രേഖ പരിശോധന, അപേക്ഷാ നില പരിശോധന എന്നിവയിൽ ഞാൻ എങ്ങനെ സഹായിക്കണം?',
     suggestions: [
       { text: 'ഡ്രൈവിംഗ് ലൈസൻസ് എങ്ങനെ പുതുക്കാം?', action: 'dl_renewal' },
       { text: 'വസ്തു പോക്കുവരവ് അപേക്ഷ പരിശോധിക്കുക', action: 'check_mutation' },

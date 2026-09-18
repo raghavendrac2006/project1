@@ -45,7 +45,7 @@ export function MobileNav({ open, onClose }: MobileNavProps) {
     { label: 'Privacy & Consent', path: ROUTES.APP.PRIVACY, icon: Lock },
     { label: 'Security Center', path: ROUTES.APP.SECURITY, icon: KeyRound },
     { label: 'Civic Payments', path: ROUTES.APP.PAYMENTS, icon: CreditCard },
-    { label: 'SAMAGRA AI', path: ROUTES.APP.ASSISTANT, icon: Bot, isHighlighted: true },
+    { label: 'CiviqOne AI', path: ROUTES.APP.ASSISTANT, icon: Bot, isHighlighted: true },
     { label: 'Notifications', path: ROUTES.APP.NOTIFICATIONS, icon: Bell },
     { label: 'Settings', path: ROUTES.APP.SETTINGS, icon: Settings },
   ]
@@ -70,7 +70,7 @@ export function MobileNav({ open, onClose }: MobileNavProps) {
             </div>
             <div>
               <span className="font-display text-base font-extrabold text-foreground tracking-tight">
-                SAMAGRA
+                CiviqOne
               </span>
               <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
                 Civic OS Mobile

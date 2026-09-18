@@ -386,7 +386,7 @@ export function GovernmentLoginPage() {
           <div>
             <div className="flex items-center gap-2">
               <span className="text-sm sm:text-base font-bold text-slate-900 dark:text-white tracking-tight font-display">
-                SAMAGRA Government Secretariat
+                CiviqOne Government Secretariat
               </span>
               <Badge variant="outline" className="text-[10px] text-blue-700 dark:text-blue-300 border-blue-300 dark:border-blue-700 bg-blue-50 dark:bg-blue-950/50 font-semibold">
                 Department Isolation Gateway

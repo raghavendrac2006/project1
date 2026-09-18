@@ -63,8 +63,8 @@ export const assistantService = {
       ? preset.mockAnswers[matchedKey]
       : {
           answer: lang === 'en'
-            ? `I searched the SAMAGRA Central Repository for "${userText}". All your linked documents and biometric credentials are fully protected under Digital Citizen Vault specifications. You can verify your active applications or explore all 40+ statutory services directly from the left navigation.`
-            : `SAMAGRA డిజిటల్ సివిక్ రిపోజిటరీలో మీ ప్రశ్న కోసం వెతికాము. మీ అన్ని ధృవీకరణ వివరాలు సురక్షితంగా ఉన్నాయి. మీరు సేవల విభాగం నుండి మరిన్ని వివరాలు పొందవచ్చు.`,
+            ? `I searched the CiviqOne Central Repository for "${userText}". All your linked documents and biometric credentials are fully protected under Digital Citizen Vault specifications. You can verify your active applications or explore all 40+ statutory services directly from the left navigation.`
+            : `CiviqOne డిజిటల్ సివిక్ రిపోజిటరీలో మీ ప్రశ్న కోసం వెతికాము. మీ అన్ని ధృవీకరణ వివరాలు సురక్షితంగా ఉన్నాయి. మీరు సేవల విభాగం నుండి మరిన్ని వివరాలు పొందవచ్చు.`,
           actions: [
             { label: 'Browse All Services', action: 'navigate', targetUrl: '/app/services' },
             { label: 'View Digital Identity', action: 'navigate', targetUrl: '/app/identity' },

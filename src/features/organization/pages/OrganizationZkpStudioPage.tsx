@@ -30,7 +30,7 @@ export function OrganizationZkpStudioPage() {
 
   // Verification Runner State
   const [selectedTemplate, setSelectedTemplate] = useState<ZkpQueryTemplate | null>(null)
-  const [citizenId, setCitizenId] = useState('usr_samagra_99182')
+  const [citizenId, setCitizenId] = useState('usr_civiqone_99182')
   const [verifying, setVerifying] = useState(false)
   const [latestReceipt, setLatestReceipt] = useState<ZkpProofReceipt | null>(null)
 
@@ -188,7 +188,7 @@ export function OrganizationZkpStudioPage() {
                     value={citizenId}
                     onChange={(e) => setCitizenId(e.target.value)}
                     className="w-full p-2.5 rounded-xl border border-input bg-card text-xs font-mono text-foreground outline-none"
-                    placeholder="usr_samagra_..."
+                    placeholder="usr_civiqone_..."
                   />
                   <Badge variant="outline" className="text-[10px] font-mono shrink-0 bg-muted">
                     Rajesh K. Sharma

@@ -33,21 +33,21 @@ interface CredentialScannerModalProps {
 
 const SAMPLE_CREDENTIALS: Array<Omit<ScannedCredentialResult, 'verificationHash' | 'verifiedAt'>> = [
   {
-    rawPayload: 'SAMAGRA://UIDAI/E-KYC/V3?uid=991849120042&name=Rajesh+K+Sharma&dob=1988-06-14&state=KA',
+    rawPayload: 'CIVIQONE://UIDAI/E-KYC/V3?uid=991849120042&name=Rajesh+K+Sharma&dob=1988-06-14&state=KA',
     credentialType: 'AADHAAR',
     identifier: '•••• •••• 4912',
     holderName: 'Rajesh K. Sharma',
     confidenceScore: 99.8,
   },
   {
-    rawPayload: 'SAMAGRA://SARATHI/DL/V2?dl=KA0320150009842&name=Rajesh+K+Sharma&class=LMV+TRANS&exp=2026-10-28',
+    rawPayload: 'CIVIQONE://SARATHI/DL/V2?dl=KA0320150009842&name=Rajesh+K+Sharma&class=LMV+TRANS&exp=2026-10-28',
     credentialType: 'DRIVING_LICENSE',
     identifier: 'KA03-20150009842',
     holderName: 'Rajesh K. Sharma',
     confidenceScore: 98.5,
   },
   {
-    rawPayload: 'SAMAGRA://TREASURY/CHALLAN/V1?rcpt=BBMP-PT-2026-489012&amt=4800&dept=REVENUE&status=CLEARED',
+    rawPayload: 'CIVIQONE://TREASURY/CHALLAN/V1?rcpt=BBMP-PT-2026-489012&amt=4800&dept=REVENUE&status=CLEARED',
     credentialType: 'TAX_CHALLAN',
     identifier: 'BBMP-PT-2026-489012',
     holderName: 'Property Unit #B-402, Indiranagar',

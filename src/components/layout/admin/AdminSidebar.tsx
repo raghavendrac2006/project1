@@ -77,7 +77,7 @@ export function AdminSidebar({ collapsed, onToggleCollapse }: AdminSidebarProps)
             </div>
             <div>
               <span className="font-bold text-sm tracking-tight text-white block">
-                SAMAGRA
+                CiviqOne
               </span>
               <span className="text-[10px] font-mono text-purple-400 font-semibold tracking-wider uppercase block">
                 Super Admin Console

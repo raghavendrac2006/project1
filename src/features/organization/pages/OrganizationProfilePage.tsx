@@ -83,7 +83,7 @@ export function OrganizationProfilePage() {
           <CardHeader className="p-5 border-b border-border">
             <CardTitle className="text-sm font-bold text-foreground flex items-center gap-2">
               <ShieldCheck className="w-4 h-4 text-emerald-500" />
-              SAMAGRA Sovereign Vetting
+              CiviqOne Sovereign Vetting
             </CardTitle>
           </CardHeader>
           <CardContent className="p-5 space-y-3 text-xs text-muted-foreground">

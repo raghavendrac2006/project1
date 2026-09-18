@@ -157,12 +157,12 @@ export function LandingPage() {
 
   const faqs = [
     {
-      q: 'What is SAMAGRA and how does it protect my digital sovereignty?',
-      a: 'SAMAGRA is your unified sovereign digital operating system. It provides tamper-proof identity credentials, zero-knowledge cryptographic proofs, and an encrypted document vault where only you hold the keys. No government department or private entity can access your records without your explicit, revocable consent.',
+      q: 'What is CiviqOne and how does it protect my digital sovereignty?',
+      a: 'CiviqOne is your unified sovereign digital operating system. It provides tamper-proof identity credentials, zero-knowledge cryptographic proofs, and an encrypted document vault where only you hold the keys. No government department or private entity can access your records without your explicit, revocable consent.',
     },
     {
       q: 'How does delegated authority for family members work?',
-      a: 'SAMAGRA strictly separates family relationships from legal authorization. You can add minor dependents under guardian management, or invite adult family members (spouse, parents) who grant you granular permissions such as viewing documents, applying for services, or managing healthcare records on their behalf.',
+      a: 'CiviqOne strictly separates family relationships from legal authorization. You can add minor dependents under guardian management, or invite adult family members (spouse, parents) who grant you granular permissions such as viewing documents, applying for services, or managing healthcare records on their behalf.',
     },
     {
       q: 'What are Verifiable Zero-Knowledge Proofs (ZKPs)?',
@@ -194,7 +194,7 @@ export function LandingPage() {
             </div>
             <div>
               <span className="font-display text-lg font-black tracking-tight text-foreground">
-                SAMAGRA
+                CiviqOne
               </span>
               <span className="hidden sm:inline-block ml-2.5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest border-l border-border pl-2.5">
                 Digital Civic OS
@@ -388,7 +388,7 @@ export function LandingPage() {
             <span className="gradient-text-primary">Everyday Civic Life</span>
           </h2>
           <p className="text-sm sm:text-base text-muted-foreground leading-relaxed text-balance">
-            Every layer of SAMAGRA is built to eliminate bureaucratic friction and give citizens complete authority over their public and private data.
+            Every layer of CiviqOne is built to eliminate bureaucratic friction and give citizens complete authority over their public and private data.
           </p>
         </div>
 
@@ -500,7 +500,7 @@ export function LandingPage() {
             Ready to Take Command of Your Civic Life?
           </h2>
           <p className="text-white/75 text-sm sm:text-base max-w-xl mx-auto leading-relaxed text-balance mb-10">
-            Join citizens using SAMAGRA for streamlined, secure, and sovereign civic engagement. Your data. Your rights. Your control.
+            Join citizens using CiviqOne for streamlined, secure, and sovereign civic engagement. Your data. Your rights. Your control.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -526,7 +526,7 @@ export function LandingPage() {
             <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-[hsl(232_84%_54%)] to-[hsl(196_80%_50%)] flex items-center justify-center">
               <Shield className="w-3.5 h-3.5 text-white" />
             </div>
-            <span className="font-bold text-foreground text-sm">SAMAGRA</span>
+            <span className="font-bold text-foreground text-sm">CiviqOne</span>
             <span className="hidden sm:inline text-border">·</span>
             <span className="hidden sm:inline">Sovereign Digital Civic Operating System</span>
           </div>

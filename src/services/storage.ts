@@ -55,39 +55,39 @@ import type {
 } from '@/types'
 
 const STORAGE_KEYS = {
-  USER: 'samagra_user_v1',
-  IDENTITY: 'samagra_identity_v1',
-  DOCUMENTS: 'samagra_documents_v1',
-  SERVICES: 'samagra_services_v2',
-  APPLICATIONS: 'samagra_applications_v1',
-  NOTIFICATIONS: 'samagra_notifications_v1',
-  PAYMENTS: 'samagra_payments_v1',
-  SETTINGS: 'samagra_settings_v1',
-  ASSISTANT: 'samagra_assistant_v1',
-  AUTH_TOKEN: 'samagra_auth_token_v1',
-  ORGANIZATIONS: 'samagra_organizations_v1',
-  ORG_MEMBERS: 'samagra_org_members_v1',
-  ORG_SERVICES: 'samagra_org_services_v1',
-  CONSENT_REQUESTS: 'samagra_consent_requests_v1',
-  ACCESS_GRANTS: 'samagra_access_grants_v1',
-  ACCESS_HISTORY: 'samagra_access_history_v1',
-  AUDIT_EVENTS: 'samagra_audit_events_v1',
-  GOV_DEPARTMENTS: 'samagra_gov_departments_v2',
-  GOV_OFFICIALS: 'samagra_gov_officials_v2',
-  ORG_SESSION: 'samagra_org_session_v1',
-  GOV_SESSION: 'samagra_gov_session_v1',
-  ADMIN_SESSION: 'samagra_admin_session_v1',
-  CREDENTIALS: 'samagra_credentials_v1',
-  FAMILY_MEMBERS: 'samagra_family_members_v1',
-  ACTIONS: 'samagra_actions_v1',
-  TRUSTED_DEVICES: 'samagra_trusted_devices_v1',
-  USER_SESSIONS: 'samagra_user_sessions_v1',
-  CONSENT_RECEIPTS: 'samagra_consent_receipts_v1',
+  USER: 'civiqone_user_v1',
+  IDENTITY: 'civiqone_identity_v1',
+  DOCUMENTS: 'civiqone_documents_v1',
+  SERVICES: 'civiqone_services_v2',
+  APPLICATIONS: 'civiqone_applications_v1',
+  NOTIFICATIONS: 'civiqone_notifications_v1',
+  PAYMENTS: 'civiqone_payments_v1',
+  SETTINGS: 'civiqone_settings_v1',
+  ASSISTANT: 'civiqone_assistant_v1',
+  AUTH_TOKEN: 'civiqone_auth_token_v1',
+  ORGANIZATIONS: 'civiqone_organizations_v1',
+  ORG_MEMBERS: 'civiqone_org_members_v1',
+  ORG_SERVICES: 'civiqone_org_services_v1',
+  CONSENT_REQUESTS: 'civiqone_consent_requests_v1',
+  ACCESS_GRANTS: 'civiqone_access_grants_v1',
+  ACCESS_HISTORY: 'civiqone_access_history_v1',
+  AUDIT_EVENTS: 'civiqone_audit_events_v1',
+  GOV_DEPARTMENTS: 'civiqone_gov_departments_v2',
+  GOV_OFFICIALS: 'civiqone_gov_officials_v2',
+  ORG_SESSION: 'civiqone_org_session_v1',
+  GOV_SESSION: 'civiqone_gov_session_v1',
+  ADMIN_SESSION: 'civiqone_admin_session_v1',
+  CREDENTIALS: 'civiqone_credentials_v1',
+  FAMILY_MEMBERS: 'civiqone_family_members_v1',
+  ACTIONS: 'civiqone_actions_v1',
+  TRUSTED_DEVICES: 'civiqone_trusted_devices_v1',
+  USER_SESSIONS: 'civiqone_user_sessions_v1',
+  CONSENT_RECEIPTS: 'civiqone_consent_receipts_v1',
 } as const
 
 function getFromStorage<T>(key: string, fallback: T): T {
   try {
-    const data = localStorage.getItem(key) || localStorage.getItem(key.replace('samagra_', 'civiqone_'))
+    const data = localStorage.getItem(key) || localStorage.getItem(key.replace('civiqone_', 'samagra_')) || localStorage.getItem(key.replace('samagra_', 'civiqone_'))
     return data ? (JSON.parse(data) as T) : fallback
   } catch {
     return fallback
@@ -409,7 +409,7 @@ export const civicStorage = {
     civicStorage.addAuditEvent({
       workspace: 'citizen',
       actor: 'Rajesh K. Sharma',
-      actorId: 'usr_samagra_1024',
+      actorId: 'usr_civiqone_1024',
       role: 'CITIZEN',
       action: 'PRIVACY_LOCKDOWN_ACTIVATED',
       resource: `Revoked all active third-party access (${count} organizations)`,

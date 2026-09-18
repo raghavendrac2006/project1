@@ -74,7 +74,7 @@ export function Sidebar({ collapsed, onToggleCollapse }: SidebarProps) {
       { label: 'Privacy & Consent', path: ROUTES.APP.PRIVACY, icon: Lock },
       { label: 'Security Center', path: ROUTES.APP.SECURITY, icon: KeyRound },
       { label: 'Civic Payments', path: ROUTES.APP.PAYMENTS, icon: CreditCard },
-      { label: 'SAMAGRA AI', path: ROUTES.APP.ASSISTANT, icon: Bot, isHighlighted: true },
+      { label: 'CiviqOne AI', path: ROUTES.APP.ASSISTANT, icon: Bot, isHighlighted: true },
       { label: 'Notifications', path: ROUTES.APP.NOTIFICATIONS, icon: Bell },
       { label: 'Settings', path: ROUTES.APP.SETTINGS, icon: Settings },
     ],
@@ -97,7 +97,7 @@ export function Sidebar({ collapsed, onToggleCollapse }: SidebarProps) {
           {!collapsed && (
             <div className="flex flex-col">
               <span className="font-display text-base font-extrabold tracking-tight text-foreground flex items-center gap-1.5">
-                SAMAGRA
+                CiviqOne
               </span>
               <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
                 Civic Operating System

@@ -83,7 +83,7 @@ export function PrivacyConsentCenterPage() {
   // Global Field Lock state (stored locally)
   const [globalFieldLocks, setGlobalFieldLocks] = useState<Record<string, boolean>>(() => {
     try {
-      const saved = localStorage.getItem('samagra_global_field_locks') || localStorage.getItem('civiqone_global_field_locks')
+      const saved = localStorage.getItem('civiqone_global_field_locks') || localStorage.getItem('civiqone_global_field_locks')
       return saved ? JSON.parse(saved) : { income: true, nationalId: false, panNumber: false, drivingLicense: false }
     } catch {
       return { income: true, nationalId: false, panNumber: false, drivingLicense: false }
@@ -233,7 +233,7 @@ export function PrivacyConsentCenterPage() {
     setGlobalFieldLocks((prev) => {
       const next = { ...prev, [fieldKey]: !prev[fieldKey] }
       try {
-        localStorage.setItem('samagra_global_field_locks', JSON.stringify(next))
+        localStorage.setItem('civiqone_global_field_locks', JSON.stringify(next))
       } catch {}
       toast({
         title: next[fieldKey] ? 'Field Globally Locked' : 'Field Unlocked',
@@ -631,7 +631,7 @@ export function PrivacyConsentCenterPage() {
       <div className="flex items-start gap-3 p-4 rounded-xl border border-border bg-card/60 text-xs text-muted-foreground">
         <Info className="w-4 h-4 text-primary shrink-0 mt-0.5" />
         <p className="leading-relaxed">
-          In the SAMAGRA architecture, private organizations <strong>never receive your complete profile automatically</strong>. Organizations must issue a cryptographic data access request stating their specific purpose and exact fields needed. You decide which individual fields to authorize, and you can revoke access at any second.
+          In the CiviqOne architecture, private organizations <strong>never receive your complete profile automatically</strong>. Organizations must issue a cryptographic data access request stating their specific purpose and exact fields needed. You decide which individual fields to authorize, and you can revoke access at any second.
         </p>
       </div>
 

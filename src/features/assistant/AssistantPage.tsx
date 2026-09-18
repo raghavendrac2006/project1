@@ -113,7 +113,7 @@ export function AssistantPage() {
           <div>
             <div className="flex items-center gap-2">
               <h1 className="font-display text-base font-bold text-foreground">
-                SAMAGRA Intelligent Civic Copilot
+                CiviqOne Intelligent Civic Copilot
               </h1>
               <Badge variant="verified" size="sm">
                 Active AI
@@ -317,7 +317,7 @@ export function AssistantPage() {
             type="text"
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
-            placeholder={`Ask SAMAGRA AI in ${currentLanguageDetails.nativeName} or English...`}
+            placeholder={`Ask CiviqOne AI in ${currentLanguageDetails.nativeName} or English...`}
             className="flex-1 bg-transparent px-3 text-xs sm:text-sm text-foreground placeholder:text-muted-foreground outline-none"
           />
           <Button
