@@ -1,5 +1,5 @@
 import React from 'react'
-import { NavLink } from 'react-router-dom'
+import { NavLink, Link } from 'react-router-dom'
 import {
   LayoutDashboard,
   Briefcase,
@@ -97,29 +97,38 @@ export function OrganizationSidebar({ collapsed, onToggleCollapse }: Organizatio
       )}
     >
       {/* Brand Header */}
-      <div className="flex h-16 items-center justify-between px-4 border-b border-border/80 shrink-0">
-        <div className="flex items-center gap-3 overflow-hidden">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-emerald-600 via-teal-600 to-cyan-500 text-white shadow-md">
-            <Building2 className="h-5 w-5 fill-white/20" />
+      <div className={cn(
+        'flex h-16 items-center border-b border-border/80 shrink-0 transition-all select-none',
+        collapsed ? 'justify-center px-2 relative' : 'justify-between px-4'
+      )}>
+        <Link to={ROUTES.ROOT} className={cn('flex items-center group', collapsed ? 'justify-center' : 'gap-3 overflow-hidden')}>
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/95 dark:bg-card/95 p-1 border border-emerald-500/25 shadow-sm group-hover:scale-105 transition-transform">
+            <img src="/civiqone-icon.png" alt="CiviQone" className="h-full w-full object-contain" />
           </div>
           {!collapsed && (
             <div className="flex flex-col min-w-0">
-              <span className="font-display text-sm font-extrabold tracking-tight text-foreground truncate flex items-center gap-1.5">
-                CiviqOne<span className="text-emerald-500 font-black">ORG</span>
+              <span className="font-display text-sm font-black tracking-tight text-foreground truncate flex items-center leading-none">
+                <span>Civi<span className="text-[#E11D48]">Q</span>one</span>
+                <span className="text-[9.5px] font-black px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 ml-1.5">ORG</span>
               </span>
-              <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider truncate">
+              <span className="text-[9.5px] font-semibold text-muted-foreground uppercase tracking-wider truncate mt-1">
                 Organization Portal
               </span>
             </div>
           )}
-        </div>
+        </Link>
 
         <button
           onClick={onToggleCollapse}
-          className="h-7 w-7 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
+          className={cn(
+            'rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors',
+            collapsed
+              ? 'absolute -right-3 top-1/2 -translate-y-1/2 h-6 w-6 bg-card shadow-md z-40'
+              : 'h-7 w-7'
+          )}
           aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
-          {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+          {collapsed ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronLeft className="w-4 h-4" />}
         </button>
       </div>
 

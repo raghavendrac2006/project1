@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Shield, User, Mail, Phone, CreditCard, Lock, ArrowLeft } from 'lucide-react'
+import { User, Mail, Phone, CreditCard, Lock, ArrowLeft } from 'lucide-react'
 import { registerSchema, type RegisterFormData } from '@/schemas'
 import { useAuth, useToast } from '@/hooks'
 import { ROUTES } from '@/constants/routes'
@@ -57,16 +57,16 @@ export function RegisterPage() {
         </Link>
 
         <div className="rounded-2xl border border-border bg-card p-6 sm:p-8 shadow-elevation">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-blue-700 to-sky-500 text-white shadow-md">
-              <Shield className="h-5 w-5 fill-white/20" />
+          <div className="flex items-center gap-3.5 mb-6">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/95 dark:bg-card/95 border border-border/80 shadow-sm p-1.5 shrink-0">
+              <img src="/civiqone-icon.png" alt="CiviQone" className="h-full w-full object-contain" />
             </div>
             <div>
               <h1 className="font-display text-xl font-bold tracking-tight text-foreground">
                 Register Citizen Digital Identity
               </h1>
               <p className="text-xs text-muted-foreground">
-                Create your verified sovereign profile on CiviqOne
+                Create your verified sovereign profile on Civi<span className="text-[#E11D48] font-bold">Q</span>one
               </p>
             </div>
           </div>

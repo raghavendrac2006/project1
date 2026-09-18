@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { adminService } from '@/services/admin.service'
 import { ROUTES } from '@/constants/routes'
-import { ShieldAlert, KeyRound, Lock, ArrowRight, CheckCircle2, Terminal } from 'lucide-react'
+import { KeyRound, Lock, ArrowRight, CheckCircle2, Terminal } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 
@@ -34,9 +34,11 @@ export function AdminLoginPage() {
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10">
         <div className="flex justify-center">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-700 via-indigo-700 to-rose-700 flex items-center justify-center text-white shadow-xl shadow-purple-950/60 border border-purple-500/30">
-            <ShieldAlert className="w-9 h-9" />
-          </div>
+          <Link to={ROUTES.ROOT} className="group">
+            <div className="w-16 h-16 rounded-2xl bg-white/95 flex items-center justify-center shadow-xl shadow-purple-950/60 border border-purple-500/30 p-2 group-hover:scale-105 transition-transform">
+              <img src="/civiqone-icon.png" alt="CiviQone" className="h-full w-full object-contain" />
+            </div>
+          </Link>
         </div>
 
         <div className="mt-4 text-center">
@@ -44,8 +46,8 @@ export function AdminLoginPage() {
             <Terminal className="w-3.5 h-3.5" />
             Root Governance
           </div>
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
-            CiviqOne Super Admin
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white font-display">
+            Civi<span className="text-[#E11D48]">Q</span>one <span className="text-purple-400">Super Admin</span>
           </h2>
           <p className="mt-1 text-sm text-slate-400">
             Cross-Portal Ecosystem Control & Sovereign Root Node

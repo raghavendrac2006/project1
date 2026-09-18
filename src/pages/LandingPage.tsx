@@ -187,17 +187,25 @@ export function LandingPage() {
       {/* ─── Sticky Navigation ─── */}
       <header className="sticky top-0 z-50 border-b border-border/60 glass-panel-strong">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-[68px] flex items-center justify-between">
-          <Link to={ROUTES.ROOT} className="flex items-center gap-3 group">
-            <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[hsl(232_84%_54%)] via-[hsl(220_80%_56%)] to-[hsl(196_80%_50%)] text-white shadow-[0_2px_12px_hsl(232_84%_54%/0.40)] group-hover:shadow-[0_4px_20px_hsl(232_84%_54%/0.55)] transition-shadow duration-300">
-              <Shield className="h-5 w-5 fill-white/20" />
-              <div className="absolute -inset-0.5 rounded-xl bg-gradient-to-br from-white/20 to-transparent" />
+          <Link to={ROUTES.ROOT} className="flex items-center gap-3 group shrink-0">
+            <div className="relative flex h-11 w-11 items-center justify-center rounded-2xl bg-white/90 dark:bg-card/90 p-1 border border-border/70 shadow-[0_2px_10px_rgba(0,0,0,0.06)] group-hover:shadow-[0_4px_16px_rgba(37,99,235,0.2)] group-hover:scale-105 transition-all duration-300">
+              <img
+                src="/civiqone-icon.png"
+                alt="CiviqOne Logo"
+                className="h-full w-full object-contain"
+              />
             </div>
-            <div>
-              <span className="font-display text-lg font-black tracking-tight text-foreground">
-                CiviqOne
-              </span>
-              <span className="hidden sm:inline-block ml-2.5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest border-l border-border pl-2.5">
-                Digital Civic OS
+            <div className="flex flex-col">
+              <div className="flex items-center gap-2">
+                <span className="font-display text-xl font-black tracking-tight text-foreground leading-none">
+                  Civi<span className="text-[#E11D48]">Q</span>one
+                </span>
+                <span className="hidden sm:inline-block text-[9px] font-extrabold text-muted-foreground uppercase tracking-widest px-2 py-0.5 rounded-full bg-muted/60 border border-border/60">
+                  Civic OS
+                </span>
+              </div>
+              <span className="hidden sm:block text-[9.5px] font-semibold text-muted-foreground/80 tracking-wide mt-0.5">
+                Citizens for a Better Tomorrow
               </span>
             </div>
           </Link>
@@ -522,13 +530,18 @@ export function LandingPage() {
       {/* ─── Footer ─── */}
       <footer className="border-t border-border/60 bg-card py-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-5 text-xs text-muted-foreground">
-          <div className="flex items-center gap-2.5">
-            <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-[hsl(232_84%_54%)] to-[hsl(196_80%_50%)] flex items-center justify-center">
-              <Shield className="w-3.5 h-3.5 text-white" />
+          <div className="flex items-center gap-3">
+            <div className="h-9 w-9 rounded-xl bg-white/90 dark:bg-card/90 p-1 border border-border/70 shadow-sm flex items-center justify-center shrink-0">
+              <img src="/civiqone-icon.png" alt="CiviqOne" className="h-full w-full object-contain" />
             </div>
-            <span className="font-bold text-foreground text-sm">CiviqOne</span>
-            <span className="hidden sm:inline text-border">·</span>
-            <span className="hidden sm:inline">Sovereign Digital Civic Operating System</span>
+            <div>
+              <span className="font-bold text-foreground text-sm flex items-center gap-1.5">
+                Civi<span className="text-[#E11D48]">Q</span>one
+                <span className="text-border">·</span>
+                <span className="text-xs font-normal text-muted-foreground">Digital Civic Operating System</span>
+              </span>
+              <p className="text-[10px] text-muted-foreground/75 font-medium">Citizens for a Better Tomorrow</p>
+            </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-4 sm:gap-6">

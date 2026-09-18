@@ -65,15 +65,15 @@ export function MobileNav({ open, onClose }: MobileNavProps) {
         {/* Sticky Header */}
         <div className="shrink-0 flex items-center justify-between p-4 border-b border-border bg-card/95 backdrop-blur-sm">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-blue-700 via-blue-600 to-sky-500 text-white shadow-md">
-              <Shield className="h-5 w-5 fill-white/20" />
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/90 dark:bg-card/90 p-1 border border-border/70 shadow-sm">
+              <img src="/civiqone-icon.png" alt="CiviqOne" className="h-full w-full object-contain" />
             </div>
             <div>
-              <span className="font-display text-base font-extrabold text-foreground tracking-tight">
-                CiviqOne
+              <span className="font-display text-base font-black text-foreground tracking-tight leading-none block">
+                Civi<span className="text-[#E11D48]">Q</span>one
               </span>
-              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
-                Civic OS Mobile
+              <p className="text-[9.5px] font-semibold text-muted-foreground tracking-wide mt-1">
+                Citizens for a Better Tomorrow
               </p>
             </div>
           </div>
