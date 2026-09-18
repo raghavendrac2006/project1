@@ -22,7 +22,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="block text-xs font-semibold text-foreground/90 uppercase tracking-wider"
+            className="block text-xs font-semibold text-foreground/75 mb-1.5 tracking-wide"
           >
             {label}
           </label>
@@ -38,7 +38,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             type={isPassword ? (showPassword ? 'text' : 'password') : type}
             className={cn(
-              'flex h-10 w-full rounded-lg border border-input bg-card px-3.5 py-2 text-sm text-foreground shadow-subtle placeholder:text-muted-foreground/60 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:border-transparent disabled:cursor-not-allowed disabled:opacity-50',
+              'flex h-11 w-full rounded-xl border border-input bg-card px-4 py-2.5 text-sm text-foreground shadow-[0_1px_2px_hsl(var(--foreground)/0.05)] placeholder:text-muted-foreground/50 transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0 focus-visible:border-primary/40 hover:border-border/80 disabled:cursor-not-allowed disabled:opacity-50',
               leftIcon ? 'pl-10' : '',
               isPassword || rightIcon ? 'pr-10' : '',
               error ? 'border-destructive focus-visible:ring-destructive' : '',
