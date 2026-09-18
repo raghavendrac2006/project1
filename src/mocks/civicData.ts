@@ -26,11 +26,11 @@ import type {
 
 export const INITIAL_USER: User = {
   id: 'usr_civiq_99182',
-  name: 'Rajesh K. Sharma',
-  email: 'rajesh.sharma@civicmail.gov.in',
+  name: 'Aarav Mehta',
+  email: 'aarav.mehta@civicmail.gov.in',
   phone: '9845012345',
-  avatar: '',
-  nationalId: '8492-9012-4412',
+  avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80',
+  nationalId: 'CIV-2048-4821',
   verificationLevel: 'Level 3 - Biometric Sovereign',
   state: 'Karnataka',
   city: 'Bengaluru',
@@ -41,11 +41,11 @@ export const INITIAL_USER: User = {
 
 export const INITIAL_IDENTITY: CitizenIdentity = {
   id: 'cid_9921_in',
-  fullName: 'Rajesh Kumar Sharma',
+  fullName: 'Aarav Mehta',
   dateOfBirth: '14 August 1988',
   gender: 'Male',
-  nationalId: '8492-9012-4412',
-  maskedNationalId: '•••• •••• 4412',
+  nationalId: 'CIV-2048-4821',
+  maskedNationalId: 'CIV-2048-••••-4821',
   qrCodeData: 'CIVIQONE:CID-9921-IN:SIG-SHA256-8A39F0B1:VERIFIED:SEC-LVL3',
   digitalSignature: '0x8f2c91b45da812fec9001b984fa472e39c4a86b1',
   issueDate: '01 Jan 2024',

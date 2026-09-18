@@ -14,6 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { useAuth, useToast } from '@/hooks'
 import { userService } from '@/services/user.service'
 import { civicStorage } from '@/services/storage'
+import { CiviqOneCard } from '@/components/civiqone-card'
 
 export function ProfilePage() {
   const { user, refreshUser } = useAuth()
@@ -105,6 +106,20 @@ export function ProfilePage() {
             Update Profile
           </Button>
         </div>
+      </div>
+
+      {/* 3D Glassmorphism CIVIQONE Card Showcase (Section 28) */}
+      <div className="p-6 rounded-3xl border border-border/80 bg-card/60 backdrop-blur-md shadow-card">
+        <div className="max-w-xl mx-auto mb-4 text-center sm:text-left">
+          <h3 className="font-display font-bold text-base text-foreground flex items-center justify-center sm:justify-start gap-2">
+            <ShieldCheck className="w-4 h-4 text-primary" />
+            Sovereign Digital Identity Smart Card
+          </h3>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Digital civic identity card for verified civic attestation. Click or press Space to flip.
+          </p>
+        </div>
+        <CiviqOneCard />
       </div>
 
       {/* Completeness Meter & Security Overview */}

@@ -9,14 +9,11 @@ import {
   Lock,
   ArrowRight,
   Zap,
-  Globe,
-  Sparkles,
   ChevronDown,
   Award,
   Layers,
   Building2,
   Landmark,
-  XCircle,
 } from 'lucide-react'
 import { ROUTES } from '@/constants/routes'
 import { Button } from '@/components/ui/Button'
@@ -114,14 +111,14 @@ export function LandingPage() {
             <span>National Sovereign Identity Architecture • Version 2.4</span>
           </div>
 
-          <h1 className="font-display text-4xl sm:text-6xl font-black tracking-tight text-foreground leading-[1.15]">
+          <h1 className="font-display text-4xl sm:text-6xl font-black tracking-tight text-foreground leading-[1.15] text-balance">
             Your Digital Identity.{' '}
             <span className="bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 bg-clip-text text-transparent">
               Completely Sovereign.
             </span>
           </h1>
 
-          <p className="mt-6 text-base sm:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+          <p className="mt-6 text-base sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed text-balance">
             Manage your credentials, encrypted document vault, family delegations, and statutory civic services from a single zero-knowledge operating system.
           </p>
 
@@ -188,23 +185,23 @@ export function LandingPage() {
               <ShieldCheck className="w-4 h-4 text-primary" />
               <span>Independent Multi-Portal Architecture</span>
             </div>
-            <h2 className="font-display text-3xl sm:text-5xl font-black text-foreground tracking-tight">
+            <h2 className="font-display text-3xl sm:text-5xl font-black text-foreground tracking-tight text-balance">
               Three Sovereign Portals.{' '}
               <span className="bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 bg-clip-text text-transparent">
                 Complete Separation of Powers.
               </span>
             </h2>
-            <p className="text-sm sm:text-base text-muted-foreground mt-3 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-sm sm:text-base text-muted-foreground mt-3 max-w-2xl mx-auto leading-relaxed text-balance">
               Every participant operates within an independent, cryptographically isolated workspace. Select your portal gateway to begin:
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-8 items-stretch">
             {/* Portal 1: Citizen */}
-            <div className="rounded-3xl border-2 border-blue-500/30 bg-card p-7 shadow-lg shadow-blue-500/5 hover:border-blue-500/60 transition-all flex flex-col justify-between group relative overflow-hidden">
+            <div className="rounded-3xl border-2 border-blue-500/30 bg-card p-7 shadow-lg shadow-blue-500/5 hover:border-blue-500/60 transition-all flex flex-col justify-between group relative overflow-hidden h-full">
               <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-bl-full pointer-events-none group-hover:bg-blue-500/10 transition-colors" />
 
-              <div>
+              <div className="flex-1 flex flex-col">
                 <div className="flex items-center justify-between mb-5">
                   <div className="h-12 w-12 rounded-2xl bg-blue-600/15 text-blue-600 dark:text-blue-400 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
                     <Shield className="w-6 h-6" />
@@ -217,24 +214,9 @@ export function LandingPage() {
                 <h3 className="text-xl font-bold text-foreground">Citizen Portal</h3>
                 <p className="text-xs font-mono text-blue-600 dark:text-blue-400 mt-0.5">/login ➔ /app/*</p>
 
-                <p className="text-xs text-muted-foreground mt-3 leading-relaxed">
+                <p className="text-xs text-muted-foreground mt-3 leading-relaxed flex-1">
                   For individual citizens and families to manage biometric smart cards, tamper-proof document vaults, government welfare schemes, and fine-grained data consent.
                 </p>
-
-                <div className="mt-5 pt-4 border-t border-border/80 space-y-2 text-xs">
-                  <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-medium text-[11px]">
-                    <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-                    <span>Full personal document ownership</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-rose-500 font-medium text-[11px]">
-                    <XCircle className="w-3.5 h-3.5 shrink-0" />
-                    <span>Zero access to Government desks</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-rose-500 font-medium text-[11px]">
-                    <XCircle className="w-3.5 h-3.5 shrink-0" />
-                    <span>Zero access to Enterprise operations</span>
-                  </div>
-                </div>
               </div>
 
               <div className="mt-8 pt-4">
@@ -247,10 +229,10 @@ export function LandingPage() {
             </div>
 
             {/* Portal 2: Organization */}
-            <div className="rounded-3xl border-2 border-emerald-500/30 bg-card p-7 shadow-lg shadow-emerald-500/5 hover:border-emerald-500/60 transition-all flex flex-col justify-between group relative overflow-hidden">
+            <div className="rounded-3xl border-2 border-emerald-500/30 bg-card p-7 shadow-lg shadow-emerald-500/5 hover:border-emerald-500/60 transition-all flex flex-col justify-between group relative overflow-hidden h-full">
               <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-bl-full pointer-events-none group-hover:bg-emerald-500/10 transition-colors" />
 
-              <div>
+              <div className="flex-1 flex flex-col">
                 <div className="flex items-center justify-between mb-5">
                   <div className="h-12 w-12 rounded-2xl bg-emerald-600/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
                     <Building2 className="w-6 h-6" />
@@ -263,28 +245,9 @@ export function LandingPage() {
                 <h3 className="text-xl font-bold text-foreground">Organization Gateway</h3>
                 <p className="text-xs font-mono text-emerald-600 dark:text-emerald-400 mt-0.5">/organization/login ➔ /organization/*</p>
 
-                <p className="text-xs text-muted-foreground mt-3 leading-relaxed">
+                <p className="text-xs text-muted-foreground mt-3 leading-relaxed flex-1">
                   For banks, insurers, healthcare networks & enterprises. Request citizen data under DPDP Act 2023 consent, run Zero-Knowledge Proofs, and verify authentic records.
                 </p>
-
-                <div className="mt-5 pt-4 border-t border-border/80 space-y-2 text-xs">
-                  <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-medium text-[11px]">
-                    <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-                    <span>Dispatch purpose-bounded data requests</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-medium text-[11px]">
-                    <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-                    <span>ZKP cryptographic verification studio</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-rose-500 font-medium text-[11px]">
-                    <XCircle className="w-3.5 h-3.5 shrink-0" />
-                    <span>Zero unconsented access to Citizen vaults</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-rose-500 font-medium text-[11px]">
-                    <XCircle className="w-3.5 h-3.5 shrink-0" />
-                    <span>Zero access to Government Secretariat</span>
-                  </div>
-                </div>
               </div>
 
               <div className="mt-8 pt-4">
@@ -297,10 +260,10 @@ export function LandingPage() {
             </div>
 
             {/* Portal 3: Government */}
-            <div className="rounded-3xl border-2 border-indigo-500/30 bg-card p-7 shadow-lg shadow-indigo-500/5 hover:border-indigo-500/60 transition-all flex flex-col justify-between group relative overflow-hidden">
+            <div className="rounded-3xl border-2 border-indigo-500/30 bg-card p-7 shadow-lg shadow-indigo-500/5 hover:border-indigo-500/60 transition-all flex flex-col justify-between group relative overflow-hidden h-full">
               <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-bl-full pointer-events-none group-hover:bg-indigo-500/10 transition-colors" />
 
-              <div>
+              <div className="flex-1 flex flex-col">
                 <div className="flex items-center justify-between mb-5">
                   <div className="h-12 w-12 rounded-2xl bg-indigo-600/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
                     <Landmark className="w-6 h-6" />
@@ -313,24 +276,9 @@ export function LandingPage() {
                 <h3 className="text-xl font-bold text-foreground">Government Secretariat</h3>
                 <p className="text-xs font-mono text-indigo-600 dark:text-indigo-400 mt-0.5">/government/login ➔ /government/*</p>
 
-                <p className="text-xs text-muted-foreground mt-3 leading-relaxed">
+                <p className="text-xs text-muted-foreground mt-3 leading-relaxed flex-1">
                   For authorized civil servants across 11 autonomous ministries & departments. Review verification queues, enforce departmental SLAs, and oversee statutory citizen dossiers.
                 </p>
-
-                <div className="mt-5 pt-4 border-t border-border/80 space-y-2 text-xs">
-                  <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-medium text-[11px]">
-                    <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-                    <span>Lawful statutory oversight on Citizen records</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-medium text-[11px]">
-                    <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-                    <span>11 isolated departmental statutory desks</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-rose-500 font-medium text-[11px]">
-                    <XCircle className="w-3.5 h-3.5 shrink-0" />
-                    <span>Zero access to private Enterprise workspaces</span>
-                  </div>
-                </div>
               </div>
 
               <div className="mt-8 pt-4">
@@ -348,77 +296,77 @@ export function LandingPage() {
       {/* Feature Pillar Showcase */}
       <section className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="font-display text-3xl sm:text-4xl font-black tracking-tight text-foreground">
+          <h2 className="font-display text-3xl sm:text-4xl font-black tracking-tight text-foreground text-balance">
             Engineered for Everyday Civic Life
           </h2>
-          <p className="text-sm sm:text-base text-muted-foreground mt-3">
+          <p className="text-sm sm:text-base text-muted-foreground mt-3 text-balance">
             Every layer of CIVIQONE is built to eliminate bureaucratic friction and give citizens complete authority over their public and private data.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-3 gap-6 items-stretch">
           {/* Card 1 */}
-          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
-            <div className="h-12 w-12 rounded-xl bg-blue-500/10 text-primary flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group h-full flex flex-col">
+            <div className="h-12 w-12 rounded-xl bg-blue-500/10 text-primary flex items-center justify-center mb-5 group-hover:scale-110 transition-transform shrink-0">
               <Award className="w-6 h-6" />
             </div>
             <h3 className="text-lg font-bold text-foreground">Digital Credential Wallet</h3>
-            <p className="text-xs sm:text-sm text-muted-foreground mt-2 leading-relaxed">
+            <p className="text-xs sm:text-sm text-muted-foreground mt-2 leading-relaxed flex-1">
               Store verifiable digital credentials with cryptographic zero-knowledge proofs. Share only what is necessary without exposing full document details.
             </p>
           </div>
 
           {/* Card 2 */}
-          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
-            <div className="h-12 w-12 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group h-full flex flex-col">
+            <div className="h-12 w-12 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform shrink-0">
               <FileText className="w-6 h-6" />
             </div>
             <h3 className="text-lg font-bold text-foreground">Intelligent Document Vault</h3>
-            <p className="text-xs sm:text-sm text-muted-foreground mt-2 leading-relaxed">
+            <p className="text-xs sm:text-sm text-muted-foreground mt-2 leading-relaxed flex-1">
               Tamper-proof storage with automated document expiry tracking, intelligent OCR metadata extraction, and direct renewal assistance before licenses lapse.
             </p>
           </div>
 
           {/* Card 3 */}
-          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
-            <div className="h-12 w-12 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group h-full flex flex-col">
+            <div className="h-12 w-12 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform shrink-0">
               <Users className="w-6 h-6" />
             </div>
             <h3 className="text-lg font-bold text-foreground">Family & Delegated Authority</h3>
-            <p className="text-xs sm:text-sm text-muted-foreground mt-2 leading-relaxed">
+            <p className="text-xs sm:text-sm text-muted-foreground mt-2 leading-relaxed flex-1">
               Manage minor dependents and elder parents under explicit legal delegations. Apply for statutory welfare or school admissions on their behalf.
             </p>
           </div>
 
           {/* Card 4 */}
-          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
-            <div className="h-12 w-12 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group h-full flex flex-col">
+            <div className="h-12 w-12 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform shrink-0">
               <Zap className="w-6 h-6" />
             </div>
             <h3 className="text-lg font-bold text-foreground">Citizen Action Center</h3>
-            <p className="text-xs sm:text-sm text-muted-foreground mt-2 leading-relaxed">
+            <p className="text-xs sm:text-sm text-muted-foreground mt-2 leading-relaxed flex-1">
               Never miss a statutory deadline. Urgent consent approvals, missing application documents, expiring credentials, and taxes aggregated into one actionable stream.
             </p>
           </div>
 
           {/* Card 5 */}
-          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
-            <div className="h-12 w-12 rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group h-full flex flex-col">
+            <div className="h-12 w-12 rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform shrink-0">
               <Layers className="w-6 h-6" />
             </div>
             <h3 className="text-lg font-bold text-foreground">Direct Civic Services</h3>
-            <p className="text-xs sm:text-sm text-muted-foreground mt-2 leading-relaxed">
+            <p className="text-xs sm:text-sm text-muted-foreground mt-2 leading-relaxed flex-1">
               Apply for government schemes, municipal licenses, and transport services with automated data prefill and transparent step-by-step progress tracking.
             </p>
           </div>
 
           {/* Card 6 */}
-          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
-            <div className="h-12 w-12 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group h-full flex flex-col">
+            <div className="h-12 w-12 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform shrink-0">
               <Lock className="w-6 h-6" />
             </div>
             <h3 className="text-lg font-bold text-foreground">Sovereign Privacy Control</h3>
-            <p className="text-xs sm:text-sm text-muted-foreground mt-2 leading-relaxed">
+            <p className="text-xs sm:text-sm text-muted-foreground mt-2 leading-relaxed flex-1">
               Audit every organization accessing your records. Revoke access instantly, generate cryptographic consent receipts, and trigger Emergency Lockdown when needed.
             </p>
           </div>
@@ -429,41 +377,41 @@ export function LandingPage() {
       <section className="py-20 bg-muted/30 border-y border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-14">
-            <h2 className="font-display text-3xl font-black text-foreground">
+            <h2 className="font-display text-3xl font-black text-foreground text-balance">
               Three Steps to Complete Civic Sovereignty
             </h2>
-            <p className="text-xs sm:text-sm text-muted-foreground mt-2">
+            <p className="text-xs sm:text-sm text-muted-foreground mt-2 text-balance">
               Simple, secure, and fully verified by national identity infrastructure.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="p-6 rounded-2xl bg-card border border-border text-center relative">
-              <div className="h-10 w-10 rounded-full bg-primary text-primary-foreground font-black flex items-center justify-center mx-auto mb-4 text-sm">
+          <div className="grid md:grid-cols-3 gap-8 items-stretch">
+            <div className="p-6 rounded-2xl bg-card border border-border text-center relative h-full flex flex-col items-center">
+              <div className="h-10 w-10 rounded-full bg-primary text-primary-foreground font-black flex items-center justify-center mx-auto mb-4 text-sm shrink-0">
                 1
               </div>
               <h3 className="font-bold text-base text-foreground">Authenticate & Verify</h3>
-              <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
+              <p className="text-xs text-muted-foreground mt-2 leading-relaxed flex-1">
                 Log in via your registered mobile number or national ID to initialize your tamper-proof biometric sovereign tier.
               </p>
             </div>
 
-            <div className="p-6 rounded-2xl bg-card border border-border text-center relative">
-              <div className="h-10 w-10 rounded-full bg-primary text-primary-foreground font-black flex items-center justify-center mx-auto mb-4 text-sm">
+            <div className="p-6 rounded-2xl bg-card border border-border text-center relative h-full flex flex-col items-center">
+              <div className="h-10 w-10 rounded-full bg-primary text-primary-foreground font-black flex items-center justify-center mx-auto mb-4 text-sm shrink-0">
                 2
               </div>
               <h3 className="font-bold text-base text-foreground">Curate Credentials & Family</h3>
-              <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
+              <p className="text-xs text-muted-foreground mt-2 leading-relaxed flex-1">
                 Sync your verified licenses, property extracts, and degree credentials. Set up delegated authority for children or elderly parents.
               </p>
             </div>
 
-            <div className="p-6 rounded-2xl bg-card border border-border text-center relative">
-              <div className="h-10 w-10 rounded-full bg-primary text-primary-foreground font-black flex items-center justify-center mx-auto mb-4 text-sm">
+            <div className="p-6 rounded-2xl bg-card border border-border text-center relative h-full flex flex-col items-center">
+              <div className="h-10 w-10 rounded-full bg-primary text-primary-foreground font-black flex items-center justify-center mx-auto mb-4 text-sm shrink-0">
                 3
               </div>
               <h3 className="font-bold text-base text-foreground">Access Services Privately</h3>
-              <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
+              <p className="text-xs text-muted-foreground mt-2 leading-relaxed flex-1">
                 Dispatch applications with pre-verified zero-knowledge proofs. Approve or revoke organizational data requests with a single tap.
               </p>
             </div>
@@ -474,10 +422,10 @@ export function LandingPage() {
       {/* Citizen FAQ */}
       <section className="py-20 max-w-4xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-12">
-          <h2 className="font-display text-3xl font-black text-foreground">
+          <h2 className="font-display text-3xl font-black text-foreground text-balance">
             Frequently Asked Questions
           </h2>
-          <p className="text-xs sm:text-sm text-muted-foreground mt-1.5">
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1.5 text-balance">
             Key information on security, privacy, and citizen rights.
           </p>
         </div>
@@ -516,10 +464,10 @@ export function LandingPage() {
       {/* Final Call to Action */}
       <section className="py-16 bg-gradient-to-tr from-blue-700 via-blue-600 to-sky-600 text-white text-center relative overflow-hidden">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 relative z-10">
-          <h2 className="font-display text-3xl sm:text-4xl font-black">
+          <h2 className="font-display text-3xl sm:text-4xl font-black text-balance">
             Ready to Take Command of Your Civic Life?
           </h2>
-          <p className="text-white/80 text-sm sm:text-base mt-3 max-w-xl mx-auto">
+          <p className="text-white/80 text-sm sm:text-base mt-3 max-w-xl mx-auto leading-relaxed text-balance">
             Join over 1.4 million citizens using CIVIQONE for streamlined, secure, and sovereign civic engagement.
           </p>
 
@@ -568,3 +516,4 @@ export function LandingPage() {
     </div>
   )
 }
+
