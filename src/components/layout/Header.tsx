@@ -17,6 +17,7 @@ import {
   Contrast,
   LifeBuoy,
   SlidersHorizontal,
+  Cloud,
 } from 'lucide-react'
 import { useAuth, useTheme, useLanguage, useAccessibility } from '@/hooks'
 import { SUPPORTED_LANGUAGES } from '@/constants/languages'
@@ -88,6 +89,11 @@ export function Header({
 
       {/* Right: Controls & Citizen Profile */}
       <div className="flex items-center gap-1.5 sm:gap-2">
+        {/* AWS Cloud Credits Infrastructure Pill */}
+        <div className="hidden xl:flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-amber-500/25 bg-amber-500/10 text-[11px] font-medium text-amber-700 dark:text-amber-400 mr-1">
+          <Cloud className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+          <span>AWS Cloud Credits · Active</span>
+        </div>
         {/* Language Selector */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

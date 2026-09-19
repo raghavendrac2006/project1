@@ -19,6 +19,8 @@ import {
   Globe2,
   BarChart3,
   Fingerprint,
+  Cloud,
+  Database,
 } from 'lucide-react'
 import { ROUTES } from '@/constants/routes'
 import { Button } from '@/components/ui/Button'
@@ -255,14 +257,24 @@ export function LandingPage() {
         <div className="absolute bottom-0 right-0 w-[400px] h-[300px] bg-gradient-to-tl from-[hsl(262_83%_58%/0.08)] to-transparent blur-3xl pointer-events-none" />
 
         <div className="relative max-w-5xl mx-auto px-4 sm:px-6 text-center">
-          {/* Sovereign badge */}
-          <div className={cn(
-            'inline-flex items-center gap-2 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full text-[11px] sm:text-xs font-bold border mb-6 sm:mb-8 shadow-sm transition-all duration-700',
-            'bg-gradient-to-r from-primary/10 via-sky-500/10 to-emerald-500/10 text-primary border-primary/20',
-            heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
-          )}>
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 pulse-glow shrink-0" />
-            <span className="truncate">National Sovereign Identity Architecture · Version 2.4</span>
+          {/* Sovereign & AWS Cloud Credits badges */}
+          <div className="flex flex-wrap items-center justify-center gap-2.5 mb-6 sm:mb-8">
+            <div className={cn(
+              'inline-flex items-center gap-2 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full text-[11px] sm:text-xs font-bold border shadow-sm transition-all duration-700',
+              'bg-gradient-to-r from-primary/10 via-sky-500/10 to-emerald-500/10 text-primary border-primary/20',
+              heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
+            )}>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 pulse-glow shrink-0" />
+              <span className="truncate">National Sovereign Identity Architecture · Version 2.4</span>
+            </div>
+            <div className={cn(
+              'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] sm:text-xs font-semibold border shadow-sm transition-all duration-700 delay-75',
+              'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/30',
+              heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
+            )}>
+              <Cloud className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+              <span>Supported by <strong>AWS Cloud Credits</strong> (AWS Activate)</span>
+            </div>
           </div>
 
           {/* Hero headline */}
@@ -445,6 +457,92 @@ export function LandingPage() {
         </div>
       </section>
 
+      {/* ─── Cloud Infrastructure & AWS Activate Credits Showcase ─── */}
+      <section className="py-20 bg-gradient-to-b from-card to-muted/30 border-y border-border/60 relative overflow-hidden">
+        <div className="absolute top-0 right-1/4 w-96 h-96 bg-amber-500/5 blur-3xl rounded-full pointer-events-none" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-6 mb-12">
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/25 mb-3">
+                <Cloud className="w-3.5 h-3.5 text-amber-500" />
+                <span>AWS Activate Cloud Infrastructure Program</span>
+              </div>
+              <h2 className="font-display text-3xl sm:text-4xl font-black text-foreground tracking-tight">
+                Powered by <span className="text-amber-500">AWS Cloud Credits</span> & Global Edge
+              </h2>
+              <p className="text-sm text-muted-foreground mt-2 max-w-xl">
+                CiviqOne's sovereign data tier is backed by AWS Cloud Credits, providing national-scale reliability, 99.99% availability, and hardware-level encryption.
+              </p>
+            </div>
+            <div className="flex items-center gap-3 shrink-0">
+              <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-card border border-border/80 shadow-sm">
+                <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-xs font-bold text-foreground">AWS AP-South-1 (Mumbai)</span>
+              </div>
+              <div className="px-4 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs font-bold">
+                Tier-4 Sovereign Enclave
+              </div>
+            </div>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {[
+              {
+                title: 'AWS CloudFront & Amplify',
+                role: 'Sub-50ms Global Edge CDN',
+                desc: 'Edge-cached across 30+ points of presence in India for instant, latency-free citizen access.',
+                icon: Globe2,
+                stat: '< 50ms Edge'
+              },
+              {
+                title: 'AWS App Runner & ECS',
+                role: 'High-Throughput Microservices',
+                desc: 'Auto-scaling Python FastAPI microservices managing dynamic traffic bursts during scheme rollouts.',
+                icon: Cpu,
+                stat: '99.99% Uptime'
+              },
+              {
+                title: 'AWS RDS PostgreSQL',
+                role: 'Multi-AZ Encrypted Storage',
+                desc: 'Zero-knowledge encrypted databases with automated continuous backups and failover protection.',
+                icon: Database,
+                stat: 'AES-256 Bit'
+              },
+              {
+                title: 'AWS KMS & Shield',
+                role: 'DDoS & Sovereign Protection',
+                desc: 'Hardware Security Modules (HSM) enforcing statutory data boundaries and anti-tamper audit logs.',
+                icon: ShieldCheck,
+                stat: 'ISO 27001'
+              },
+            ].map((infra, idx) => (
+              <div
+                key={idx}
+                className="p-6 rounded-2xl bg-card border border-border/70 hover:border-amber-500/40 hover:shadow-lg transition-all duration-300 group flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="h-10 w-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <infra.icon className="w-5 h-5" />
+                    </div>
+                    <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-muted text-muted-foreground">
+                      {infra.stat}
+                    </span>
+                  </div>
+                  <h3 className="font-bold text-sm text-foreground mb-1">{infra.title}</h3>
+                  <p className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 mb-2">{infra.role}</p>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{infra.desc}</p>
+                </div>
+                <div className="mt-4 pt-3 border-t border-border/40 flex items-center gap-1.5 text-[10px] text-muted-foreground font-medium">
+                  <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+                  <span>AWS Activate Verified</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ─── FAQ ─── */}
       <section className="py-24 max-w-4xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-14 animate-fade-in-up">
@@ -557,6 +655,10 @@ export function LandingPage() {
             <Link to={ROUTES.ADMIN.LOGIN} className="hover:text-foreground transition-colors font-medium">
               Admin
             </Link>
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/25 font-semibold text-[10.5px]">
+              <Cloud className="w-3.5 h-3.5 text-amber-500" />
+              <span>Powered by <strong>AWS Cloud Credits</strong> (AWS Activate)</span>
+            </div>
             <span className="hidden sm:inline font-mono text-[11px] text-muted-foreground/60">Zero-Knowledge Sovereign Enclave</span>
           </div>
         </div>

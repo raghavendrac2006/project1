@@ -61,6 +61,14 @@ function buildTrustProfile(): OrgTrustProfile {
         status: 'active',
         badgeColor: 'purple',
       },
+      {
+        id: 'cert_005',
+        name: 'AWS Cloud Sovereign Infrastructure (AWS Activate Credits)',
+        issuingBody: 'Amazon Web Services Cloud Infrastructure',
+        validUntil: '2026-12-31',
+        status: 'active',
+        badgeColor: 'amber',
+      },
     ],
     dataPractices: [
       {

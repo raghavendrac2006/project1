@@ -21,6 +21,7 @@ import {
   Database,
   Compass,
   LifeBuoy,
+  Cloud,
 } from 'lucide-react'
 import { ROUTES } from '@/constants/routes'
 import { cn } from '@/lib/utils'
@@ -202,6 +203,23 @@ export function Sidebar({ collapsed, onToggleCollapse }: SidebarProps) {
             </div>
           )}
         </div>
+
+        {/* AWS Cloud Credits Infrastructure Badge */}
+        {!collapsed ? (
+          <div className="mt-2.5 px-2.5 py-1.5 rounded-lg border border-border/60 bg-muted/30 flex items-center justify-between text-[10px]">
+            <div className="flex items-center gap-1.5 text-muted-foreground">
+              <Cloud className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+              <span className="font-medium text-foreground/80">AWS Cloud Credits</span>
+            </div>
+            <span className="px-1.5 py-0.5 font-mono text-[9px] font-bold rounded bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
+              Active
+            </span>
+          </div>
+        ) : (
+          <div className="mt-2 flex justify-center" title="Powered by AWS Cloud Credits">
+            <Cloud className="w-4 h-4 text-amber-500" />
+          </div>
+        )}
       </div>
     </aside>
   )

@@ -17,6 +17,7 @@ import {
   Check,
   Activity,
   Search,
+  Cloud,
 } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -290,6 +291,35 @@ export function SecurityCenterPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* AWS Cloud Infrastructure & Credits Security Attestation */}
+      <div className="p-4.5 rounded-2xl border border-amber-500/25 bg-gradient-to-r from-amber-500/10 via-card to-background flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-sm">
+        <div className="flex items-center gap-3.5">
+          <div className="h-11 w-11 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+            <Cloud className="w-6 h-6" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="text-xs font-bold text-foreground">Sovereign Cloud Enclave</h3>
+              <Badge variant="outline" className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30 text-[10px] font-semibold py-0.5">
+                AWS Activate Credits Verified
+              </Badge>
+            </div>
+            <p className="text-[11px] text-muted-foreground mt-0.5">
+              Deployed on Amazon Web Services (AWS AP-South-1 Mumbai) with hardware KMS envelope encryption, multi-AZ failover, and zero third-party telemetry.
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <div className="px-3 py-1 rounded-lg bg-muted/60 text-[10px] font-mono font-medium text-muted-foreground flex items-center gap-1.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+            99.99% AWS Uptime SLA
+          </div>
+          <div className="px-3 py-1 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold">
+            SOC 2 / ISO 27001
+          </div>
+        </div>
+      </div>
 
       {/* Behavioral Threat Alert Panel */}
       {activeAnomalies.length > 0 && (
