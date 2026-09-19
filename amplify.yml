@@ -11,6 +11,8 @@ frontend:
       commands:
         - env | grep -E '^(VITE_)' > .env.production || true
         - npm run build
+        - cp -r dist/* build/ 2>/dev/null || true
+        - ls -la dist/
   artifacts:
     baseDirectory: dist
     files:
