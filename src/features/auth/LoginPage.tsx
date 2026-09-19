@@ -38,9 +38,12 @@ export function LoginPage() {
   const [otpCode, setOtpCode] = useState('')
   const [countdown, setCountdown] = useState(30)
 
-  // Cast location state safely without 'any'
+  // Cast location state safely without 'any' and prevent redirect loops
   const locationState = location.state as { from?: { pathname?: string } } | null
-  const from = locationState?.from?.pathname || ROUTES.APP.DASHBOARD
+  const rawFrom = locationState?.from?.pathname
+  const from = rawFrom && !rawFrom.includes('/login') && !rawFrom.includes('/register') && !rawFrom.includes('/verify-otp')
+    ? rawFrom
+    : ROUTES.APP.DASHBOARD
 
   const {
     register,

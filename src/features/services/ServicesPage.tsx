@@ -19,7 +19,6 @@ import {
   MapPin,
   ExternalLink,
   Scroll,
-  Globe2,
 } from 'lucide-react'
 
 const ALL_STATES_AND_UTS = [

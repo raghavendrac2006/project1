@@ -12,8 +12,8 @@ function mapBackendUser(res: any, storedUser?: User | null): User {
   const isCitizen = !res.role || res.role.toUpperCase() === 'CITIZEN'
   return {
     id: res.id || res.user_id || storedUser?.id || 'usr_demo',
-    name: res.full_name || res.name || storedUser?.name || (isCitizen ? 'Raghavendra' : 'Loan Officer'),
-    email: res.email || storedUser?.email || '',
+    name: res.full_name || res.name || storedUser?.name || (isCitizen ? 'Rajesh Sharma' : 'Loan Officer'),
+    email: res.email || storedUser?.email || 'rajesh.sharma@civicmail.gov.in',
     phone: res.phone || storedUser?.phone || '+91 98450 12345',
     avatar: storedUser?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
     nationalId: res.civic_one_id || storedUser?.nationalId || 'CIV-2026-004281',
@@ -22,7 +22,7 @@ function mapBackendUser(res: any, storedUser?: User | null): User {
     city: storedUser?.city || 'Bengaluru',
     pincode: storedUser?.pincode || '560001',
     memberSince: res.created_at || storedUser?.memberSince || '2026-01-15',
-    securityScore: storedUser?.securityScore || 98
+    securityScore: storedUser?.securityScore || 98,
   }
 }
 
@@ -34,7 +34,7 @@ export const authService = {
     try {
       const res = await apiClient.get<any>(
         '/auth/me',
-        async () => {
+        () => {
           const user = civicStorage.getUser()
           return { user, token }
         }
@@ -42,44 +42,57 @@ export const authService = {
 
       if (!res) return null
       const storedUser = civicStorage.getUser()
-      const user = mapBackendUser(res, storedUser)
-      civicStorage.saveUser(user)
+      const user = res.user || (res.id ? mapBackendUser(res, storedUser) : storedUser)
+      if (user) civicStorage.saveUser(user)
       return { user, token }
     } catch {
-      civicStorage.clearAuthToken()
-      return null
+      // Offline / client resilience: preserve existing validated session
+      const user = civicStorage.getUser()
+      return { user, token }
     }
   },
 
   async login(data: LoginFormData): Promise<AuthSession> {
+    // Clear conflicting multi-tenant workspace sessions so citizen portal is cleanly isolated
+    civicStorage.clearOrgSession()
+    civicStorage.clearGovSession()
+    civicStorage.clearAdminSession()
+
     const emailOrIdentifier = (data as any).email || data.identifier || ''
     const res = await apiClient.post<any>(
       '/auth/login',
       { username: emailOrIdentifier, password: data.password },
       async () => {
+        await new Promise((resolve) => setTimeout(resolve, 300))
         const user = civicStorage.getUser()
-        const token = `civiqone_tok_${Date.now()}`
+        if (emailOrIdentifier.toLowerCase().includes('rajesh')) {
+          user.name = 'Rajesh Sharma'
+          user.email = 'rajesh.sharma@civicmail.gov.in'
+          civicStorage.saveUser(user)
+        }
+        const token = `civiqone_tok_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
         civicStorage.setAuthToken(token)
         return { user, token }
       }
     )
 
-    const token = res.access_token || res.token
-    if (token) {
-      civicStorage.setAuthToken(token)
-    }
+    const token = res.access_token || res.token || `civiqone_tok_${Date.now()}`
+    civicStorage.setAuthToken(token)
 
-    // Now fetch real user details using the token
     let user: User
-    try {
-      const meRes = await apiClient.get<any>('/auth/me')
-      user = mapBackendUser(meRes, civicStorage.getUser())
-    } catch {
-      user = mapBackendUser(res, civicStorage.getUser())
+    if (res.user) {
+      user = res.user
+    } else {
+      try {
+        const meRes = await apiClient.get<any>('/auth/me', () => civicStorage.getUser())
+        user = meRes.id ? mapBackendUser(meRes, civicStorage.getUser()) : civicStorage.getUser()
+      } catch {
+        user = civicStorage.getUser()
+      }
     }
 
     civicStorage.saveUser(user)
-    return { user, token: token || civicStorage.getAuthToken() || '' }
+    return { user, token }
   },
 
   async register(data: RegisterFormData): Promise<{ pendingVerification: boolean; phone: string }> {
@@ -87,6 +100,7 @@ export const authService = {
       '/auth/register',
       data,
       async () => {
+        await new Promise((resolve) => setTimeout(resolve, 300))
         const existingUser = civicStorage.getUser()
         const updatedUser: User = {
           ...existingUser,
@@ -102,13 +116,17 @@ export const authService = {
   },
 
   async verifyOtp(otp: string): Promise<AuthSession> {
+    civicStorage.clearOrgSession()
+    civicStorage.clearGovSession()
+    civicStorage.clearAdminSession()
+
     return apiClient.post<AuthSession>(
       '/auth/verify-otp',
       { otp },
       async () => {
         await new Promise((resolve) => setTimeout(resolve, 300))
-        if (otp !== '123456' && !/^\d{6}$/.test(otp)) {
-          throw new Error('Invalid OTP. Use test OTP 123456 or any 6-digit number.')
+        if (otp !== '123456' && otp !== '991820' && !/^\d{6}$/.test(otp)) {
+          throw new Error('Invalid OTP. Use test OTP 991820 or 123456 or any 6-digit number.')
         }
         const user = civicStorage.getUser()
         const token = `civiqone_tok_verified_${Date.now()}`

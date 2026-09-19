@@ -47,6 +47,13 @@ class ApiClient {
     options: RequestInit = {},
     fallbackFn?: () => Promise<T> | T
   ): Promise<T> {
+    // If deployed on HTTPS or remote host and baseUrl is default localhost without custom API env, fast fallback
+    const isRemote = typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1'
+    const isDefaultLocalApi = this.config.baseUrl.includes('localhost:8000') || (typeof window !== 'undefined' && window.location.protocol === 'https:' && this.config.baseUrl.startsWith('http:'))
+    if (isRemote && isDefaultLocalApi && fallbackFn && this.config.useMockFallback) {
+      return Promise.resolve(fallbackFn())
+    }
+
     const url = `${this.config.baseUrl.replace(/\/$/, '')}/${endpoint.replace(/^\//, '')}`
     const controller = new AbortController()
     const timer = setTimeout(() => controller.abort(), this.config.timeoutMs)

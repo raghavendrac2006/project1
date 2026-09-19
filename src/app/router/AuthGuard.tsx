@@ -79,6 +79,20 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
               Back to Org
             </Button>
           </div>
+
+          <div className="pt-1 text-center">
+            <button
+              type="button"
+              onClick={() => {
+                civicStorage.clearOrgSession()
+                setOrgSession(null)
+                navigate(ROUTES.AUTH.LOGIN)
+              }}
+              className="text-xs text-slate-400 hover:text-white underline transition-colors"
+            >
+              Switch to Citizen Sign In →
+            </button>
+          </div>
         </div>
       </div>
     )

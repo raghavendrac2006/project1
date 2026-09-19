@@ -17,13 +17,10 @@ import {
   Sparkles,
   User,
   ShieldCheck,
-  ShieldAlert,
-  ShieldOff,
   CheckCircle2,
   AlertTriangle,
   Lock,
   Unlock,
-  Eye,
   QrCode,
 } from 'lucide-react'
 import { Card } from '@/components/ui/Card'

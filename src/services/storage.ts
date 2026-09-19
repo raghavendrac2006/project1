@@ -161,9 +161,16 @@ export const civicStorage = {
   getAssistantMessages: (): AssistantMessage[] => getFromStorage(STORAGE_KEYS.ASSISTANT, []),
   saveAssistantMessages: (msgs: AssistantMessage[]): void => saveToStorage(STORAGE_KEYS.ASSISTANT, msgs),
 
-  getAuthToken: (): string | null => localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN),
+  getAuthToken: (): string | null => {
+    const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN) || localStorage.getItem('samagra_auth_token_v1')
+    if (!token || token === 'null' || token === 'undefined' || token.trim() === '') return null
+    return token
+  },
   setAuthToken: (token: string): void => localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, token),
-  clearAuthToken: (): void => localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN),
+  clearAuthToken: (): void => {
+    localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN)
+    localStorage.removeItem('samagra_auth_token_v1')
+  },
 
   // Organizations
   getOrganizations: (): Organization[] => getFromStorage(STORAGE_KEYS.ORGANIZATIONS, INITIAL_ORGANIZATIONS),
