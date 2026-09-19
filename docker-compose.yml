@@ -1,0 +1,85 @@
+version: '3.8'
+
+services:
+  # ==========================================
+  # PostgreSQL Database (Simulates AWS RDS)
+  # ==========================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: civiqone_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: civicuser
+      POSTGRES_PASSWORD: civicpassword123
+      POSTGRES_DB: civicone
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U civicuser -d civicone"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - civiqone_network
+
+  # ==========================================
+  # FastAPI Backend Service
+  # ==========================================
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: civiqone_backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://civicuser:civicpassword123@postgres:5432/civicone
+      - SECRET_KEY=civiqone_dev_secret_key_99182_sovereign_identity
+      - BACKEND_CORS_ORIGINS=http://localhost,http://localhost:80,http://localhost:5173,*
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - civiqone_network
+
+  # ==========================================
+  # React 19 Frontend + Nginx Web Server
+  # ==========================================
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+      args:
+        - VITE_API_BASE_URL=/api/v1
+        - VITE_USE_MOCK=false
+    container_name: civiqone_frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    networks:
+      - civiqone_network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  civiqone_network:
+    driver: bridge

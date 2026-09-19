@@ -1,0 +1,53 @@
+# ==========================================
+# Multi-stage Frontend Production Dockerfile
+# Stage 1: Build Vite React SPA
+# Stage 2: High-Performance Nginx Alpine
+# ==========================================
+
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Install dependencies first for Docker caching
+COPY package.json package-lock.json ./
+RUN npm ci --prefer-offline --no-audit
+
+# Build arguments for Vite environment variables
+ARG VITE_API_BASE_URL=/api/v1
+ARG VITE_APP_TITLE="CiviqOne — Digital Civic Operating System"
+ARG VITE_USE_MOCK=false
+ARG VITE_API_TIMEOUT_MS=10000
+
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+ENV VITE_APP_TITLE=$VITE_APP_TITLE
+ENV VITE_USE_MOCK=$VITE_USE_MOCK
+ENV VITE_API_TIMEOUT_MS=$VITE_API_TIMEOUT_MS
+
+# Copy source code and build config
+COPY . .
+
+# Run production build (TypeScript compile + Vite bundle)
+RUN npm run build
+
+# ==========================================
+# Stage 2: Serve with Nginx
+# ==========================================
+FROM nginx:1.27-alpine AS runner
+
+# Remove default nginx static assets
+RUN rm -rf /usr/share/nginx/html/*
+
+# Copy custom Nginx configuration
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Copy compiled static assets from builder stage
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+# Expose port 80
+EXPOSE 80
+
+# Healthcheck for container orchestrators (ECS, App Runner, Kubernetes)
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+    CMD wget --quiet --tries=1 --spider http://localhost:80/health || exit 1
+
+CMD ["nginx", "-g", "daemon off;"]

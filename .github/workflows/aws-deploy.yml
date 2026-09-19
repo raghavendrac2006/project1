@@ -1,0 +1,132 @@
+name: AWS Production CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, master, release/*]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  # ====================================================
+  # Stage 1: Continuous Integration (Lint, Typecheck, Test)
+  # ====================================================
+  validate-and-test:
+    name: "Stage 1: Validate & Test (Zero-Error Verification)"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # --- Frontend Verification ---
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Frontend Dependencies
+        run: npm ci
+
+      - name: Run Frontend Linting (Oxlint)
+        run: npm run lint
+
+      - name: Run Frontend Build & Typecheck (tsc -b && vite build)
+        run: npm run build
+        env:
+          VITE_API_BASE_URL: /api/v1
+          VITE_USE_MOCK: "false"
+
+      # --- Backend Verification ---
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: 'pip'
+
+      - name: Install Backend Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+
+      - name: Run Backend Unit & Integration Tests (Pytest)
+        run: pytest backend/tests
+
+  # ====================================================
+  # Stage 2: Containerization & Docker Image Build
+  # ====================================================
+  build-docker-images:
+    name: "Stage 2: Build & Verify Docker Containers"
+    needs: validate-and-test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Backend Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile.backend
+          push: false
+          tags: civiqone-backend:latest
+
+      - name: Build Frontend Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile.frontend
+          push: false
+          tags: civiqone-frontend:latest
+
+  # ====================================================
+  # Stage 3: AWS Deploy (S3 + CloudFront / App Runner)
+  # ====================================================
+  deploy-to-aws:
+    name: "Stage 3: Deploy to AWS"
+    needs: build-docker-images
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && vars.AWS_REGION != ''
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Setup Node.js & Build Static Assets
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: |
+          npm ci
+          npm run build
+        env:
+          VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
+          VITE_USE_MOCK: "false"
+
+      - name: Deploy Frontend to S3
+        if: vars.AWS_S3_BUCKET != ''
+        run: |
+          aws s3 sync dist/ s3://${{ vars.AWS_S3_BUCKET }} --delete --cache-control "public, max-age=31536000, immutable" --exclude "index.html"
+          aws s3 cp dist/index.html s3://${{ vars.AWS_S3_BUCKET }}/index.html --cache-control "no-cache, no-store, must-revalidate"
+
+      - name: Invalidate CloudFront Cache
+        if: vars.CLOUDFRONT_DISTRIBUTION_ID != ''
+        run: |
+          aws cloudfront create-invalidation --distribution-id ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"

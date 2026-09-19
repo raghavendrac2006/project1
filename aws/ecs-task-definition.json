@@ -1,0 +1,61 @@
+{
+  "family": "civiqone-backend-task",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "512",
+  "memory": "1024",
+  "executionRoleArn": "arn:aws:iam::ACCOUNT_ID:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::ACCOUNT_ID:role/civiqoneTaskRole",
+  "containerDefinitions": [
+    {
+      "name": "civiqone-backend",
+      "image": "ACCOUNT_ID.dkr.ecr.AWS_REGION.amazonaws.com/civiqone-backend:latest",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 8000,
+          "hostPort": 8000,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [
+        {
+          "name": "PROJECT_NAME",
+          "value": "CIVICONE / SAMAGRA Sovereign Backend"
+        },
+        {
+          "name": "BACKEND_CORS_ORIGINS",
+          "value": "https://civiqone.example.com,https://d123456.cloudfront.net"
+        }
+      ],
+      "secrets": [
+        {
+          "name": "DATABASE_URL",
+          "valueFrom": "arn:aws:secretsmanager:AWS_REGION:ACCOUNT_ID:secret:civiqone/database_url"
+        },
+        {
+          "name": "SECRET_KEY",
+          "valueFrom": "arn:aws:secretsmanager:AWS_REGION:ACCOUNT_ID:secret:civiqone/secret_key"
+        }
+      ],
+      "healthCheck": {
+        "command": [
+          "CMD-SHELL",
+          "curl -f http://localhost:8000/api/v1/health || exit 1"
+        ],
+        "interval": 30,
+        "timeout": 5,
+        "retries": 3,
+        "startPeriod": 15
+      },
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/civiqone-backend",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
+    }
+  ]
+}

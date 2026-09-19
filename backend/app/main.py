@@ -42,11 +42,37 @@ app.add_middleware(
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
 
+from sqlalchemy import text
+import datetime
+
 @app.get("/")
 def root():
     return {
         "app": settings.PROJECT_NAME,
         "status": "running",
         "docs": "/docs",
-        "api_v1": f"{settings.API_V1_STR}"
+        "api_v1": f"{settings.API_V1_STR}",
+        "health": "/health"
     }
+
+
+@app.get("/health")
+@app.get(f"{settings.API_V1_STR}/health")
+def health_check():
+    db_status = "connected"
+    try:
+        with SessionLocal() as session:
+            session.execute(text("SELECT 1"))
+    except Exception as e:
+        db_status = f"unhealthy: {str(e)}"
+
+    is_healthy = db_status == "connected"
+    response_payload = {
+        "status": "healthy" if is_healthy else "degraded",
+        "service": settings.PROJECT_NAME,
+        "database": db_status,
+        "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        "version": "1.0.0"
+    }
+    return response_payload
+
