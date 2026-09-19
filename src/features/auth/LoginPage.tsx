@@ -22,10 +22,9 @@ import { ROUTES } from '@/constants/routes'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
 import { cn } from '@/lib/utils'
-
 export function LoginPage() {
   const { theme, toggleTheme } = useTheme()
-  const { login } = useAuth()
+  const { login, verifyOtp } = useAuth()
   const toast = useToast()
   const navigate = useNavigate()
   const location = useLocation()
@@ -94,17 +93,11 @@ export function LoginPage() {
     }
     setIsLoading(true)
     try {
-      await new Promise((r) => setTimeout(r, 700))
-      // Use standard credentials login behind the scenes
-      await login({
-        identifier: 'rajesh.sharma@civicmail.gov.in',
-        password: 'Password@123',
-        rememberMe: true,
-      })
+      await verifyOtp(otpCode)
       toast.success('Identity Verified via OTP', 'Welcome back, Citizen Rajesh Sharma.')
       navigate(from, { replace: true })
-    } catch {
-      toast.error('Verification Error', 'Failed to authenticate via OTP token.')
+    } catch (err) {
+      toast.error('Verification Error', err instanceof Error ? err.message : 'Failed to authenticate via OTP token.')
     } finally {
       setIsLoading(false)
     }
