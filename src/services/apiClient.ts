@@ -47,11 +47,12 @@ class ApiClient {
     options: RequestInit = {},
     fallbackFn?: () => Promise<T> | T
   ): Promise<T> {
-    // If no live remote backend is explicitly configured via VITE_API_BASE_URL, use fallback immediately
-    const hasLiveBackend = Boolean(
-      import.meta.env.VITE_API_BASE_URL && !import.meta.env.VITE_API_BASE_URL.includes('localhost')
-    )
-    if (!hasLiveBackend && fallbackFn) {
+    const isBrowser = typeof window !== 'undefined'
+    const isRemoteDeployment = isBrowser && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1'
+    const isLocalApi = this.config.baseUrl.includes('localhost') || this.config.baseUrl.includes('127.0.0.1')
+
+    // If deployed on remote host (like Vercel) and baseUrl still points to localhost, fast fallback
+    if (isRemoteDeployment && isLocalApi && fallbackFn) {
       return Promise.resolve(fallbackFn())
     }
 
@@ -93,9 +94,9 @@ class ApiClient {
     } catch (error) {
       clearTimeout(timer)
 
-      // If backend call fails and a fallback mock provider exists, execute fallback
+      // If backend call fails (e.g. server down, CORS, network offline) and a fallback mock exists, gracefully fallback
       if (fallbackFn) {
-        console.warn(`[ApiClient] Live backend request to '${url}' failed (${(error as Error).message}). Executing mock fallback provider.`)
+        console.warn(`[ApiClient] Request to '${url}' failed (${(error as Error).message}). Using offline sovereign fallback.`)
         return Promise.resolve(fallbackFn())
       }
 

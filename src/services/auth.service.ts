@@ -31,15 +31,6 @@ export const authService = {
     const token = civicStorage.getAuthToken()
     if (!token) return null
 
-    const hasLiveBackend = Boolean(
-      import.meta.env.VITE_API_BASE_URL && !import.meta.env.VITE_API_BASE_URL.includes('localhost')
-    )
-
-    if (!hasLiveBackend) {
-      const user = civicStorage.getUser()
-      return { user, token }
-    }
-
     try {
       const res = await apiClient.get<any>(
         '/auth/me',
@@ -84,19 +75,15 @@ export const authService = {
       return { user, token }
     }
 
-    const hasLiveBackend = Boolean(
-      import.meta.env.VITE_API_BASE_URL && !import.meta.env.VITE_API_BASE_URL.includes('localhost')
-    )
-
-    if (!hasLiveBackend) {
-      await new Promise((resolve) => setTimeout(resolve, 300))
-      return createLocalSession()
-    }
-
     try {
       const res = await apiClient.post<any>(
         '/auth/login',
-        { username: emailOrIdentifier, password: data.password },
+        {
+          username: emailOrIdentifier,
+          identifier: emailOrIdentifier,
+          email: emailOrIdentifier,
+          password: data.password,
+        },
         () => createLocalSession()
       )
 
@@ -129,15 +116,6 @@ export const authService = {
       return { pendingVerification: true, phone: data.phone }
     }
 
-    const hasLiveBackend = Boolean(
-      import.meta.env.VITE_API_BASE_URL && !import.meta.env.VITE_API_BASE_URL.includes('localhost')
-    )
-
-    if (!hasLiveBackend) {
-      await new Promise((resolve) => setTimeout(resolve, 300))
-      return createLocalUser()
-    }
-
     try {
       return await apiClient.post<{ pendingVerification: boolean; phone: string }>(
         '/auth/register',
@@ -163,15 +141,6 @@ export const authService = {
       const token = `civiqone_tok_verified_${Date.now()}`
       civicStorage.setAuthToken(token)
       return { user, token }
-    }
-
-    const hasLiveBackend = Boolean(
-      import.meta.env.VITE_API_BASE_URL && !import.meta.env.VITE_API_BASE_URL.includes('localhost')
-    )
-
-    if (!hasLiveBackend) {
-      await new Promise((resolve) => setTimeout(resolve, 300))
-      return createLocalOtpSession()
     }
 
     try {
