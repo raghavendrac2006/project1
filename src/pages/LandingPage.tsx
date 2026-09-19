@@ -25,6 +25,7 @@ import {
 import { ROUTES } from '@/constants/routes'
 import { Button } from '@/components/ui/Button'
 import { cn } from '@/lib/utils'
+import { AwsCloudConsoleModal } from '@/components/shared/AwsCloudConsoleModal'
 
 /* ── Animated counter hook ── */
 function useCountUp(target: number, duration = 1800, start = false) {
@@ -151,6 +152,7 @@ function FeaturePill({ icon: Icon, title, description, color, delay = 0 }: {
 export function LandingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(0)
   const [heroVisible, setHeroVisible] = useState(false)
+  const [awsModalOpen, setAwsModalOpen] = useState(false)
 
   useEffect(() => {
     const t = setTimeout(() => setHeroVisible(true), 100)
@@ -267,14 +269,19 @@ export function LandingPage() {
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 pulse-glow shrink-0" />
               <span className="truncate">National Sovereign Identity Architecture · Version 2.4</span>
             </div>
-            <div className={cn(
-              'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] sm:text-xs font-semibold border shadow-sm transition-all duration-700 delay-75',
-              'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/30',
-              heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
-            )}>
+            <button
+              onClick={() => setAwsModalOpen(true)}
+              className={cn(
+                'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] sm:text-xs font-semibold border shadow-sm transition-all duration-700 delay-75 cursor-pointer hover:scale-105 hover:bg-amber-500/20 active:scale-98',
+                'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/30',
+                heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
+              )}
+              title="Launch AWS Cloud Technology Console"
+            >
               <Cloud className="w-3.5 h-3.5 text-amber-500 shrink-0" />
               <span>Supported by <strong>AWS Cloud Credits</strong> (AWS Activate)</span>
-            </div>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse ml-0.5" />
+            </button>
           </div>
 
           {/* Hero headline */}
@@ -474,14 +481,19 @@ export function LandingPage() {
                 CiviqOne's sovereign data tier is backed by AWS Cloud Credits, providing national-scale reliability, 99.99% availability, and hardware-level encryption.
               </p>
             </div>
-            <div className="flex items-center gap-3 shrink-0">
+            <div className="flex flex-wrap items-center gap-3 shrink-0">
               <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-card border border-border/80 shadow-sm">
                 <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
                 <span className="text-xs font-bold text-foreground">AWS AP-South-1 (Mumbai)</span>
               </div>
-              <div className="px-4 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs font-bold">
-                Tier-4 Sovereign Enclave
-              </div>
+              <Button
+                onClick={() => setAwsModalOpen(true)}
+                variant="outline"
+                className="px-4 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs font-bold cursor-pointer transition-all shadow-sm flex items-center gap-2"
+              >
+                <Cloud className="w-3.5 h-3.5" />
+                Launch AWS Console
+              </Button>
             </div>
           </div>
 
@@ -655,14 +667,21 @@ export function LandingPage() {
             <Link to={ROUTES.ADMIN.LOGIN} className="hover:text-foreground transition-colors font-medium">
               Admin
             </Link>
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/25 font-semibold text-[10.5px]">
+            <button
+              onClick={() => setAwsModalOpen(true)}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/25 font-semibold text-[10.5px] cursor-pointer transition-all"
+              title="Open AWS Cloud Technology Console"
+            >
               <Cloud className="w-3.5 h-3.5 text-amber-500" />
               <span>Powered by <strong>AWS Cloud Credits</strong> (AWS Activate)</span>
-            </div>
+            </button>
             <span className="hidden sm:inline font-mono text-[11px] text-muted-foreground/60">Zero-Knowledge Sovereign Enclave</span>
           </div>
         </div>
       </footer>
+
+      {/* Global AWS Cloud Technology Console Modal */}
+      <AwsCloudConsoleModal open={awsModalOpen} onOpenChange={setAwsModalOpen} />
     </div>
   )
 }

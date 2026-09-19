@@ -46,5 +46,15 @@ class Settings(BaseSettings):
             return v.replace("postgres://", "postgresql://", 1)
         return v
 
+    # AWS Cloud Infrastructure Configuration
+    AWS_REGION: str = os.getenv("AWS_REGION", "ap-south-1")
+    AWS_S3_BUCKET: str = os.getenv("AWS_S3_BUCKET", "civiqone-sovereign-vault-ap-south-1")
+    AWS_KMS_KEY_ARN: str = os.getenv(
+        "AWS_KMS_KEY_ARN",
+        "arn:aws:kms:ap-south-1:991820498812:key/civiqone-sovereign-data-master-key"
+    )
+    AWS_ACCESS_KEY_ID: str = os.getenv("AWS_ACCESS_KEY_ID", "")
+    AWS_SECRET_ACCESS_KEY: str = os.getenv("AWS_SECRET_ACCESS_KEY", "")
+
 settings = Settings()
 

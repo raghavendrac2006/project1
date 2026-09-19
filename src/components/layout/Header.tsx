@@ -34,6 +34,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/Avatar'
 import { Button } from '@/components/ui/Button'
 import { civicStorage } from '@/services/storage'
+import { AwsCloudConsoleModal } from '@/components/shared/AwsCloudConsoleModal'
 
 interface HeaderProps {
   onToggleMobileMenu: () => void
@@ -54,6 +55,7 @@ export function Header({
 
   const [notifications] = useState(() => civicStorage.getNotifications())
   const unreadCount = notifications.filter((n) => !n.isRead).length
+  const [awsModalOpen, setAwsModalOpen] = useState(false)
 
   const handleLogout = async () => {
     await logout()
@@ -89,11 +91,15 @@ export function Header({
 
       {/* Right: Controls & Citizen Profile */}
       <div className="flex items-center gap-1.5 sm:gap-2">
-        {/* AWS Cloud Credits Infrastructure Pill */}
-        <div className="hidden xl:flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-amber-500/25 bg-amber-500/10 text-[11px] font-medium text-amber-700 dark:text-amber-400 mr-1">
+        {/* AWS Cloud Credits Infrastructure Pill / Interactive Console Launcher */}
+        <button
+          onClick={() => setAwsModalOpen(true)}
+          className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-[11px] font-medium text-amber-700 dark:text-amber-400 mr-1 transition-all duration-150 cursor-pointer shadow-sm hover:scale-102"
+          title="Open AWS Cloud Technology Console"
+        >
           <Cloud className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-          <span>AWS Cloud Credits · Active</span>
-        </div>
+          <span>AWS Cloud Tech · Active</span>
+        </button>
         {/* Language Selector */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -339,6 +345,9 @@ export function Header({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+
+      {/* Global AWS Cloud Technology Console Modal */}
+      <AwsCloudConsoleModal open={awsModalOpen} onOpenChange={setAwsModalOpen} />
     </header>
   )
 }

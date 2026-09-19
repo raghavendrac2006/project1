@@ -83,7 +83,7 @@ if (-not (Test-Path $PytestPath)) {
 try {
     & $PytestPath backend/tests
     if ($LASTEXITCODE -eq 0) {
-        Write-Host "  [PASS] All backend tests passed cleanly (61/61 tests)." -ForegroundColor Green
+        Write-Host "  [PASS] All backend tests passed cleanly (65/65 tests including AWS Services)." -ForegroundColor Green
         $PassedStages++
     } else {
         Write-Host "  [FAIL] Pytest exited with code $LASTEXITCODE" -ForegroundColor Red

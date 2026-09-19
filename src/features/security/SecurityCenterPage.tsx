@@ -22,6 +22,7 @@ import {
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
+import { AwsCloudConsoleModal } from '@/components/shared/AwsCloudConsoleModal'
 import { StepUpAuthenticationModal } from '@/components/auth/StepUpAuthenticationModal'
 import { securityService } from '@/services/security.service'
 import { citizenIntelligenceService, LoginHeatmapPoint } from '@/services/citizen-intelligence.service'
@@ -43,6 +44,7 @@ export function SecurityCenterPage() {
 
   // Step-Up Modal state
   const [stepUpOpen, setStepUpOpen] = useState(false)
+  const [awsModalOpen, setAwsModalOpen] = useState(false)
   const [stepUpActionName, setStepUpActionName] = useState('Authorizing Security Action')
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null)
 
@@ -386,6 +388,61 @@ export function SecurityCenterPage() {
         </Card>
       )}
 
+      {/* AWS Cloud Hardware Security & KMS Sovereign Enclave Card */}
+      <Card className="rounded-2xl border-border bg-gradient-to-br from-card to-amber-500/5 shadow-sm overflow-hidden">
+        <CardHeader className="pb-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400">
+                <Cloud className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <CardTitle className="text-sm sm:text-base text-foreground">AWS Sovereign Hardware Security (HSM & KMS)</CardTitle>
+                  <Badge variant="outline" className="text-[10px] font-bold text-amber-600 dark:text-amber-400 border-amber-500/30 bg-amber-500/10">
+                    FIPS 140-2 Level 3
+                  </Badge>
+                </div>
+                <CardDescription className="text-xs mt-0.5">
+                  Citizen cryptographic root keys guarded inside AWS Asia Pacific (Mumbai) hardware modules
+                </CardDescription>
+              </div>
+            </div>
+            <Button
+              onClick={() => setAwsModalOpen(true)}
+              variant="outline"
+              size="sm"
+              className="text-xs font-bold rounded-xl border-amber-500/30 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 self-start sm:self-auto gap-1.5"
+            >
+              <Cloud className="w-3.5 h-3.5" />
+              Launch AWS Tech Console
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="grid sm:grid-cols-3 gap-3 pt-0">
+          <div className="p-3 rounded-xl bg-card border border-border/80">
+            <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">AWS Key ARN</p>
+            <p className="text-xs font-mono font-semibold text-foreground truncate mt-1">
+              arn:aws:kms:ap-south-1:991820498812:key/civiqone-sovereign-master
+            </p>
+          </div>
+          <div className="p-3 rounded-xl bg-card border border-border/80">
+            <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Envelope Encryption</p>
+            <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 mt-1">
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              Active (AES-256-GCM + 4096-bit RSA)
+            </p>
+          </div>
+          <div className="p-3 rounded-xl bg-card border border-border/80">
+            <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">AWS Infrastructure</p>
+            <p className="text-xs font-semibold text-foreground flex items-center gap-1.5 mt-1">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              AWS ap-south-1 (Mumbai) · Healthy
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Credential Exposure Check Row */}
       <div className="p-4 rounded-2xl border border-border bg-card shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3.5">
@@ -686,6 +743,12 @@ export function SecurityCenterPage() {
             setPendingAction(null)
           }
         }}
+      />
+
+      {/* AWS Cloud Technology Console Modal */}
+      <AwsCloudConsoleModal
+        open={awsModalOpen}
+        onOpenChange={setAwsModalOpen}
       />
     </div>
   )

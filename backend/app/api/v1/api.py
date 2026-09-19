@@ -7,7 +7,8 @@ from backend.app.api.v1.endpoints import (
     active,
     history,
     notify,
-    institution
+    institution,
+    aws
 )
 
 api_router = APIRouter()
@@ -20,3 +21,4 @@ api_router.include_router(active.router, prefix="/active-access", tags=["Active 
 api_router.include_router(history.router, prefix="/access-history", tags=["Audit Log & History"])
 api_router.include_router(notify.router, prefix="/notifications", tags=["Notifications"])
 api_router.include_router(institution.router, prefix="/institution", tags=["Institution Operations"])
+api_router.include_router(aws.router, prefix="/aws", tags=["AWS Cloud Technology"])
