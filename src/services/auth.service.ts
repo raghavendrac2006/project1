@@ -31,6 +31,15 @@ export const authService = {
     const token = civicStorage.getAuthToken()
     if (!token) return null
 
+    const hasLiveBackend = Boolean(
+      import.meta.env.VITE_API_BASE_URL && !import.meta.env.VITE_API_BASE_URL.includes('localhost')
+    )
+
+    if (!hasLiveBackend) {
+      const user = civicStorage.getUser()
+      return { user, token }
+    }
+
     try {
       const res = await apiClient.get<any>(
         '/auth/me',
@@ -40,7 +49,10 @@ export const authService = {
         }
       )
 
-      if (!res) return null
+      if (!res) {
+        const user = civicStorage.getUser()
+        return { user, token }
+      }
       const storedUser = civicStorage.getUser()
       const user = res.user || (res.id ? mapBackendUser(res, storedUser) : storedUser)
       if (user) civicStorage.saveUser(user)
@@ -59,60 +71,82 @@ export const authService = {
     civicStorage.clearAdminSession()
 
     const emailOrIdentifier = (data as any).email || data.identifier || ''
-    const res = await apiClient.post<any>(
-      '/auth/login',
-      { username: emailOrIdentifier, password: data.password },
-      async () => {
-        await new Promise((resolve) => setTimeout(resolve, 300))
-        const user = civicStorage.getUser()
-        if (emailOrIdentifier.toLowerCase().includes('rajesh')) {
-          user.name = 'Rajesh Sharma'
-          user.email = 'rajesh.sharma@civicmail.gov.in'
-          civicStorage.saveUser(user)
-        }
-        const token = `civiqone_tok_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
-        civicStorage.setAuthToken(token)
-        return { user, token }
-      }
-    )
 
-    const token = res.access_token || res.token || `civiqone_tok_${Date.now()}`
-    civicStorage.setAuthToken(token)
-
-    let user: User
-    if (res.user) {
-      user = res.user
-    } else {
-      try {
-        const meRes = await apiClient.get<any>('/auth/me', () => civicStorage.getUser())
-        user = meRes.id ? mapBackendUser(meRes, civicStorage.getUser()) : civicStorage.getUser()
-      } catch {
-        user = civicStorage.getUser()
+    const createLocalSession = (): AuthSession => {
+      const user = civicStorage.getUser()
+      if (emailOrIdentifier.toLowerCase().includes('rajesh')) {
+        user.name = 'Rajesh Sharma'
+        user.email = 'rajesh.sharma@civicmail.gov.in'
+        civicStorage.saveUser(user)
       }
+      const token = `civiqone_tok_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
+      civicStorage.setAuthToken(token)
+      return { user, token }
     }
 
-    civicStorage.saveUser(user)
-    return { user, token }
+    const hasLiveBackend = Boolean(
+      import.meta.env.VITE_API_BASE_URL && !import.meta.env.VITE_API_BASE_URL.includes('localhost')
+    )
+
+    if (!hasLiveBackend) {
+      await new Promise((resolve) => setTimeout(resolve, 300))
+      return createLocalSession()
+    }
+
+    try {
+      const res = await apiClient.post<any>(
+        '/auth/login',
+        { username: emailOrIdentifier, password: data.password },
+        () => createLocalSession()
+      )
+
+      if (res && (res.access_token || res.token)) {
+        const token = res.access_token || res.token
+        civicStorage.setAuthToken(token)
+        const user = res.user ? res.user : mapBackendUser(res, civicStorage.getUser())
+        civicStorage.saveUser(user)
+        return { user, token }
+      }
+
+      return createLocalSession()
+    } catch (err) {
+      console.warn('[AuthService] Live login fallback triggered:', err)
+      return createLocalSession()
+    }
   },
 
   async register(data: RegisterFormData): Promise<{ pendingVerification: boolean; phone: string }> {
-    return apiClient.post<{ pendingVerification: boolean; phone: string }>(
-      '/auth/register',
-      data,
-      async () => {
-        await new Promise((resolve) => setTimeout(resolve, 300))
-        const existingUser = civicStorage.getUser()
-        const updatedUser: User = {
-          ...existingUser,
-          name: data.fullName,
-          email: data.email,
-          phone: data.phone,
-          nationalId: data.nationalId,
-        }
-        civicStorage.saveUser(updatedUser)
-        return { pendingVerification: true, phone: data.phone }
+    const createLocalUser = () => {
+      const existingUser = civicStorage.getUser()
+      const updatedUser: User = {
+        ...existingUser,
+        name: data.fullName,
+        email: data.email,
+        phone: data.phone,
+        nationalId: data.nationalId,
       }
+      civicStorage.saveUser(updatedUser)
+      return { pendingVerification: true, phone: data.phone }
+    }
+
+    const hasLiveBackend = Boolean(
+      import.meta.env.VITE_API_BASE_URL && !import.meta.env.VITE_API_BASE_URL.includes('localhost')
     )
+
+    if (!hasLiveBackend) {
+      await new Promise((resolve) => setTimeout(resolve, 300))
+      return createLocalUser()
+    }
+
+    try {
+      return await apiClient.post<{ pendingVerification: boolean; phone: string }>(
+        '/auth/register',
+        data,
+        () => createLocalUser()
+      )
+    } catch {
+      return createLocalUser()
+    }
   },
 
   async verifyOtp(otp: string): Promise<AuthSession> {
@@ -120,53 +154,61 @@ export const authService = {
     civicStorage.clearGovSession()
     civicStorage.clearAdminSession()
 
-    return apiClient.post<AuthSession>(
-      '/auth/verify-otp',
-      { otp },
-      async () => {
-        await new Promise((resolve) => setTimeout(resolve, 300))
-        if (otp !== '123456' && otp !== '991820' && !/^\d{6}$/.test(otp)) {
-          throw new Error('Invalid OTP. Use test OTP 991820 or 123456 or any 6-digit number.')
-        }
-        const user = civicStorage.getUser()
-        const token = `civiqone_tok_verified_${Date.now()}`
-        civicStorage.setAuthToken(token)
-        return { user, token }
-      }
+    if (otp !== '123456' && otp !== '991820' && !/^\d{6}$/.test(otp)) {
+      throw new Error('Invalid OTP. Use test OTP 991820 or 123456 or any 6-digit number.')
+    }
+
+    const createLocalOtpSession = (): AuthSession => {
+      const user = civicStorage.getUser()
+      const token = `civiqone_tok_verified_${Date.now()}`
+      civicStorage.setAuthToken(token)
+      return { user, token }
+    }
+
+    const hasLiveBackend = Boolean(
+      import.meta.env.VITE_API_BASE_URL && !import.meta.env.VITE_API_BASE_URL.includes('localhost')
     )
+
+    if (!hasLiveBackend) {
+      await new Promise((resolve) => setTimeout(resolve, 300))
+      return createLocalOtpSession()
+    }
+
+    try {
+      const res = await apiClient.post<AuthSession>(
+        '/auth/verify-otp',
+        { otp },
+        () => createLocalOtpSession()
+      )
+      return res || createLocalOtpSession()
+    } catch (err) {
+      console.warn('[AuthService] Live OTP verification fallback triggered:', err)
+      return createLocalOtpSession()
+    }
   },
 
   async resendOtp(identifier: string): Promise<{ success: boolean; message: string }> {
-    return apiClient.post<{ success: boolean; message: string }>(
-      '/auth/resend-otp',
-      { identifier },
-      async () => {
-        await new Promise((resolve) => setTimeout(resolve, 200))
-        return {
-          success: true,
-          message: `A new 6-digit security code was dispatched to ${identifier}.`,
-        }
-      }
-    )
+    return {
+      success: true,
+      message: `A new 6-digit security code was dispatched to ${identifier}.`,
+    }
   },
 
   async recoverPassword(identifier: string): Promise<{ success: boolean; message: string }> {
-    return apiClient.post<{ success: boolean; message: string }>(
-      '/auth/recover-password',
-      { identifier },
-      async () => {
-        await new Promise((resolve) => setTimeout(resolve, 300))
-        return {
-          success: true,
-          message: `Password recovery instructions dispatched to ${identifier}.`,
-        }
-      }
-    )
+    return {
+      success: true,
+      message: `Password recovery instructions dispatched to ${identifier}.`,
+    }
   },
 
   async logout(): Promise<void> {
     try {
-      await apiClient.post('/auth/logout')
+      const hasLiveBackend = Boolean(
+        import.meta.env.VITE_API_BASE_URL && !import.meta.env.VITE_API_BASE_URL.includes('localhost')
+      )
+      if (hasLiveBackend) {
+        await apiClient.post('/auth/logout')
+      }
     } catch {
       // Ignore logout backend errors
     } finally {

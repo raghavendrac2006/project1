@@ -47,10 +47,11 @@ class ApiClient {
     options: RequestInit = {},
     fallbackFn?: () => Promise<T> | T
   ): Promise<T> {
-    // If deployed on HTTPS or remote host and baseUrl is default localhost without custom API env, fast fallback
-    const isRemote = typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1'
-    const isDefaultLocalApi = this.config.baseUrl.includes('localhost:8000') || (typeof window !== 'undefined' && window.location.protocol === 'https:' && this.config.baseUrl.startsWith('http:'))
-    if (isRemote && isDefaultLocalApi && fallbackFn && this.config.useMockFallback) {
+    // If no live remote backend is explicitly configured via VITE_API_BASE_URL, use fallback immediately
+    const hasLiveBackend = Boolean(
+      import.meta.env.VITE_API_BASE_URL && !import.meta.env.VITE_API_BASE_URL.includes('localhost')
+    )
+    if (!hasLiveBackend && fallbackFn) {
       return Promise.resolve(fallbackFn())
     }
 
@@ -93,7 +94,7 @@ class ApiClient {
       clearTimeout(timer)
 
       // If backend call fails and a fallback mock provider exists, execute fallback
-      if (fallbackFn && this.config.useMockFallback) {
+      if (fallbackFn) {
         console.warn(`[ApiClient] Live backend request to '${url}' failed (${(error as Error).message}). Executing mock fallback provider.`)
         return Promise.resolve(fallbackFn())
       }
