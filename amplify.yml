@@ -3,6 +3,7 @@ frontend:
   phases:
     preBuild:
       commands:
+        - nvm use 20 || nvm install 20 || true
         - node -v
         - npm -v
         - npm ci --prefer-offline --no-audit
