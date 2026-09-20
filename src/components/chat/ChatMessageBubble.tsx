@@ -86,9 +86,39 @@ export function ChatMessageBubble({
             return <div key={idx} className="h-1" />
           }
 
-          // Section header with icons (📌, 📋, 💰, ⏱️, 🚀, ⚠️, 💡)
-          const isHeader = /^(📌|📋|💰|⏱️|🚀|⚠️|💡)/.test(trimmed)
+          // Section header with emoji icons (📌, 📋, 💰, ⏱️, 🚀, ⚠️, 💡, 🆔, 🌾, ⚖️, 📜, ⏳, 👶, 💍, 🏥, 🗳️, 📲, ✈️, 🏛️, 📥, 🔍, 🚨, 💼)
+          const emojiHeaderMatch = trimmed.match(
+            /^([\p{Emoji_Presentation}\p{Extended_Pictographic}]\uFE0F?|📌|📋|💰|⏱️|🚀|⚠️|💡|🆔|🌾|⚖️|📜|⏳|👶|💍|🏥|🗳️|📲|✈️|🏛️|📥|🔍|🚨|💼)\s*(.*)$/u
+          )
           const isBullet = trimmed.startsWith('•') || trimmed.startsWith('-') || /^\d+\./.test(trimmed)
+
+          if (emojiHeaderMatch) {
+            const emoji = emojiHeaderMatch[1]
+            const textAfter = emojiHeaderMatch[2]
+            const parts = textAfter.split(/(\*\*[^*]+\*\*)/g)
+            const parsedText = parts.map((part, pIdx) => {
+              if (part.startsWith('**') && part.endsWith('**')) {
+                return (
+                  <span key={pIdx} className="font-bold text-foreground">
+                    {part.slice(2, -2)}
+                  </span>
+                )
+              }
+              return part
+            })
+
+            return (
+              <div
+                key={idx}
+                className="mt-2.5 pt-1 font-semibold text-xs sm:text-[12.5px] text-foreground tracking-tight flex items-baseline gap-1.5"
+              >
+                <span className="font-emoji text-sm shrink-0 inline-flex items-center justify-center select-none" aria-hidden="true">
+                  {emoji}
+                </span>
+                <span className="flex-1">{parsedText}</span>
+              </div>
+            )
+          }
 
           // Parse **bold** parts
           const parts = line.split(/(\*\*[^*]+\*\*)/g)
@@ -102,17 +132,6 @@ export function ChatMessageBubble({
             }
             return part
           })
-
-          if (isHeader) {
-            return (
-              <div
-                key={idx}
-                className="mt-2.5 pt-1 font-semibold text-xs sm:text-[12.5px] text-foreground tracking-tight flex items-baseline gap-1"
-              >
-                {parsedLine}
-              </div>
-            )
-          }
 
           if (isBullet) {
             return (

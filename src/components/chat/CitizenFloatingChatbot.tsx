@@ -16,6 +16,16 @@ import {
   VolumeX,
   RotateCcw,
   Bot,
+  Car,
+  CreditCard,
+  Wheat,
+  HeartPulse,
+  FileText,
+  Heart,
+  Building2,
+  Scale,
+  Globe,
+  Check,
 } from 'lucide-react'
 import { AIAvatarVisualizer, type AvatarState } from './AIAvatarVisualizer'
 import { ChatMessageBubble } from './ChatMessageBubble'
@@ -48,15 +58,23 @@ const LANG_BCP47: Record<SupportedLanguage, string> = {
   gu: 'gu-IN',
 }
 
-const CIVIC_CATEGORIES = [
-  { id: 'transport', label: '🚗 Transport & DL', query: 'How do I apply for a Driving License and book RTO test slot?' },
-  { id: 'aadhaar', label: '🆔 Aadhaar Updates', query: 'How to update mobile number and address in Aadhaar?' },
-  { id: 'ration', label: '🌾 Ration Card', query: 'How to apply for new Ration Card under NFSA?' },
-  { id: 'health', label: '🏥 Ayushman (PMJAY)', query: 'How to check eligibility and download Ayushman Bharat PMJAY card?' },
-  { id: 'certificates', label: '📜 Caste & Income', query: 'What documents are required for Caste and Income Certificate?' },
-  { id: 'marriage', label: '💍 Marriage Reg.', query: 'What is the procedure for registering marriage?' },
-  { id: 'epfo', label: '🏢 PF / Pension', query: 'How to apply for EPFO PF withdrawal and check claim status?' },
-  { id: 'grievance', label: '⚖️ File Grievance', query: 'How to lodge a grievance complaint against civic delay?' },
+interface CivicCategory {
+  id: string
+  label: string
+  emoji: string
+  icon: React.ComponentType<{ className?: string }>
+  query: string
+}
+
+const CIVIC_CATEGORIES: CivicCategory[] = [
+  { id: 'transport', label: 'Transport & DL', emoji: '🚗', icon: Car, query: 'How do I apply for a Driving License and book RTO test slot?' },
+  { id: 'aadhaar', label: 'Aadhaar Updates', emoji: '🆔', icon: CreditCard, query: 'How to update mobile number and address in Aadhaar?' },
+  { id: 'ration', label: 'Ration Card', emoji: '🌾', icon: Wheat, query: 'How to apply for new Ration Card under NFSA?' },
+  { id: 'health', label: 'Ayushman PMJAY', emoji: '🏥', icon: HeartPulse, query: 'How to check eligibility and download Ayushman Bharat PMJAY card?' },
+  { id: 'certificates', label: 'Caste & Income', emoji: '📜', icon: FileText, query: 'What documents are required for Caste and Income Certificate?' },
+  { id: 'marriage', label: 'Marriage Reg.', emoji: '💍', icon: Heart, query: 'What is the procedure for registering marriage?' },
+  { id: 'epfo', label: 'PF & Pension', emoji: '🏢', icon: Building2, query: 'How to apply for EPFO PF withdrawal and check claim status?' },
+  { id: 'grievance', label: 'File Grievance', emoji: '⚖️', icon: Scale, query: 'How to lodge a grievance complaint against civic delay?' },
 ]
 
 export function CitizenFloatingChatbot() {
@@ -334,22 +352,44 @@ export function CitizenFloatingChatbot() {
 
               {/* Header Actions */}
               <div className="flex items-center gap-1">
-                {/* Language Selector Dropdown */}
-                <div className="relative">
-                  <select
-                    value={language}
-                    onChange={(e) => setLanguage(e.target.value as SupportedLanguage)}
-                    className="bg-muted/70 hover:bg-muted border border-border text-[11px] font-semibold text-foreground rounded-lg py-1 pl-2 pr-5 cursor-pointer outline-none transition-colors appearance-none"
-                    title="Switch Language"
-                  >
+                {/* Language Selector Dropdown with Cross-Platform Emoji Support */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      type="button"
+                      className="inline-flex items-center gap-1 bg-muted/70 hover:bg-muted border border-border text-[11px] font-semibold text-foreground rounded-lg py-1 px-2 cursor-pointer outline-none transition-colors"
+                      title="Switch Language"
+                    >
+                      <Globe className="w-3 h-3 text-primary shrink-0" />
+                      <span className="font-emoji text-xs select-none">{currentLanguageDetails.flag}</span>
+                      <span className="truncate max-w-[56px]">{currentLanguageDetails.nativeName}</span>
+                      <ChevronDown className="w-3 h-3 text-muted-foreground shrink-0 ml-0.5" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48 max-h-64 overflow-y-auto">
+                    <DropdownMenuLabel className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground">
+                      Select Language
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
                     {SUPPORTED_LANGUAGES.map((l) => (
-                      <option key={l.code} value={l.code}>
-                        {l.flag} {l.nativeName}
-                      </option>
+                      <DropdownMenuItem
+                        key={l.code}
+                        onClick={() => setLanguage(l.code)}
+                        className={cn(
+                          'flex items-center justify-between text-xs cursor-pointer py-1.5',
+                          language === l.code && 'font-bold text-primary bg-primary/10'
+                        )}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="font-emoji text-sm select-none">{l.flag}</span>
+                          <span className="font-medium">{l.nativeName}</span>
+                          <span className="text-[10px] text-muted-foreground">({l.name})</span>
+                        </div>
+                        {language === l.code && <Check className="w-3.5 h-3.5 text-primary shrink-0" />}
+                      </DropdownMenuItem>
                     ))}
-                  </select>
-                  <ChevronDown className="w-3 h-3 text-muted-foreground absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                </div>
+                  </DropdownMenuContent>
+                </DropdownMenu>
 
                 {/* Audio Narration Toggle */}
                 <Button
@@ -444,19 +484,26 @@ export function CitizenFloatingChatbot() {
 
             {/* Quick Topic Chips */}
             <div className="px-3 py-2 border-b border-border/60 bg-muted/20 flex items-center gap-1.5 overflow-x-auto no-scrollbar shrink-0">
-              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider shrink-0 flex items-center gap-1 pr-1">
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider shrink-0 flex items-center gap-1 pr-1 select-none">
                 <Sparkles className="w-2.5 h-2.5 text-primary" /> Topics:
               </span>
-              {CIVIC_CATEGORIES.map((cat) => (
-                <button
-                  key={cat.id}
-                  type="button"
-                  onClick={() => handleSendMessage(cat.query)}
-                  className="whitespace-nowrap px-2.5 py-1 rounded-full text-[11px] font-medium border border-border/80 bg-card hover:bg-primary/10 hover:border-primary/40 hover:text-primary transition-colors cursor-pointer shrink-0"
-                >
-                  {cat.label}
-                </button>
-              ))}
+              {CIVIC_CATEGORIES.map((cat) => {
+                const IconComponent = cat.icon
+                return (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    onClick={() => handleSendMessage(cat.query)}
+                    className="whitespace-nowrap px-2.5 py-1.5 rounded-xl text-[11px] font-semibold border border-border/80 bg-card hover:bg-primary/10 hover:border-primary/40 hover:text-primary text-foreground transition-all duration-150 cursor-pointer shrink-0 inline-flex items-center gap-1.5 shadow-xs group"
+                  >
+                    <span className="font-emoji text-xs leading-none select-none shrink-0" aria-hidden="true">
+                      {cat.emoji}
+                    </span>
+                    <IconComponent className="w-3 h-3 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
+                    <span>{cat.label}</span>
+                  </button>
+                )
+              })}
             </div>
 
             {/* Live Officer Active Status Banner */}

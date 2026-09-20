@@ -6,7 +6,7 @@ import { LanguageContext } from './contexts'
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [language, setLanguageState] = useState<SupportedLanguage>(() => {
     const saved = localStorage.getItem('civiqone_lang') as SupportedLanguage | null
-    if (saved && ['en', 'te', 'ta', 'kn', 'ml'].includes(saved)) {
+    if (saved && SUPPORTED_LANGUAGES.some((l) => l.code === saved)) {
       return saved
     }
     return 'en'

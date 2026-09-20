@@ -51,8 +51,8 @@ class ApiClient {
     const isRemoteDeployment = isBrowser && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1'
     const isLocalApi = this.config.baseUrl.includes('localhost') || this.config.baseUrl.includes('127.0.0.1')
 
-    // If deployed on remote host (like Vercel) and baseUrl still points to localhost, fast fallback
-    if (isRemoteDeployment && isLocalApi && fallbackFn) {
+    // If mock fallback is enabled or remote deployment without live backend, use sovereign fallback immediately
+    if ((this.config.useMockFallback || (isRemoteDeployment && isLocalApi)) && fallbackFn) {
       return Promise.resolve(fallbackFn())
     }
 
