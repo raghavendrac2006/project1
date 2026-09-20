@@ -1,4 +1,17 @@
-# Logs
+# Environment variables & secrets (CRITICAL - DO NOT COMMIT)
+.env
+.env.*
+*.env
+.env.local
+.env.development
+.env.test
+.env.production
+!.env.example
+backend/.env
+backend/.env.*
+!backend/.env.example
+
+# Logs & Debug
 logs
 *.log
 npm-debug.log*
@@ -6,26 +19,80 @@ yarn-debug.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-build
-dist-ssr
+# Node / Frontend Build
+node_modules/
+dist/
+dist-ssr/
+build/
+.turbo/
+.eslintcache
+.oxlint-cache
 *.local
 
-# Editor directories and files
+# Python & Backend
+backend/venv/
+venv/
+.venv/
+env/
+ENV/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Testing & Coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+
+# Databases & Local Storage
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+civicone_local.db
+
+# Editor & OS Artifacts
 .vscode/*
 !.vscode/extensions.json
-.idea
-.DS_Store
+.idea/
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
 
-# Python & Backend
-backend/venv/
-__pycache__/
-*.pyc
-*.db
-.pytest_cache/
+# Cloud, Terraform, & Docker local states
+.terraform/
+*.tfstate
+*.tfstate.backup
+.serverless/
